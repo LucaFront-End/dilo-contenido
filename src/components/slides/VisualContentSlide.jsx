@@ -79,8 +79,8 @@ export default function VisualContentSlide({ clientTitle, instagram, onNavigateT
         </span>
       </div>
 
-      {/* Decorative Vectors on Right */}
-      <div className="decor-arch absolute top-20 right-4 pointer-events-none opacity-80">
+      {/* Decorative Vectors on Right (Desktop only) */}
+      <div className="decor-arch absolute top-20 right-4 pointer-events-none opacity-80 hidden lg:block">
         <svg width="100" height="180" viewBox="0 0 120 220" fill="none">
           <path d="M100 180 V80 C100 30 20 30 20 80 V180" stroke="#18181b" strokeWidth="10" strokeLinecap="round" />
           <rect x="40" y="90" width="25" height="25" stroke="#18181b" strokeWidth="2.5" fill="none" />
@@ -90,7 +90,7 @@ export default function VisualContentSlide({ clientTitle, instagram, onNavigateT
       </div>
 
       {/* Slide Inner Body */}
-      <div className="flex-1 flex flex-col lg:flex-row items-center justify-between gap-6 p-4 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+      <div className="flex-1 flex flex-col lg:flex-row items-center justify-between gap-6 p-3 sm:p-6 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
         {/* Left Side: 3x3 High-Res Grid */}
         <div className="w-full lg:w-1/2 flex flex-col justify-center">
           <div className="mb-3 flex items-center justify-between">

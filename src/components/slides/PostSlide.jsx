@@ -67,11 +67,11 @@ export default function PostSlide({
         </svg>
       </div>
 
-      {/* Slide Body: 2 Columns (Left: Media / Right: Copy) */}
-      <div className="flex-1 flex flex-col lg:flex-row items-center justify-between gap-6 p-4 md:p-8 lg:p-12 overflow-y-auto max-w-7xl mx-auto w-full z-10">
+      {/* Slide Body: 2 Columns on desktop, clean vertical stack on mobile */}
+      <div className="flex-1 flex flex-col lg:flex-row items-stretch lg:items-center justify-start lg:justify-between gap-4 md:gap-6 p-3 sm:p-6 md:p-8 lg:p-12 overflow-y-auto max-w-7xl mx-auto w-full z-10">
         {/* Left Column: Media Presentation */}
         <div className="w-full lg:w-1/2 flex flex-col items-center justify-center">
-          <div className="relative w-full max-w-md md:max-w-lg aspect-square bg-zinc-100 rounded-2xl overflow-hidden border border-zinc-200/80 shadow-xl flex items-center justify-center group">
+          <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg aspect-square bg-zinc-100 rounded-2xl overflow-hidden border border-zinc-200/80 shadow-md md:shadow-xl flex items-center justify-center group mx-auto">
             <img
               src={images[activeImageIdx]}
               alt={`Slide ${slide.pageNumber}`}
@@ -146,9 +146,9 @@ export default function PostSlide({
         </div>
 
         {/* Right Column: Copy & Actions */}
-        <div className="w-full lg:w-1/2 flex flex-col justify-between max-w-xl">
-          {/* Top Bar: Orange COPY Pill + Client Approval */}
-          <div className="flex items-center justify-between mb-4">
+        <div className="w-full lg:w-1/2 flex flex-col justify-between max-w-xl mt-4 lg:mt-0">
+          {/* Top Bar: Orange COPY Pill + Client Actions */}
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             {/* Orange COPY Pill faithful to PDF */}
             <div className="copy-badge-pill">
               <svg viewBox="0 0 24 24" className="w-5 h-5 fill-none stroke-current stroke-2">

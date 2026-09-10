@@ -31,15 +31,15 @@ export default function ContactSlide() {
   ];
 
   return (
-    <div className="slide-content contact-slide flex flex-col justify-between w-full h-full relative overflow-hidden bg-white p-8 md:p-14 select-none">
+    <div className="slide-content contact-slide flex flex-col justify-between w-full h-full relative overflow-hidden bg-white p-4 sm:p-8 md:p-14 select-none">
       {/* Decorative Vectors Faithful to PDF */}
-      <div className="decor-curves absolute -top-10 -left-10 w-48 h-48 pointer-events-none opacity-90">
+      <div className="decor-curves absolute -top-10 -left-10 w-28 h-28 md:w-48 md:h-48 pointer-events-none opacity-30 md:opacity-90">
         <svg viewBox="0 0 200 200" fill="none" className="w-full h-full text-zinc-900">
           <path d="M20 50 C40 10 90 20 70 80 C50 140 10 100 30 150 C50 200 120 180 140 140" stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
         </svg>
       </div>
 
-      <div className="decor-pen-tool absolute top-12 right-16 pointer-events-none">
+      <div className="decor-pen-tool absolute top-12 right-16 pointer-events-none hidden lg:block">
         <svg width="70" height="70" viewBox="0 0 100 100" fill="none">
           <circle cx="50" cy="50" r="4" fill="#FF5A00" />
           <path d="M20 70 C40 30 70 30 85 50" stroke="#111" strokeWidth="2" strokeDasharray="3 3" />
@@ -49,7 +49,7 @@ export default function ContactSlide() {
         </svg>
       </div>
 
-      <div className="decor-arch absolute top-32 right-8 pointer-events-none">
+      <div className="decor-arch absolute top-32 right-8 pointer-events-none hidden lg:block">
         <svg width="120" height="220" viewBox="0 0 120 220" fill="none">
           <path d="M100 180 V80 C100 30 20 30 20 80 V180" stroke="#18181b" strokeWidth="12" strokeLinecap="round" />
           <rect x="40" y="90" width="25" height="25" stroke="#18181b" strokeWidth="2.5" fill="none" />
@@ -59,7 +59,7 @@ export default function ContactSlide() {
       </div>
 
       {/* Main Center Area */}
-      <div className="relative z-10 my-auto max-w-4xl">
+      <div className="flex-1 flex flex-col justify-start md:justify-center relative z-10 max-w-4xl mx-auto w-full overflow-y-auto py-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           {/* Brand & Logo */}
           <div className="space-y-4">

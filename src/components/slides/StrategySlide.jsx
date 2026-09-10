@@ -51,8 +51,8 @@ export default function StrategySlide({ estrategia }) {
         </span>
       </div>
 
-      {/* Decorative Vectors on Right */}
-      <div className="decor-arch absolute top-20 right-8 pointer-events-none opacity-80">
+      {/* Decorative Vectors on Right (Desktop only) */}
+      <div className="decor-arch absolute top-20 right-8 pointer-events-none opacity-80 hidden lg:block">
         <svg width="120" height="220" viewBox="0 0 120 220" fill="none">
           <path d="M100 180 V80 C100 30 20 30 20 80 V180" stroke="#18181b" strokeWidth="12" strokeLinecap="round" />
           <rect x="40" y="90" width="25" height="25" stroke="#18181b" strokeWidth="2.5" fill="none" />
@@ -62,8 +62,8 @@ export default function StrategySlide({ estrategia }) {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col justify-center p-6 md:p-14 max-w-5xl mx-auto w-full z-10 overflow-y-auto">
-        <div className="mb-8">
+      <div className="flex-1 flex flex-col justify-start md:justify-center p-4 sm:p-8 md:p-14 max-w-5xl mx-auto w-full z-10 overflow-y-auto">
+        <div className="mb-6 md:mb-8">
           <span className="text-xs font-bold uppercase tracking-widest text-orange-600 bg-orange-50 px-3 py-1 rounded-full">
             Pilares de Comunicación
           </span>

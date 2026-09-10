@@ -36,24 +36,24 @@ export default function Header({
             </span>
           </button>
           {clientTitle && (
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-700 font-bold tracking-wider uppercase">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 font-bold tracking-wider uppercase max-w-[140px] truncate hidden sm:inline-block">
               {clientTitle} · {clientMonth}
             </span>
           )}
           {onOpenPortal && (
             <button
               onClick={onOpenPortal}
-              className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-zinc-100 hover:bg-orange-50 text-zinc-700 hover:text-orange-600 border border-zinc-200 transition-colors hidden sm:flex items-center gap-1.5"
+              className="px-2 py-1 text-xs font-semibold rounded-lg bg-zinc-100 hover:bg-orange-50 text-zinc-700 hover:text-orange-600 border border-zinc-200 transition-colors flex items-center gap-1"
               title="Cambiar de parrilla o ver todos los clientes"
             >
               <Sparkles className="w-3.5 h-3.5 text-orange-500" />
-              <span>Clientes</span>
+              <span className="hidden xs:inline">Clientes</span>
             </button>
           )}
         </div>
 
-        {/* Center decorative line (faithful to PDF) */}
-        <div className="dilo-header-line flex-1 mx-4" />
+        {/* Center decorative line (faithful to PDF, desktop only) */}
+        <div className="dilo-header-line flex-1 mx-4 hidden md:block" />
 
         {/* Right tools and 2026 label */}
         <div className="flex items-center gap-3">

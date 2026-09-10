@@ -38,6 +38,30 @@ export default function SlideDeck({
     setCurrentSlideIndex((prev) => (prev > 0 ? prev - 1 : prev));
   };
 
+  // Touch swipe navigation for mobile devices
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const minSwipeDistance = 50;
+
+  const handleTouchStart = (e) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    if (distance > minSwipeDistance) {
+      nextSlide();
+    } else if (distance < -minSwipeDistance) {
+      prevSlide();
+    }
+  };
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -118,11 +142,14 @@ export default function SlideDeck({
   };
 
   return (
-    <div className="slide-deck-wrapper flex flex-col items-center justify-center relative w-full h-full bg-zinc-100 p-2 md:p-6 overflow-hidden">
-      {/* 16:9 Slide Presentation Frame */}
+    <div className="slide-deck-wrapper flex flex-col items-center justify-start md:justify-center relative w-full min-h-screen bg-zinc-100 p-2 sm:p-4 md:p-6 pb-24 md:pb-6 overflow-y-auto md:overflow-hidden">
+      {/* 16:9 Slide Presentation Frame on desktop, adaptive touch-friendly card on mobile */}
       <div
         ref={deckRef}
-        className="slide-frame-container relative aspect-video w-full max-w-[1500px] max-h-[85vh] bg-white rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden border border-zinc-200/80 transition-all"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className="slide-frame-container relative w-full max-w-[1500px] h-auto min-h-[580px] md:aspect-video md:max-h-[85vh] bg-white rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl overflow-hidden border border-zinc-200/80 transition-all flex flex-col"
       >
         {renderSlideContent()}
 
