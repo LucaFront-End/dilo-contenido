@@ -1,0 +1,258 @@
+/* Presentation and PDF faithful styles */
+
+/* Header Top Bar */
+.dilo-header {
+  width: 100%;
+  background: #ffffff;
+  border-bottom: 1px solid #e4e4e7;
+  padding: 12px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.dilo-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.dilo-header-line {
+  height: 1px;
+  background: #e4e4e7;
+}
+
+/* Left Black Rounded Category Pill (Faithful to PDF, responsive) */
+.pdf-side-pill {
+  width: 100%;
+  background: #111111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  user-select: none;
+  z-index: 20;
+}
+
+.pdf-side-pill-text {
+  color: #ffffff;
+  writing-mode: horizontal-tb;
+  transform: none;
+  letter-spacing: 0.15em;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+@media (min-width: 768px) {
+  .pdf-side-pill {
+    width: 72px;
+    height: 100%;
+    border-top-right-radius: 28px;
+    border-bottom-right-radius: 28px;
+    padding: 24px 0;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.08);
+  }
+
+  .pdf-side-pill-text {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 18px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .pdf-side-pill {
+    width: 86px;
+    border-top-right-radius: 36px;
+    border-bottom-right-radius: 36px;
+  }
+
+  .pdf-side-pill-text {
+    font-size: 22px;
+  }
+}
+
+/* Orange COPY Pill Badge */
+.copy-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 24px;
+  background: linear-gradient(135deg, #FF5A00 0%, #EA580C 100%);
+  color: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+  border: 2px solid #ffffff;
+}
+
+/* Orange Hashtag Pill Badge */
+.hashtag-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: linear-gradient(135deg, #FF5A00 0%, #EA580C 100%);
+  color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 3px 10px rgba(234, 88, 12, 0.2);
+}
+
+/* Slide Frame Container 16:9 on desktop, adaptive on mobile */
+.slide-deck-wrapper {
+  min-height: calc(100vh - 65px);
+  padding: 8px;
+}
+
+@media (min-width: 768px) {
+  .slide-deck-wrapper {
+    padding: 24px;
+  }
+}
+
+.slide-frame-container {
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 1024px) {
+  .slide-frame-container {
+    aspect-ratio: 16 / 9;
+    max-height: 85vh;
+  }
+}
+
+.slide-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 768px) {
+  .slide-content {
+    flex-direction: row;
+  }
+}
+
+/* Smartphone Mockup */
+.smartphone-mockup {
+  width: 290px;
+  height: 580px;
+  max-width: 100%;
+  background: #18181b;
+  border-radius: 40px;
+  padding: 8px;
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.35), 0 0 0 4px #27272a;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 640px) {
+  .smartphone-mockup {
+    width: 320px;
+    height: 640px;
+    border-radius: 46px;
+    padding: 10px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .smartphone-mockup {
+    width: 340px;
+    height: 670px;
+  }
+}
+
+.mockup-island {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 22px;
+  background: #000000;
+  border-radius: 20px;
+  z-index: 30;
+}
+
+.mockup-screen {
+  border-radius: 38px;
+  overflow: hidden;
+}
+
+/* Password Gate Overlay */
+.password-gate-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 14, 0.94);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+.password-gate-card {
+  width: 100%;
+  max-width: 440px;
+  background: #141419;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  padding: 36px 30px;
+  position: relative;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+.ambient-glow {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(255, 90, 0, 0.35) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.brand-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  background: rgba(255, 90, 0, 0.1);
+  border: 1px solid rgba(255, 90, 0, 0.3);
+  color: #ff8a4c;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.dilo-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #1c1c22;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Utilities */
+.cursor-zoom-in {
+  cursor: zoom-in;
+}
+
+.scale-102 {
+  transform: scale(1.02);
+}

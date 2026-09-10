@@ -1,0 +1,302 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { ChevronLeft, ChevronRight, LayoutGrid, Maximize, ListFilter, Eye, MessageSquare } from 'lucide-react';
+import CoverSlide from './slides/CoverSlide';
+import VisualContentSlide from './slides/VisualContentSlide';
+import StrategySlide from './slides/StrategySlide';
+import PostSlide from './slides/PostSlide';
+import HashtagsSlide from './slides/HashtagsSlide';
+import ContactSlide from './slides/ContactSlide';
+import CommentsModal from './CommentsModal';
+
+export default function SlideDeck({
+  clientData,
+  onCopyToast,
+  comments = [],
+  onAddComment,
+  onDeleteComment
+}) {
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isGlobalCommentsOpen, setIsGlobalCommentsOpen] = useState(false);
+  const deckRef = useRef(null);
+
+  const slides = clientData?.slides || [];
+  const totalSlides = slides.length;
+  const currentSlide = slides[currentSlideIndex];
+
+  const goToSlide = (index) => {
+    if (index >= 0 && index < totalSlides) {
+      setCurrentSlideIndex(index);
+    }
+  };
+
+  const nextSlide = () => {
+    setCurrentSlideIndex((prev) => (prev < totalSlides - 1 ? prev + 1 : prev));
+  };
+
+  const prevSlide = () => {
+    setCurrentSlideIndex((prev) => (prev > 0 ? prev - 1 : prev));
+  };
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Don't intercept if typing in an input
+      if (['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        goToSlide(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        goToSlide(totalSlides - 1);
+      } else if (e.key === 'Escape') {
+        setIsDrawerOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [totalSlides]);
+
+  // Render proper slide component
+  const renderSlideContent = () => {
+    if (!currentSlide) return null;
+
+    const pageNum = currentSlide.pageNumber;
+
+    if (pageNum === 1) {
+      return (
+        <CoverSlide
+          clientTitle={clientData.title}
+          clientMonth={clientData.mes}
+          clientYear={clientData.ano}
+          onStart={() => goToSlide(1)}
+        />
+      );
+    }
+
+    if (pageNum === 2) {
+      return (
+        <VisualContentSlide
+          clientTitle={clientData.title}
+          instagram={clientData.instagram}
+          onNavigateToSlide={(slideNum) => goToSlide(slideNum - 1)}
+        />
+      );
+    }
+
+    if (pageNum === 3) {
+      return <StrategySlide estrategia={clientData.estrategia} />;
+    }
+
+    if (pageNum === 29) {
+      return <HashtagsSlide hashtags={clientData.hashtags} onCopySuccess={onCopyToast} />;
+    }
+
+    if (pageNum === 30) {
+      return <ContactSlide />;
+    }
+
+    // Standard Post slides (4 through 28)
+    return (
+      <PostSlide
+        slide={currentSlide}
+        onCopySuccess={onCopyToast}
+        comments={comments}
+        onAddComment={onAddComment}
+        onDeleteComment={onDeleteComment}
+        clientTitle={clientData?.title}
+      />
+    );
+  };
+
+  return (
+    <div className="slide-deck-wrapper flex flex-col items-center justify-center relative w-full h-full bg-zinc-100 p-2 md:p-6 overflow-hidden">
+      {/* 16:9 Slide Presentation Frame */}
+      <div
+        ref={deckRef}
+        className="slide-frame-container relative aspect-video w-full max-w-[1500px] max-h-[85vh] bg-white rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden border border-zinc-200/80 transition-all"
+      >
+        {renderSlideContent()}
+
+        {/* Floating Left / Right navigation overlay arrows on hover */}
+        {currentSlideIndex > 0 && (
+          <button
+            onClick={prevSlide}
+            className="absolute left-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/90 hover:bg-white text-zinc-900 shadow-xl border border-zinc-200/80 transition-all opacity-0 hover:opacity-100 z-30 cursor-pointer hidden md:flex items-center justify-center"
+            title="Diapositiva anterior (←)"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+        )}
+
+        {currentSlideIndex < totalSlides - 1 && (
+          <button
+            onClick={nextSlide}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/90 hover:bg-white text-zinc-900 shadow-xl border border-zinc-200/80 transition-all opacity-0 hover:opacity-100 z-30 cursor-pointer hidden md:flex items-center justify-center"
+            title="Siguiente diapositiva (→)"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+        )}
+      </div>
+
+      {/* Bottom Control Bar */}
+      <div className="deck-control-bar mt-4 flex items-center justify-between gap-4 w-full max-w-[1500px] px-4 py-2 bg-white/90 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-lg select-none">
+        {/* Left: Previous button */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={prevSlide}
+            disabled={currentSlideIndex === 0}
+            className="px-3 py-1.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 disabled:opacity-30 disabled:pointer-events-none text-zinc-800 text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Anterior</span>
+          </button>
+          <button
+            onClick={nextSlide}
+            disabled={currentSlideIndex === totalSlides - 1}
+            className="px-3 py-1.5 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-30 disabled:pointer-events-none text-white text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
+          >
+            <span className="hidden sm:inline">Siguiente</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Center: Slide indicator & Title */}
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-bold text-zinc-800 tracking-wide font-space">
+            Lámina {currentSlideIndex + 1} de {totalSlides}
+          </span>
+          <span className="hidden md:inline-block text-[11px] font-semibold text-zinc-500 px-2 py-0.5 bg-zinc-100 rounded-md">
+            {currentSlide?.type || 'POST'}
+          </span>
+        </div>
+
+        {/* Right: Comments button & Drawer toggle */}
+        <div className="flex items-center gap-2">
+          {/* Global comments button */}
+          <button
+            onClick={() => setIsGlobalCommentsOpen(true)}
+            className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 shadow-sm cursor-pointer"
+            title="Ver todos los comentarios y solicitudes de la parrilla"
+          >
+            <MessageSquare className="w-3.5 h-3.5 text-orange-600" />
+            <span className="hidden sm:inline">Comentarios</span>
+            {comments.length > 0 && (
+              <span className="px-1.5 py-0.2 bg-orange-500 text-white text-[10px] font-black rounded-full">
+                {comments.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              isDrawerOpen
+                ? 'bg-zinc-900 text-white'
+                : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'
+            }`}
+            title="Ver índice de diapositivas"
+          >
+            <LayoutGrid className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Índice</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Progress Bar along the bottom */}
+      <div className="w-full max-w-[1500px] h-1 bg-zinc-200 rounded-full mt-2 overflow-hidden">
+        <div
+          className="h-full bg-orange-500 transition-all duration-300 rounded-full"
+          style={{ width: `${((currentSlideIndex + 1) / totalSlides) * 100}%` }}
+        />
+      </div>
+
+      {/* Slide Thumbnails Drawer Modal */}
+      {isDrawerOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex flex-col justify-end">
+          <div className="bg-zinc-900 border-t border-zinc-800 rounded-t-3xl p-6 max-h-[70vh] flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-bold text-white tracking-tight font-space">
+                  Todas las Diapositivas ({totalSlides})
+                </h3>
+                <p className="text-xs text-zinc-400">
+                  Haz clic en cualquier lámina para saltar directamente. Las láminas con comentarios muestran un distintivo 💬.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsDrawerOpen(false)}
+                className="px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+              >
+                Cerrar ✕
+              </button>
+            </div>
+
+            {/* Grid of 30 thumbnails */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-10 gap-3 overflow-y-auto p-1">
+              {slides.map((s, idx) => {
+                const slideCommentsCount = comments.filter(c => c.slideNumber === s.pageNumber).length;
+                return (
+                  <div
+                    key={s.id}
+                    onClick={() => {
+                      goToSlide(idx);
+                      setIsDrawerOpen(false);
+                    }}
+                    className={`group relative aspect-video bg-zinc-800 rounded-xl overflow-hidden border-2 cursor-pointer transition-all ${
+                      idx === currentSlideIndex
+                        ? 'border-orange-500 scale-105 shadow-lg shadow-orange-500/20'
+                        : 'border-zinc-700 hover:border-zinc-500 opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <img
+                      src={s.image}
+                      alt={`Thumb ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Eye className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/80 rounded text-[10px] font-bold text-white font-mono">
+                      #{idx + 1}
+                    </span>
+                    <span className="absolute top-1 right-1 px-1 py-0.2 bg-orange-600 rounded text-[8px] font-bold text-white">
+                      {s.type.slice(0, 4)}
+                    </span>
+                    {/* Badge if slide has comments! */}
+                    {slideCommentsCount > 0 && (
+                      <span className="absolute top-1 left-1 px-1.5 py-0.5 bg-amber-500 text-white rounded text-[9px] font-bold flex items-center gap-0.5 shadow-md">
+                        💬 {slideCommentsCount}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Global Comments Summary Modal */}
+      <CommentsModal
+        isOpen={isGlobalCommentsOpen}
+        onClose={() => setIsGlobalCommentsOpen(false)}
+        allComments={comments}
+        onAddComment={onAddComment}
+        onDeleteComment={onDeleteComment}
+        onNavigateToSlide={(idx) => goToSlide(idx)}
+        clientTitle={clientData?.title}
+        isGlobalView={true}
+      />
+    </div>
+  );
+}
