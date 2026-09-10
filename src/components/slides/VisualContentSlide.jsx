@@ -9,63 +9,63 @@ export default function VisualContentSlide({ clientTitle, instagram, onNavigateT
       id: 1,
       title: '¿Alarma o CÁMARAS PRIMERO?',
       targetSlide: 4,
-      image: '/assets/posts/p04_img01.jpeg',
+      image: '/assets/posts/p04_img05.jpeg',
       badge: 'CARRUSEL'
     },
     {
       id: 2,
       title: 'Logística y Unidades Cuauhtli',
       targetSlide: 19,
-      image: '/assets/posts/p19_img01.jpeg',
+      image: '/assets/posts/p19_img05.jpeg',
       badge: 'POST'
     },
     {
       id: 3,
       title: 'Instalar una cámara no es lo MISMO',
       targetSlide: 14,
-      image: '/assets/posts/p14_img01.jpeg',
+      image: '/assets/posts/p14_img06.jpeg',
       badge: 'POST'
     },
     {
       id: 4,
       title: 'Seguridad PERIMETRAL',
       targetSlide: 6,
-      image: '/assets/posts/p06_img01.jpeg',
+      image: '/assets/posts/p06_img05.jpeg',
       badge: 'CARRUSEL'
     },
     {
       id: 5,
       title: 'Mantenimiento e Infraestructura',
       targetSlide: 21,
-      image: '/assets/posts/p21_img01.jpeg',
+      image: '/assets/posts/p21_img05.jpeg',
       badge: 'POST'
     },
     {
       id: 6,
       title: 'Control de Acceso Empresarial',
       targetSlide: 18,
-      image: '/assets/posts/p18_img01.jpeg',
+      image: '/assets/posts/p18_img05.jpeg',
       badge: 'POST'
     },
     {
       id: 7,
       title: 'Cableado estructurado: La base invisible',
       targetSlide: 12,
-      image: '/assets/posts/p12_img01.jpeg',
+      image: '/assets/posts/p12_img05.jpeg',
       badge: 'CARRUSEL'
     },
     {
       id: 8,
       title: 'Procesos de Instalación en Sitio',
       targetSlide: 23,
-      image: '/assets/posts/p23_img01.jpeg',
+      image: '/assets/posts/p23_img05.jpeg',
       badge: 'POST'
     },
     {
       id: 9,
       title: 'Tener el número de policía no es suficiente',
       targetSlide: 15,
-      image: '/assets/posts/p15_img01.jpeg',
+      image: '/assets/posts/p15_img05.jpeg',
       badge: 'POST'
     }
   ];
@@ -90,25 +90,47 @@ export default function VisualContentSlide({ clientTitle, instagram, onNavigateT
       </div>
 
       {/* Slide Inner Body */}
-      <div className="flex-1 flex flex-col lg:flex-row items-center justify-between gap-6 p-3 sm:p-6 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
-        {/* Left Side: 3x3 High-Res Grid */}
+      <div className="flex-1 flex flex-col lg:flex-row items-center justify-between gap-4 md:gap-6 p-3 sm:p-6 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+        {/* Left Side: 3x3 High-Res Grid (Enhanced for mobile & desktop) */}
         <div className="w-full lg:w-1/2 flex flex-col justify-center">
           <div className="mb-3 flex items-center justify-between">
             <div>
-              <h3 className="text-xl md:text-2xl font-black text-zinc-900 font-space tracking-tight">
+              <h3 className="text-lg sm:text-xl md:text-2xl font-black text-zinc-900 font-space tracking-tight">
                 Vista de Feed Instagram
               </h3>
-              <p className="text-xs text-zinc-500 font-medium">
-                Parrilla mensual de publicaciones interconectadas. Haz clic en cualquiera para ver su detalle.
+              <p className="text-[11px] sm:text-xs text-zinc-500 font-medium">
+                Parrilla mensual de publicaciones interconectadas. Toca para ver su detalle.
               </p>
             </div>
-            <span className="text-xs font-bold px-3 py-1 bg-orange-100 text-orange-700 rounded-full">
-              9 Diseños Clave
+            <span className="text-[10px] sm:text-xs font-bold px-2.5 py-1 bg-orange-100 text-orange-700 rounded-full shrink-0">
+              9 Diseños
             </span>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 md:gap-3 bg-zinc-100 p-3 rounded-2xl border border-zinc-200 shadow-inner">
-            {feedItems.map((item, idx) => (
+          {/* Instagram mini-profile banner for mobile */}
+          <div className="flex lg:hidden items-center justify-between p-2.5 mb-2.5 bg-zinc-50 rounded-xl border border-zinc-200 text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-rose-500 p-[1.5px]">
+                <div className="w-full h-full bg-white rounded-full flex items-center justify-center font-bold text-[9px] text-zinc-800 uppercase">
+                  DILO
+                </div>
+              </div>
+              <div>
+                <span className="font-bold text-zinc-900 block leading-tight">
+                  @{instagram?.username || 'sistemascuauhtli'}
+                </span>
+                <span className="text-[10px] text-zinc-500">
+                  {instagram?.postsCount || 336} posts · {instagram?.followersCount || 92} seguidores
+                </span>
+              </div>
+            </div>
+            <span className="text-[10px] font-bold px-2 py-0.5 bg-blue-50 text-blue-700 rounded-md border border-blue-200">
+              Parrilla Activa
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 md:gap-3 bg-zinc-100 p-2 sm:p-3 rounded-2xl border border-zinc-200 shadow-inner">
+            {feedItems.map((item) => (
               <div
                 key={item.id}
                 onClick={() => onNavigateToSlide && onNavigateToSlide(item.targetSlide)}
@@ -119,30 +141,32 @@ export default function VisualContentSlide({ clientTitle, instagram, onNavigateT
                   alt={item.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => {
-                    // Fallback to slide image if post image isn't loaded
                     e.target.src = `/assets/slides/slide_${String(item.targetSlide).padStart(2, '0')}.png`;
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2 text-white">
-                  <span className="text-[10px] uppercase font-bold text-orange-400">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-1.5 text-white">
+                  <span className="text-[9px] uppercase font-bold text-orange-400">
                     Slide #{item.targetSlide}
                   </span>
-                  <span className="text-xs font-semibold line-clamp-2 leading-tight">
+                  <span className="text-[10px] font-semibold line-clamp-2 leading-tight">
                     {item.title}
                   </span>
                 </div>
                 {item.badge && (
-                  <span className="absolute top-1.5 right-1.5 px-1.5 py-0.5 bg-black/70 backdrop-blur-sm text-white text-[9px] font-bold rounded">
+                  <span className="absolute top-1 right-1 px-1.5 py-0.5 bg-black/75 backdrop-blur-sm text-white text-[8px] font-bold rounded">
                     {item.badge}
                   </span>
                 )}
+                <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-orange-600/90 text-white text-[8px] font-bold rounded">
+                  #{item.targetSlide}
+                </span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Right Side: Realistic Instagram Smartphone Mockup faithful to PDF Page 2 */}
-        <div className="w-full lg:w-1/2 flex justify-center items-center">
+        {/* Right Side: Realistic Instagram Smartphone Mockup (Desktop only to prevent redundant vertical scroll on mobile) */}
+        <div className="hidden lg:flex w-full lg:w-1/2 justify-center items-center">
           <div className="smartphone-mockup shadow-2xl">
             {/* Dynamic Island / Speaker */}
             <div className="mockup-island" />

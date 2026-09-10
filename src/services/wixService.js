@@ -214,10 +214,14 @@ export async function getParrillaBySlug(slug) {
             ...s,
             type: wixMatch.tipoDePost?.toUpperCase() || s.type,
             copy: wixCopy || s.copy,
-            images: wixImages.length > 0 ? wixImages : [s.image]
+            images: wixImages.length > 0 ? wixImages : (s.postImages || [s.image]),
+            postImages: wixImages.length > 0 ? wixImages : (s.postImages || [s.image])
           };
         }
-        return s;
+        return {
+          ...s,
+          postImages: s.postImages || [s.image]
+        };
       })
     };
 

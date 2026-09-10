@@ -55,19 +55,19 @@ export default function CoverSlide({ clientTitle, clientMonth, clientYear, onSta
       </div>
 
       {/* Main Center Area */}
-      <div className="relative z-10 my-auto max-w-4xl py-2 md:py-4">
+      <div className="relative z-10 my-auto max-w-4xl py-2 md:py-4 w-full">
         {/* Official Dilo Digital Logo */}
-        <div className="flex items-center gap-3 md:gap-3.5 mb-4 md:mb-6">
+        <div className="flex items-center gap-2.5 sm:gap-3.5 mb-3 sm:mb-4 md:mb-6">
           <img
             src="/assets/logo/dilo-logo-orange.png"
             alt="Dilo Digital"
-            className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain drop-shadow-sm select-none"
+            className="w-10 h-10 sm:w-14 sm:h-14 md:w-20 md:h-20 object-contain drop-shadow-sm select-none"
           />
           <div className="flex flex-col justify-center">
-            <span className="text-[10px] sm:text-[11px] md:text-xs font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-zinc-400">
+            <span className="text-[9px] sm:text-[11px] md:text-xs font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-zinc-400">
               Agencia de Crecimiento Digital
             </span>
-            <span className="text-xl sm:text-2xl md:text-3xl font-black text-zinc-950 tracking-tight font-space leading-none mt-0.5">
+            <span className="text-lg sm:text-2xl md:text-3xl font-black text-zinc-950 tracking-tight font-space leading-none mt-0.5">
               DILO <span className="text-orange-500">DIGITAL</span>
             </span>
           </div>
@@ -75,28 +75,30 @@ export default function CoverSlide({ clientTitle, clientMonth, clientYear, onSta
 
         {/* Big Impact Titles faithful to PDF Page 1 */}
         <div className="space-y-0.5 sm:space-y-1">
-          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-zinc-950 uppercase tracking-tight font-space leading-tight">
+          <h2 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-zinc-950 uppercase tracking-tight font-space leading-tight">
             PRESENTACIÓN DE
           </h2>
-          <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-orange-500 uppercase tracking-tighter font-space leading-none">
+          <h1 className="text-3xl sm:text-5xl md:text-8xl lg:text-9xl font-black text-orange-500 uppercase tracking-tighter font-space leading-none">
             PARRILLA
           </h1>
         </div>
 
         {/* Dynamic Client Tagline & Month & CTA */}
-        <div className="mt-6 md:mt-8 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3.5">
-          <div className="px-4 py-2.5 bg-zinc-950 text-white font-bold rounded-xl md:rounded-2xl text-xs sm:text-sm md:text-base tracking-wide uppercase shadow-lg shadow-zinc-900/10 flex items-center justify-center gap-2 border border-zinc-800">
-            <Sparkles className="w-4 h-4 text-orange-400 shrink-0" />
-            <span className="truncate">{clientTitle || 'Sistemas Cuauhtli'}</span>
-          </div>
+        <div className="mt-4 sm:mt-6 md:mt-8 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-2 sm:gap-3.5">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex-1 sm:flex-none px-3.5 py-2 sm:px-4 sm:py-2.5 bg-zinc-950 text-white font-bold rounded-xl md:rounded-2xl text-xs sm:text-sm md:text-base tracking-wide uppercase shadow-md flex items-center justify-center gap-1.5 border border-zinc-800">
+              <Sparkles className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+              <span className="truncate">{clientTitle || 'Sistemas Cuauhtli'}</span>
+            </div>
 
-          <div className="px-4 py-2.5 bg-orange-100/90 text-orange-700 font-extrabold rounded-xl md:rounded-2xl text-xs sm:text-sm md:text-base tracking-wider uppercase border border-orange-200 text-center">
-            {clientMonth || 'Septiembre'} {clientYear || '2026'}
+            <div className="px-3.5 py-2 sm:px-4 sm:py-2.5 bg-orange-100/90 text-orange-700 font-extrabold rounded-xl md:rounded-2xl text-xs sm:text-sm md:text-base tracking-wider uppercase border border-orange-200 text-center shrink-0">
+              {clientMonth || 'Septiembre'} {clientYear || '2026'}
+            </div>
           </div>
 
           <button
             onClick={onStart}
-            className="px-5 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-xl md:rounded-2xl text-xs sm:text-sm md:text-base transition-all shadow-lg shadow-orange-500/25 flex items-center justify-center gap-2 cursor-pointer group hover:scale-[1.02] active:scale-[0.98]"
+            className="w-full sm:w-auto px-5 py-2.5 sm:py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-xl md:rounded-2xl text-xs sm:text-sm md:text-base transition-all shadow-md shadow-orange-500/25 flex items-center justify-center gap-2 cursor-pointer group hover:scale-[1.02] active:scale-[0.98]"
           >
             <span>Explorar Parrilla</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -105,16 +107,17 @@ export default function CoverSlide({ clientTitle, clientMonth, clientYear, onSta
       </div>
 
       {/* Clean Footer Bar with Non-overlapping Brand Mark */}
-      <div className="relative z-10 flex items-center justify-between text-xs font-semibold text-zinc-400 tracking-wider pt-4 border-t border-zinc-100 mt-4 md:mt-0">
-        <div className="flex items-center gap-2">
-          <span className="text-orange-500 font-black text-lg leading-none select-none">+</span>
-          <span className="uppercase text-zinc-500 font-bold text-[10px] sm:text-xs">Agencia de Crecimiento Digital</span>
+      <div className="relative z-10 flex items-center justify-between text-xs font-semibold text-zinc-400 tracking-wider pt-3 sm:pt-4 border-t border-zinc-100 mt-3 md:mt-0">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <span className="text-orange-500 font-black text-base sm:text-lg leading-none select-none">+</span>
+          <span className="uppercase text-zinc-500 font-bold text-[9px] sm:text-xs">Agencia de Crecimiento Digital</span>
         </div>
-        <div className="hidden sm:flex items-center gap-2 text-zinc-400 text-[11px] font-medium">
-          <span>Usa las flechas</span>
-          <kbd className="px-2 py-0.5 bg-zinc-100 border border-zinc-300 rounded text-[10px] text-zinc-700 font-mono font-bold">←</kbd>
-          <kbd className="px-2 py-0.5 bg-zinc-100 border border-zinc-300 rounded text-[10px] text-zinc-700 font-mono font-bold">→</kbd>
-          <span>para navegar</span>
+        <div className="flex items-center gap-1.5 text-zinc-400 text-[10px] sm:text-[11px] font-medium">
+          <span className="hidden sm:inline">Usa las flechas</span>
+          <kbd className="hidden sm:inline-block px-1.5 py-0.5 bg-zinc-100 border border-zinc-300 rounded text-[10px] text-zinc-700 font-mono font-bold">←</kbd>
+          <kbd className="hidden sm:inline-block px-1.5 py-0.5 bg-zinc-100 border border-zinc-300 rounded text-[10px] text-zinc-700 font-mono font-bold">→</kbd>
+          <span className="hidden sm:inline">para navegar</span>
+          <span className="sm:hidden text-orange-600 font-semibold">Desliza para explorar 👉</span>
         </div>
       </div>
     </div>

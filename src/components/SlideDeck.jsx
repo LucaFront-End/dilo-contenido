@@ -149,7 +149,7 @@ export default function SlideDeck({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="slide-frame-container relative w-full max-w-[1500px] h-auto min-h-[580px] md:aspect-video md:max-h-[85vh] bg-white rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl overflow-hidden border border-zinc-200/80 transition-all flex flex-col"
+        className="slide-frame-container relative w-full max-w-[1500px] h-auto md:aspect-video md:max-h-[85vh] bg-white rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl overflow-hidden border border-zinc-200/80 transition-all flex flex-col"
       >
         {renderSlideContent()}
 
@@ -269,7 +269,7 @@ export default function SlideDeck({
             </div>
 
             {/* Grid of 30 thumbnails */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-10 gap-3 overflow-y-auto p-1">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 lg:grid-cols-10 gap-2.5 overflow-y-auto p-1 max-h-[55vh]">
               {slides.map((s, idx) => {
                 const slideCommentsCount = comments.filter(c => c.slideNumber === s.pageNumber).length;
                 return (
@@ -279,16 +279,16 @@ export default function SlideDeck({
                       goToSlide(idx);
                       setIsDrawerOpen(false);
                     }}
-                    className={`group relative aspect-video bg-zinc-800 rounded-xl overflow-hidden border-2 cursor-pointer transition-all ${
+                    className={`group relative w-full aspect-[16/9] bg-zinc-800 rounded-xl overflow-hidden border-2 cursor-pointer transition-all shrink-0 ${
                       idx === currentSlideIndex
-                        ? 'border-orange-500 scale-105 shadow-lg shadow-orange-500/20'
-                        : 'border-zinc-700 hover:border-zinc-500 opacity-70 hover:opacity-100'
+                        ? 'border-orange-500 scale-[1.02] shadow-lg shadow-orange-500/20'
+                        : 'border-zinc-700 hover:border-zinc-500 opacity-75 hover:opacity-100'
                     }`}
                   >
                     <img
                       src={s.image}
                       alt={`Thumb ${idx + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover block"
                     />
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <Eye className="w-5 h-5 text-white" />

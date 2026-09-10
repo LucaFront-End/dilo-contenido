@@ -15,38 +15,38 @@ export default function Header({
   onOpenPortal
 }) {
   return (
-    <header className="dilo-header">
-      <div className="dilo-header-top">
+    <header className="dilo-header w-full px-3 py-2 md:px-6 md:py-3 sticky top-0 z-40 bg-white border-b border-zinc-200 overflow-x-hidden">
+      <div className="dilo-header-top flex items-center justify-between max-w-[1500px] mx-auto w-full gap-2">
         {/* Left handle: @dilodigitalmx and client info */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <button
             onClick={onOpenPortal}
-            className="flex items-center gap-2 group hover:opacity-80 transition-opacity"
+            className="flex items-center gap-1.5 sm:gap-2 group hover:opacity-80 transition-opacity"
             title="Ir al Portal de Parrillas"
           >
             <div className="dilo-brand-logo flex items-center">
               <img
                 src="/assets/logo/dilo-logo-orange.png"
                 alt="Dilo Digital"
-                className="w-6 h-6 object-contain"
+                className="w-5 h-5 sm:w-6 sm:h-6 object-contain"
               />
             </div>
-            <span className="dilo-handle font-bold text-sm text-zinc-800 tracking-wide group-hover:text-orange-600 transition-colors">
+            <span className="dilo-handle font-bold text-xs sm:text-sm text-zinc-800 tracking-wide group-hover:text-orange-600 transition-colors">
               @dilodigitalmx
             </span>
           </button>
           {clientTitle && (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 font-bold tracking-wider uppercase max-w-[140px] truncate hidden sm:inline-block">
+            <span className="text-[11px] sm:text-xs px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 font-bold tracking-wider uppercase max-w-[110px] sm:max-w-[140px] truncate hidden md:inline-block">
               {clientTitle} · {clientMonth}
             </span>
           )}
           {onOpenPortal && (
             <button
               onClick={onOpenPortal}
-              className="px-2 py-1 text-xs font-semibold rounded-lg bg-zinc-100 hover:bg-orange-50 text-zinc-700 hover:text-orange-600 border border-zinc-200 transition-colors flex items-center gap-1"
+              className="px-2 py-1 text-[11px] sm:text-xs font-semibold rounded-lg bg-zinc-100 hover:bg-orange-50 text-zinc-700 hover:text-orange-600 border border-zinc-200 transition-colors flex items-center gap-1"
               title="Cambiar de parrilla o ver todos los clientes"
             >
-              <Sparkles className="w-3.5 h-3.5 text-orange-500" />
+              <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-orange-500" />
               <span className="hidden xs:inline">Clientes</span>
             </button>
           )}
@@ -56,10 +56,10 @@ export default function Header({
         <div className="dilo-header-line flex-1 mx-4 hidden md:block" />
 
         {/* Right tools and 2026 label */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {/* Live sync status badge */}
           <div
-            className={`text-xs px-2.5 py-1 rounded-lg flex items-center gap-1.5 font-medium cursor-pointer transition-colors ${
+            className={`text-xs px-2 py-1 rounded-lg flex items-center gap-1.5 font-medium cursor-pointer transition-colors ${
               isWixLive
                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
                 : 'bg-zinc-100 text-zinc-600 border border-zinc-200'
@@ -69,26 +69,26 @@ export default function Header({
           >
             <span className={`w-2 h-2 rounded-full ${isWixLive ? 'bg-emerald-500 animate-pulse' : 'bg-zinc-400'}`} />
             <span className="hidden sm:inline font-semibold">En Línea</span>
-            <RefreshCw className="w-3 h-3 text-zinc-400 hover:text-zinc-600" />
+            <RefreshCw className="w-3 h-3 text-zinc-400 hover:text-zinc-600 hidden sm:inline" />
           </div>
 
           {/* View mode toggle */}
-          <div className="view-mode-toggle flex bg-zinc-100 p-1 rounded-xl border border-zinc-200">
+          <div className="view-mode-toggle flex bg-zinc-100 p-0.5 sm:p-1 rounded-xl border border-zinc-200">
             <button
               onClick={() => setViewMode('slides')}
-              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+              className={`flex items-center gap-1 px-2 sm:px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
                 viewMode === 'slides'
                   ? 'bg-white text-zinc-900 shadow-sm'
                   : 'text-zinc-500 hover:text-zinc-900'
               }`}
-              title="Vista Diapositivas (Formato PDF)"
+              title="Vista Diapositivas"
             >
               <Presentation className="w-3.5 h-3.5 text-orange-600" />
               <span className="hidden md:inline">Diapositivas</span>
             </button>
             <button
               onClick={() => setViewMode('grid')}
-              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+              className={`flex items-center gap-1 px-2 sm:px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
                 viewMode === 'grid'
                   ? 'bg-white text-zinc-900 shadow-sm'
                   : 'text-zinc-500 hover:text-zinc-900'
@@ -100,10 +100,10 @@ export default function Header({
             </button>
           </div>
 
-          {/* Share Button */}
+          {/* Share Button (hidden on very small screens, accessible in deck) */}
           <button
             onClick={onShare}
-            className="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors"
+            className="p-1 sm:p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors hidden sm:block"
             title="Copiar enlace de la parrilla"
           >
             <Share2 className="w-4 h-4" />
@@ -112,7 +112,7 @@ export default function Header({
           {/* Fullscreen Button */}
           <button
             onClick={toggleFullscreen}
-            className="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors"
+            className="p-1 sm:p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors hidden sm:block"
             title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -122,15 +122,15 @@ export default function Header({
           {onRelock && (
             <button
               onClick={onRelock}
-              className="p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="p-1 sm:p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
               title="Bloquear parrilla"
             >
-              <Lock className="w-4 h-4" />
+              <Lock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           )}
 
           {/* 2026 Year Indicator */}
-          <span className="dilo-year font-bold text-base text-zinc-900 tracking-tight ml-1">
+          <span className="dilo-year font-bold text-sm sm:text-base text-zinc-900 tracking-tight ml-0.5 hidden sm:inline">
             2026
           </span>
         </div>

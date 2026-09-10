@@ -116,7 +116,6 @@
 .slide-frame-container {
   box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
   width: 100%;
-  min-height: 560px;
   display: flex;
   flex-direction: column;
 }
@@ -125,6 +124,7 @@
   .slide-frame-container {
     aspect-ratio: 16 / 9;
     max-height: 85vh;
+    min-height: 560px;
   }
 }
 

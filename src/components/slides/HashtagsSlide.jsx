@@ -3,6 +3,7 @@ import { Settings, Copy, Check, Hash, Sparkles } from 'lucide-react';
 
 export default function HashtagsSlide({ hashtags, onCopySuccess }) {
   const [copiedGroup, setCopiedGroup] = useState(null);
+  const [activeTab, setActiveTab] = useState('nicho');
 
   const categories = [
     {
@@ -60,14 +61,16 @@ export default function HashtagsSlide({ hashtags, onCopySuccess }) {
     });
   };
 
+  const currentCategory = categories.find(c => c.id === activeTab) || categories[0];
+
   return (
     <div className="slide-content hashtags-slide flex w-full h-full relative overflow-hidden bg-white select-text">
       {/* Black Left Rounded Category Pill with Gear Icon faithful to PDF */}
       <div className="pdf-side-pill shrink-0 flex flex-col items-center">
-        <div className="p-2 text-orange-500 mb-2">
-          <Settings className="w-6 h-6 animate-spin-slow" />
+        <div className="p-1 sm:p-2 text-orange-500 mb-1 sm:mb-2">
+          <Settings className="w-5 h-5 sm:w-6 sm:h-6 animate-spin-slow" />
         </div>
-        <span className="pdf-side-pill-text tracking-widest font-black uppercase text-xl md:text-2xl font-space">
+        <span className="pdf-side-pill-text tracking-widest font-black uppercase text-xs sm:text-sm md:text-2xl font-space">
           HASTAGS
         </span>
       </div>
@@ -83,20 +86,20 @@ export default function HashtagsSlide({ hashtags, onCopySuccess }) {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col justify-start md:justify-center p-4 sm:p-8 md:p-14 max-w-6xl mx-auto w-full z-10 overflow-y-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 md:mb-8">
+      <div className="flex-1 flex flex-col justify-start md:justify-center p-3 sm:p-6 md:p-14 max-w-6xl mx-auto w-full z-10 overflow-y-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 mb-4 sm:mb-8">
           <div>
-            <h2 className="text-3xl md:text-5xl font-black text-zinc-900 font-space tracking-tight">
+            <h2 className="text-xl sm:text-3xl md:text-5xl font-black text-zinc-900 font-space tracking-tight">
               Estrategia de Etiquetas (Hashtags)
             </h2>
-            <p className="text-sm text-zinc-500 mt-1">
-              Segmentación calculada para optimizar el alcance orgánico y la autoridad de marca en Instagram.
+            <p className="text-xs sm:text-sm text-zinc-500 mt-0.5 sm:mt-1">
+              Segmentación calculada para optimizar el alcance orgánico en Instagram.
             </p>
           </div>
 
           <button
             onClick={handleCopyAll}
-            className="px-5 py-2.5 bg-zinc-900 hover:bg-black text-white font-bold rounded-xl text-xs flex items-center gap-2 shadow-md transition-all cursor-pointer"
+            className="px-4 py-2 sm:px-5 sm:py-2.5 bg-zinc-900 hover:bg-black text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer shrink-0"
           >
             {copiedGroup === 'ALL' ? (
               <>
@@ -112,8 +115,55 @@ export default function HashtagsSlide({ hashtags, onCopySuccess }) {
           </button>
         </div>
 
-        {/* 3 Columns Organized with Orange Badges faithful to PDF */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 relative">
+        {/* Mobile Tab Selector (<md) */}
+        <div className="flex md:hidden items-center justify-between gap-1 p-1 bg-zinc-100 rounded-xl mb-3 border border-zinc-200">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveTab(cat.id)}
+              className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-center ${
+                activeTab === cat.id
+                  ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
+                  : 'text-zinc-500 hover:text-zinc-900'
+              }`}
+            >
+              {cat.title.replace('# ', '')}
+            </button>
+          ))}
+        </div>
+
+        {/* Mobile Active Tab Card (<md) */}
+        <div className="block md:hidden bg-zinc-50/80 border border-zinc-200 rounded-2xl p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <span className="font-black text-xs uppercase tracking-wider text-orange-600 font-space">
+              {currentCategory.title}
+            </span>
+            <button
+              onClick={() => handleCopyTags(currentCategory.title, currentCategory.tags)}
+              className="px-2.5 py-1 text-xs font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 rounded-lg flex items-center gap-1 cursor-pointer border border-orange-200"
+            >
+              {copiedGroup === currentCategory.title ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copiedGroup === currentCategory.title ? '¡Copiado!' : 'Copiar grupo'}</span>
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {currentCategory.tags.map((tag, tIdx) => (
+              <span
+                key={tIdx}
+                onClick={() => {
+                  navigator.clipboard.writeText(tag);
+                  if (onCopySuccess) onCopySuccess(`"${tag}" copiado`);
+                }}
+                className="px-3 py-1.5 bg-white hover:bg-orange-50 border border-zinc-200 hover:border-orange-300 rounded-xl text-xs font-semibold text-zinc-800 hover:text-orange-600 transition-all cursor-pointer active:scale-95 shadow-2xs"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* 3 Columns Organized with Orange Badges faithful to PDF (Desktop md:grid) */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 relative">
           {categories.map((cat, idx) => (
             <div key={cat.id} className="flex flex-col relative">
               {/* Category Pill Tag */}

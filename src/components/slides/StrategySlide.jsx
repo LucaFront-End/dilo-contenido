@@ -62,41 +62,41 @@ export default function StrategySlide({ estrategia }) {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col justify-start md:justify-center p-4 sm:p-8 md:p-14 max-w-5xl mx-auto w-full z-10 overflow-y-auto">
-        <div className="mb-6 md:mb-8">
-          <span className="text-xs font-bold uppercase tracking-widest text-orange-600 bg-orange-50 px-3 py-1 rounded-full">
+      <div className="flex-1 flex flex-col justify-start md:justify-center p-3 sm:p-6 md:p-14 max-w-5xl mx-auto w-full z-10 overflow-y-auto">
+        <div className="mb-3 sm:mb-6 md:mb-8">
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-orange-600 bg-orange-50 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full">
             Pilares de Comunicación
           </span>
-          <h2 className="text-3xl md:text-5xl font-black text-zinc-900 font-space tracking-tight mt-2">
-            Estrategia de Contenido Mensual
+          <h2 className="text-xl sm:text-3xl md:text-5xl font-black text-zinc-900 font-space tracking-tight mt-1.5 sm:mt-2">
+            Estrategia de Contenido
           </h2>
-          <p className="text-sm text-zinc-500 max-w-2xl mt-1">
-            Diseñada meticulosamente por el equipo de Dilo Digital para conectar con tomadores de decisiones y clientes calificados.
+          <p className="text-xs sm:text-sm text-zinc-500 max-w-2xl mt-0.5 sm:mt-1">
+            Diseñada meticulosamente por Dilo Digital para generar confianza y conversiones.
           </p>
         </div>
 
         {/* 4 Strategy Pillar Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-6">
           {pillars.map((p, idx) => {
             const Icon = p.icon;
             return (
               <div
                 key={idx}
-                className="bg-zinc-50/80 hover:bg-white border border-zinc-200/80 hover:border-orange-200 hover:shadow-xl rounded-2xl p-6 transition-all duration-300"
+                className="bg-zinc-50/80 hover:bg-white border border-zinc-200/80 hover:border-orange-200 hover:shadow-xl rounded-xl sm:rounded-2xl p-3 sm:p-6 transition-all duration-300"
               >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold shadow-md shadow-orange-500/20">
-                    <Icon className="w-5 h-5" />
+                <div className="flex items-center gap-2.5 mb-2.5 sm:mb-4">
+                  <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-orange-500 text-white flex items-center justify-center font-bold shadow-sm shadow-orange-500/20">
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <h3 className="text-xl font-bold text-zinc-900 tracking-tight">
+                  <h3 className="text-sm sm:text-xl font-bold text-zinc-900 tracking-tight">
                     {p.title}
                   </h3>
                 </div>
 
-                <ul className="space-y-2.5">
+                <ul className="space-y-1.5 sm:space-y-2.5">
                   {p.items.map((item, itemIdx) => (
-                    <li key={itemIdx} className="flex items-start gap-2.5 text-zinc-700 text-sm leading-relaxed">
-                      <CheckCircle2 className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+                    <li key={itemIdx} className="flex items-start gap-2 text-zinc-700 text-xs sm:text-sm leading-snug sm:leading-relaxed">
+                      <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-500 shrink-0 mt-0.5" />
                       <span>{item}</span>
                     </li>
                   ))}

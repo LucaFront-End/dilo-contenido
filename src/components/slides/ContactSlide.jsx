@@ -59,32 +59,32 @@ export default function ContactSlide() {
       </div>
 
       {/* Main Center Area */}
-      <div className="flex-1 flex flex-col justify-start md:justify-center relative z-10 max-w-4xl mx-auto w-full overflow-y-auto py-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+      <div className="flex-1 flex flex-col justify-start md:justify-center relative z-10 max-w-4xl mx-auto w-full overflow-y-auto py-2 sm:py-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-10 items-center">
           {/* Brand & Logo */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-4">
+          <div className="space-y-2 sm:space-y-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               <img
                 src="/assets/logo/dilo-logo-orange.png"
                 alt="Dilo Digital"
-                className="w-20 h-20 object-contain drop-shadow-sm select-none"
+                className="w-12 h-12 sm:w-20 sm:h-20 object-contain drop-shadow-sm select-none"
               />
               <div>
-                <span className="text-xs font-black uppercase tracking-[0.2em] text-zinc-400 block">
+                <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-zinc-400 block">
                   Agencia de Crecimiento
                 </span>
-                <span className="text-3xl font-black text-zinc-950 tracking-tight block leading-none font-space mt-1">
+                <span className="text-xl sm:text-3xl font-black text-zinc-950 tracking-tight block leading-none font-space mt-0.5 sm:mt-1">
                   DILO <span className="text-orange-500">DIGITAL</span>
                 </span>
               </div>
             </div>
-            <p className="text-sm text-zinc-500 max-w-sm pt-2">
+            <p className="text-xs sm:text-sm text-zinc-500 max-w-sm pt-1 sm:pt-2">
               Estrategia, diseño y resultados medibles para impulsar tu marca al siguiente nivel.
             </p>
           </div>
 
           {/* Contact Details faithful to PDF Page 30 */}
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-1 gap-2 sm:gap-4">
             {contacts.map((c, i) => {
               const Icon = c.icon;
               return (
@@ -93,20 +93,20 @@ export default function ContactSlide() {
                   href={c.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-4 p-3.5 rounded-2xl bg-zinc-50 hover:bg-orange-50 border border-zinc-200/80 hover:border-orange-300 transition-all group shadow-sm hover:shadow-md cursor-pointer"
+                  className="flex items-center gap-3 p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-zinc-50 hover:bg-orange-50 border border-zinc-200/80 hover:border-orange-300 transition-all group shadow-2xs hover:shadow-md cursor-pointer"
                 >
-                  <div className="w-11 h-11 rounded-xl bg-zinc-900 group-hover:bg-orange-500 text-white flex items-center justify-center transition-colors shadow">
-                    <Icon className="w-5 h-5" />
+                  <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-zinc-900 group-hover:bg-orange-500 text-white flex items-center justify-center transition-colors shadow shrink-0">
+                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <div className="flex-1">
-                    <span className="text-[11px] uppercase tracking-wider text-zinc-400 font-bold block">
+                  <div className="flex-1 min-w-0">
+                    <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-zinc-400 font-bold block truncate">
                       {c.sub}
                     </span>
-                    <span className="text-base font-bold text-zinc-900 group-hover:text-orange-600 transition-colors">
+                    <span className="text-xs sm:text-base font-bold text-zinc-900 group-hover:text-orange-600 transition-colors block truncate">
                       {c.label}
                     </span>
                   </div>
-                  <ArrowUpRight className="w-4 h-4 text-zinc-400 group-hover:text-orange-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                  <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400 group-hover:text-orange-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0" />
                 </a>
               );
             })}
@@ -114,8 +114,8 @@ export default function ContactSlide() {
         </div>
 
         {/* Big Bottom Typography: CONTACTO */}
-        <div className="mt-12">
-          <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-zinc-950 uppercase tracking-tighter font-space leading-none">
+        <div className="mt-4 sm:mt-12">
+          <h1 className="text-4xl sm:text-8xl lg:text-9xl font-black text-zinc-950 uppercase tracking-tighter font-space leading-none">
             CONTACTO
           </h1>
         </div>

@@ -21,8 +21,15 @@ export default function PostSlide({
   const slideComments = comments.filter((c) => c.slideNumber === slide.pageNumber);
   const commentsCount = slideComments.length;
 
-  // If slide has multiple carousel images or single image
-  const images = slide.images && slide.images.length > 0 ? slide.images : [slide.image];
+  // View mode: 'creative' (sharp social post) vs 'pdf' (full slide canvas)
+  const [viewMode, setViewMode] = useState('creative');
+
+  // Multi-image post creatives vs PDF slide
+  const postImages = slide.postImages && slide.postImages.length > 0
+    ? slide.postImages
+    : (slide.images && slide.images.length > 0 ? slide.images : [slide.image]);
+
+  const images = viewMode === 'creative' ? postImages : [slide.image];
   const isCarousel = images.length > 1;
 
   const handleCopy = () => {
@@ -51,13 +58,36 @@ export default function PostSlide({
   return (
     <div className="slide-content post-slide flex w-full h-full relative overflow-hidden bg-white select-text">
       {/* Black Left Rounded Category Pill */}
-      <div className="pdf-side-pill shrink-0">
-        <span className="pdf-side-pill-text tracking-widest font-black uppercase text-xl md:text-2xl font-space">
+      <div className="pdf-side-pill shrink-0 flex items-center justify-between md:justify-center">
+        <span className="pdf-side-pill-text tracking-widest font-black uppercase text-xs sm:text-sm md:text-2xl font-space">
           {slide.type || 'POST'}
         </span>
+        {/* Mobile View Toggle: Post Creative vs Full PDF Slide */}
+        <div className="flex md:hidden items-center bg-zinc-800 p-0.5 rounded-lg border border-zinc-700 text-[10px] font-bold">
+          <button
+            onClick={() => { setViewMode('creative'); setActiveImageIdx(0); }}
+            className={`px-2 py-0.5 rounded transition-all ${
+              viewMode === 'creative'
+                ? 'bg-orange-500 text-white shadow-sm'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            Post
+          </button>
+          <button
+            onClick={() => { setViewMode('pdf'); setActiveImageIdx(0); }}
+            className={`px-2 py-0.5 rounded transition-all ${
+              viewMode === 'pdf'
+                ? 'bg-orange-500 text-white shadow-sm'
+                : 'text-zinc-400 hover:text-white'
+            }`}
+          >
+            Lámina
+          </button>
+        </div>
       </div>
 
-      {/* Decorative Vectors on Right */}
+      {/* Decorative Vectors on Right (Desktop only) */}
       <div className="decor-arch absolute top-20 right-4 pointer-events-none opacity-80 hidden xl:block">
         <svg width="100" height="180" viewBox="0 0 120 220" fill="none">
           <path d="M100 180 V80 C100 30 20 30 20 80 V180" stroke="#18181b" strokeWidth="10" strokeLinecap="round" />
@@ -68,10 +98,10 @@ export default function PostSlide({
       </div>
 
       {/* Slide Body: 2 Columns on desktop, clean vertical stack on mobile */}
-      <div className="flex-1 flex flex-col lg:flex-row items-stretch lg:items-center justify-start lg:justify-between gap-4 md:gap-6 p-3 sm:p-6 md:p-8 lg:p-12 overflow-y-auto max-w-7xl mx-auto w-full z-10">
+      <div className="flex-1 flex flex-col lg:flex-row items-stretch lg:items-center justify-start lg:justify-between gap-3 sm:gap-6 p-2.5 sm:p-6 md:p-8 lg:p-12 overflow-y-auto max-w-7xl mx-auto w-full z-10">
         {/* Left Column: Media Presentation */}
         <div className="w-full lg:w-1/2 flex flex-col items-center justify-center">
-          <div className="relative w-full max-w-sm sm:max-w-md md:max-w-lg aspect-square bg-zinc-100 rounded-2xl overflow-hidden border border-zinc-200/80 shadow-md md:shadow-xl flex items-center justify-center group mx-auto">
+          <div className="relative w-full max-w-xs sm:max-w-md md:max-w-lg aspect-square bg-zinc-100 rounded-xl sm:rounded-2xl overflow-hidden border border-zinc-200/80 shadow-md md:shadow-xl flex items-center justify-center group mx-auto">
             <img
               src={images[activeImageIdx]}
               alt={`Slide ${slide.pageNumber}`}
@@ -82,10 +112,10 @@ export default function PostSlide({
             {/* Lightbox button overlay */}
             <button
               onClick={() => setIsLightboxOpen(true)}
-              className="absolute top-3 right-3 p-2 bg-black/60 hover:bg-black/80 text-white rounded-xl backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-2.5 right-2.5 p-1.5 sm:p-2 bg-black/60 hover:bg-black/80 text-white rounded-lg sm:rounded-xl backdrop-blur-sm opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity"
               title="Ampliar creatividad"
             >
-              <ZoomIn className="w-4 h-4" />
+              <ZoomIn className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
 
             {/* Carousel navigation buttons */}
@@ -96,28 +126,28 @@ export default function PostSlide({
                     e.stopPropagation();
                     setActiveImageIdx((prev) => (prev > 0 ? prev - 1 : images.length - 1));
                   }}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 p-2 bg-black/60 hover:bg-black/80 text-white rounded-full backdrop-blur-sm transition-all"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 bg-black/60 hover:bg-black/80 text-white rounded-full backdrop-blur-sm transition-all"
                   title="Anterior lámina del carrusel"
                 >
-                  <ChevronLeft className="w-5 h-5" />
+                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     setActiveImageIdx((prev) => (prev < images.length - 1 ? prev + 1 : 0));
                   }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-black/60 hover:bg-black/80 text-white rounded-full backdrop-blur-sm transition-all"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 bg-black/60 hover:bg-black/80 text-white rounded-full backdrop-blur-sm transition-all"
                   title="Siguiente lámina del carrusel"
                 >
-                  <ChevronRight className="w-5 h-5" />
+                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
               </>
             )}
 
             {/* Badge Indicator */}
             {isCarousel && (
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/70 backdrop-blur-sm rounded-full text-white text-xs font-semibold flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-orange-400" />
+              <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 sm:px-3 sm:py-1 bg-black/70 backdrop-blur-sm rounded-full text-white text-[10px] sm:text-xs font-semibold flex items-center gap-1.5">
+                <Layers className="w-3 h-3 text-orange-400" />
                 <span>
                   Lámina {activeImageIdx + 1} de {images.length}
                 </span>
@@ -127,12 +157,12 @@ export default function PostSlide({
 
           {/* Carousel thumbnails strip */}
           {isCarousel && (
-            <div className="flex items-center gap-2 mt-3 overflow-x-auto max-w-full pb-1">
+            <div className="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-3 overflow-x-auto max-w-full pb-1">
               {images.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveImageIdx(idx)}
-                  className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all shrink-0 ${
+                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden border-2 transition-all shrink-0 ${
                     idx === activeImageIdx
                       ? 'border-orange-500 scale-105 shadow-md'
                       : 'border-transparent opacity-60 hover:opacity-100'
@@ -143,12 +173,65 @@ export default function PostSlide({
               ))}
             </div>
           )}
+
+          {/* Action Bar directly under the post on Mobile (<lg) */}
+          <div className="grid grid-cols-3 gap-1.5 w-full max-w-xs sm:max-w-md mt-2.5 lg:hidden">
+            <button
+              onClick={handleApprove}
+              className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border ${
+                approved
+                  ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm'
+                  : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 border-zinc-200'
+              }`}
+            >
+              <ThumbsUp className="w-3.5 h-3.5" />
+              <span>{approved ? 'Aprobado ✓' : 'Aprobar'}</span>
+            </button>
+
+            <button
+              onClick={() => setIsCommentModalOpen(true)}
+              className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border ${
+                commentsCount > 0
+                  ? 'bg-amber-50 text-amber-900 border-amber-300 shadow-sm'
+                  : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5 text-orange-600" />
+              <span>Comentarios</span>
+              {commentsCount > 0 && (
+                <span className="px-1 py-0.2 bg-orange-500 text-white text-[9px] font-black rounded-full">
+                  {commentsCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={handleCopy}
+              className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                copied
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'bg-orange-500 hover:bg-orange-600 text-white shadow-sm'
+              }`}
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  <span>¡Copiado!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copiar</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Right Column: Copy & Actions */}
-        <div className="w-full lg:w-1/2 flex flex-col justify-between max-w-xl mt-4 lg:mt-0">
-          {/* Top Bar: Orange COPY Pill + Client Actions */}
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <div className="w-full lg:w-1/2 flex flex-col justify-between max-w-xl mt-2 sm:mt-4 lg:mt-0">
+          {/* Top Bar: Orange COPY Pill + Client Actions (Desktop only) */}
+          <div className="hidden lg:flex items-center justify-between gap-2 mb-3">
             {/* Orange COPY Pill faithful to PDF */}
             <div className="copy-badge-pill">
               <svg viewBox="0 0 24 24" className="w-5 h-5 fill-none stroke-current stroke-2">
@@ -235,7 +318,17 @@ export default function PostSlide({
           )}
 
           {/* Copy Text Body */}
-          <div className="bg-zinc-50/70 border border-zinc-200/80 rounded-2xl p-5 text-sm text-zinc-800 leading-relaxed max-h-[380px] overflow-y-auto font-sans shadow-inner space-y-3">
+          <div className="bg-zinc-50/70 border border-zinc-200/80 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 text-xs sm:text-sm text-zinc-800 leading-relaxed max-h-[340px] sm:max-h-[380px] overflow-y-auto font-sans shadow-inner space-y-2 sm:space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
+              <span>Copy de la Publicación</span>
+              <button
+                onClick={handleCopy}
+                className="text-[10px] text-orange-600 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <Copy className="w-3 h-3" />
+                <span>{copied ? '¡Copiado!' : 'Copiar'}</span>
+              </button>
+            </div>
             {slide.copy ? (
               slide.copy.split('\n\n').map((paragraph, pIdx) => (
                 <p key={pIdx} className="whitespace-pre-line">
@@ -248,7 +341,7 @@ export default function PostSlide({
 
             {/* Hashtags Section */}
             {slide.hashtags && (
-              <div className="pt-3 border-t border-zinc-200/80 text-xs text-orange-600 font-medium">
+              <div className="pt-2.5 border-t border-zinc-200/80 text-[11px] sm:text-xs text-orange-600 font-medium">
                 <p className="leading-relaxed font-mono">{slide.hashtags}</p>
               </div>
             )}
