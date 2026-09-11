@@ -68,12 +68,7 @@ export default function HashtagsSlide({ hashtags }) {
         className="absolute top-8 md:top-12 -right-2 md:right-4 h-[65%] sm:h-[72%] md:h-[78%] max-h-[560px] object-contain pointer-events-none select-none hidden lg:block z-0 opacity-80"
       />
 
-      {/* Subtle authentic dot matrix grid pattern (element-10) */}
-      <img
-        src="/assets/graphics/element-10.png"
-        alt=""
-        className="absolute bottom-6 right-36 w-16 md:w-20 object-contain pointer-events-none select-none hidden 2xl:block opacity-25 z-0"
-      />
+
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col justify-start md:justify-center p-3 sm:p-6 md:p-14 max-w-6xl mx-auto w-full z-10 overflow-y-auto">

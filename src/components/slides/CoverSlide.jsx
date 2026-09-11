@@ -6,51 +6,29 @@ export default function CoverSlide({ clientTitle, clientMonth, clientYear, onSta
     <div className="slide-content cover-slide-container relative w-full h-full flex flex-col justify-between p-6 sm:p-8 md:p-14 overflow-hidden select-none bg-white">
       {/* Original Dilo Vector Graphics Faithful to PDF Page 1 */}
 
-      {/* Top Left: Authentic Curves + Magnifying Glass (element-04) */}
+      {/* Left: Authentic Single Black Swirl / Rulo */}
       <img
-        src="/assets/graphics/element-04.png"
+        src="/assets/graphics/left-swirl.png"
         alt=""
-        className="absolute -top-4 -left-4 md:-top-2 md:-left-2 w-28 sm:w-36 md:w-48 lg:w-56 object-contain pointer-events-none select-none z-0 opacity-90"
+        className="absolute -top-4 -left-2 md:top-0 md:left-0 w-24 sm:w-28 md:w-36 lg:w-44 object-contain pointer-events-none select-none z-0 opacity-80"
       />
 
-      {/* Top Left: Authentic Black & Orange Arrows (element-05) */}
-      <img
-        src="/assets/graphics/element-05.png"
-        alt=""
-        className="absolute top-20 sm:top-24 md:top-32 left-16 sm:left-24 md:left-32 w-8 sm:w-10 md:w-14 object-contain pointer-events-none select-none z-0"
-      />
-
-      {/* Bottom Left: Authentic Orange Square with Crosshair (element-08) */}
-      <img
-        src="/assets/graphics/element-08.png"
-        alt=""
-        className="absolute -bottom-6 -left-6 md:bottom-2 md:left-2 w-14 sm:w-18 md:w-24 object-contain pointer-events-none select-none opacity-80 z-0"
-      />
-
-      {/* Right Side: Authentic Signature Dilo Right Motif (Arch, Pen Tool, Square, Dots) */}
+      {/* Right Side: Authentic Pen Nib + Two Swirls (Punta de la pluma y los dos rulos) */}
       <img
         src="/assets/graphics/dilo-right-motif.png"
         alt=""
-        className="absolute top-4 sm:top-8 md:top-10 -right-2 md:right-4 h-[65%] sm:h-[72%] md:h-[80%] max-h-[580px] object-contain pointer-events-none select-none hidden lg:block z-0"
+        className="absolute top-4 sm:top-8 md:top-10 -right-2 md:right-4 h-[60%] sm:h-[68%] md:h-[75%] max-h-[520px] object-contain pointer-events-none select-none hidden lg:block z-0 opacity-90"
       />
 
       {/* Main Center Area */}
       <div className="relative z-10 my-auto max-w-4xl py-2 md:py-4 w-full">
-        {/* Official Dilo Digital Logo */}
-        <div className="flex items-center gap-2.5 sm:gap-3.5 mb-3 sm:mb-4 md:mb-6">
+        {/* Official Dilo Digital Logo Lockup */}
+        <div className="mb-4 sm:mb-6 md:mb-8">
           <img
             src="/assets/logo/dilo-logo-black.png"
-            alt="Dilo Digital"
-            className="w-10 h-10 sm:w-14 sm:h-14 md:w-20 md:h-20 object-contain drop-shadow-sm select-none"
+            alt="Dilo Digital - Agencia de Marketing Digital"
+            className="h-10 sm:h-12 md:h-16 w-auto object-contain select-none"
           />
-          <div className="flex flex-col justify-center">
-            <span className="text-[9px] sm:text-[11px] md:text-xs font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-zinc-400">
-              Agencia de Marketing Digital
-            </span>
-            <span className="text-lg sm:text-2xl md:text-3xl font-black text-zinc-950 tracking-tight font-space leading-none mt-0.5">
-              DILO <span className="text-orange-500">DIGITAL</span>
-            </span>
-          </div>
         </div>
 
         {/* Big Impact Titles faithful to PDF Page 1 */}

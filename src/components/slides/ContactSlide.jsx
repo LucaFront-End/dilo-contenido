@@ -34,32 +34,18 @@ export default function ContactSlide() {
     <div className="slide-content contact-slide relative w-full h-full flex flex-col justify-between p-6 sm:p-8 md:p-14 overflow-hidden select-none bg-white">
       {/* Original Dilo Vector Graphics Faithful to PDF Page 30 */}
 
-      {/* Top Left: Authentic Curves + Magnifying Glass (element-04) */}
+      {/* Left: Authentic Single Black Swirl / Rulo */}
       <img
-        src="/assets/graphics/element-04.png"
+        src="/assets/graphics/left-swirl.png"
         alt=""
-        className="absolute -top-4 -left-4 md:-top-2 md:-left-2 w-28 sm:w-36 md:w-48 lg:w-56 object-contain pointer-events-none select-none z-0 opacity-90"
+        className="absolute -top-4 -left-2 md:top-0 md:left-0 w-24 sm:w-28 md:w-36 lg:w-44 object-contain pointer-events-none select-none z-0 opacity-80"
       />
 
-      {/* Top Left: Authentic Black & Orange Arrows (element-05) */}
-      <img
-        src="/assets/graphics/element-05.png"
-        alt=""
-        className="absolute top-20 sm:top-24 md:top-32 left-16 sm:left-24 md:left-32 w-8 sm:w-10 md:w-14 object-contain pointer-events-none select-none z-0"
-      />
-
-      {/* Bottom Left: Authentic Orange Square with Crosshair (element-08) */}
-      <img
-        src="/assets/graphics/element-08.png"
-        alt=""
-        className="absolute -bottom-6 -left-6 md:bottom-2 md:left-2 w-14 sm:w-18 md:w-24 object-contain pointer-events-none select-none opacity-80 z-0"
-      />
-
-      {/* Right Side: Authentic Signature Dilo Right Motif (Arch, Pen Tool, Square, Dots) */}
+      {/* Right Side: Authentic Pen Nib + Two Swirls (Punta de la pluma y los dos rulos) */}
       <img
         src="/assets/graphics/dilo-right-motif.png"
         alt=""
-        className="absolute top-4 sm:top-8 md:top-10 -right-2 md:right-4 h-[65%] sm:h-[72%] md:h-[80%] max-h-[580px] object-contain pointer-events-none select-none hidden lg:block z-0"
+        className="absolute top-4 sm:top-8 md:top-10 -right-2 md:right-4 h-[60%] sm:h-[68%] md:h-[75%] max-h-[520px] object-contain pointer-events-none select-none hidden lg:block z-0 opacity-90"
       />
 
       {/* Main Center Area: Left-Structured Layout matching Slide 1 */}
@@ -67,21 +53,13 @@ export default function ContactSlide() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center">
           {/* Left Column: Branding, Big Impact Typography & Value proposition (7 cols) */}
           <div className="lg:col-span-7 flex flex-col justify-center">
-            {/* Official Dilo Digital Logo */}
-            <div className="flex items-center gap-3 sm:gap-3.5 mb-3 sm:mb-5">
+            {/* Official Dilo Digital Logo Lockup */}
+            <div className="mb-4 sm:mb-6">
               <img
                 src="/assets/logo/dilo-logo-black.png"
-                alt="Dilo Digital"
-                className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain drop-shadow-sm select-none"
+                alt="Dilo Digital - Agencia de Marketing Digital"
+                className="h-10 sm:h-12 md:h-16 w-auto object-contain select-none"
               />
-              <div className="flex flex-col justify-center">
-                <span className="text-[9px] sm:text-[11px] md:text-xs font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-zinc-400">
-                  Agencia de Marketing Digital
-                </span>
-                <span className="text-xl sm:text-2xl md:text-3xl font-black text-zinc-950 tracking-tight font-space leading-none mt-0.5">
-                  DILO <span className="text-orange-500">DIGITAL</span>
-                </span>
-              </div>
             </div>
 
             {/* Big Impact Titles faithful to Cover Slide 1 */}
