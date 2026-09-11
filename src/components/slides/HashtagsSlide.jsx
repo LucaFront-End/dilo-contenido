@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Settings, Copy, Check, Hash, Sparkles } from 'lucide-react';
+import { Settings, Hash, Sparkles } from 'lucide-react';
 
-export default function HashtagsSlide({ hashtags, onCopySuccess }) {
-  const [copiedGroup, setCopiedGroup] = useState(null);
+export default function HashtagsSlide({ hashtags }) {
   const [activeTab, setActiveTab] = useState('nicho');
 
   const categories = [
@@ -43,28 +42,15 @@ export default function HashtagsSlide({ hashtags, onCopySuccess }) {
     }
   ];
 
-  const handleCopyTags = (groupTitle, tags) => {
-    const text = tags.join(' ');
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedGroup(groupTitle);
-      if (onCopySuccess) onCopySuccess(`¡Hashtags de "${groupTitle}" copiados!`);
-      setTimeout(() => setCopiedGroup(null), 2000);
-    });
-  };
-
-  const handleCopyAll = () => {
-    const allTags = categories.flatMap(c => c.tags).join(' ');
-    navigator.clipboard.writeText(allTags).then(() => {
-      setCopiedGroup('ALL');
-      if (onCopySuccess) onCopySuccess('¡Todos los hashtags copiados al portapapeles!');
-      setTimeout(() => setCopiedGroup(null), 2000);
-    });
-  };
-
-  const currentCategory = categories.find(c => c.id === activeTab) || categories[0];
+  const currentCategory = categories.find((c) => c.id === activeTab) || categories[0];
 
   return (
-    <div className="slide-content hashtags-slide flex w-full h-full relative overflow-hidden bg-white select-text">
+    <div
+      className="slide-content hashtags-slide flex w-full h-full relative overflow-hidden bg-white select-none"
+      style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none', msUserSelect: 'none' }}
+      onCopy={(e) => { e.preventDefault(); return false; }}
+      onContextMenu={(e) => e.preventDefault()}
+    >
       {/* Black Left Rounded Category Pill with Gear Icon faithful to PDF */}
       <div className="pdf-side-pill shrink-0 flex flex-col items-center">
         <div className="p-1 sm:p-2 text-orange-500 mb-1 sm:mb-2">
@@ -81,7 +67,7 @@ export default function HashtagsSlide({ hashtags, onCopySuccess }) {
           <path d="M100 180 V80 C100 30 20 30 20 80 V180" stroke="#18181b" strokeWidth="12" strokeLinecap="round" />
           <rect x="40" y="90" width="25" height="25" stroke="#18181b" strokeWidth="2.5" fill="none" />
           <circle cx="70" cy="190" r="6" fill="#18181b" />
-          <circle cx="70" cy="210" r="6" fill="#FF5A00" />
+          <circle cx="70" cy="210" r="5" fill="#FF5A00" />
         </svg>
       </div>
 
@@ -97,22 +83,9 @@ export default function HashtagsSlide({ hashtags, onCopySuccess }) {
             </p>
           </div>
 
-          <button
-            onClick={handleCopyAll}
-            className="px-4 py-2 sm:px-5 sm:py-2.5 bg-zinc-900 hover:bg-black text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer shrink-0"
-          >
-            {copiedGroup === 'ALL' ? (
-              <>
-                <Check className="w-4 h-4 text-emerald-400" />
-                <span>¡Todos Copiados!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-4 h-4 text-orange-400" />
-                <span>Copiar Todos</span>
-              </>
-            )}
-          </button>
+          <span className="px-3.5 py-1.5 bg-zinc-100 text-zinc-600 text-xs font-semibold rounded-xl border border-zinc-200 shrink-0 self-start sm:self-auto">
+            Estrategia de Nicho · Marca · Geolocalización
+          </span>
         </div>
 
         {/* Mobile Tab Selector (<md) */}
@@ -121,7 +94,7 @@ export default function HashtagsSlide({ hashtags, onCopySuccess }) {
             <button
               key={cat.id}
               onClick={() => setActiveTab(cat.id)}
-              className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-center ${
+              className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
                 activeTab === cat.id
                   ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
                   : 'text-zinc-500 hover:text-zinc-900'
@@ -132,29 +105,21 @@ export default function HashtagsSlide({ hashtags, onCopySuccess }) {
           ))}
         </div>
 
-        {/* Mobile Active Tab Card (<md) */}
+        {/* Mobile Active Tab Card (<md) (Protected from copy) */}
         <div className="block md:hidden bg-zinc-50/80 border border-zinc-200 rounded-2xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
             <span className="font-black text-xs uppercase tracking-wider text-orange-600 font-space">
               {currentCategory.title}
             </span>
-            <button
-              onClick={() => handleCopyTags(currentCategory.title, currentCategory.tags)}
-              className="px-2.5 py-1 text-xs font-bold text-orange-600 bg-orange-50 hover:bg-orange-100 rounded-lg flex items-center gap-1 cursor-pointer border border-orange-200"
-            >
-              {copiedGroup === currentCategory.title ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copiedGroup === currentCategory.title ? '¡Copiado!' : 'Copiar grupo'}</span>
-            </button>
+            <span className="text-[10px] text-zinc-400 font-medium">Solo lectura</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {currentCategory.tags.map((tag, tIdx) => (
               <span
                 key={tIdx}
-                onClick={() => {
-                  navigator.clipboard.writeText(tag);
-                  if (onCopySuccess) onCopySuccess(`"${tag}" copiado`);
-                }}
-                className="px-3 py-1.5 bg-white hover:bg-orange-50 border border-zinc-200 hover:border-orange-300 rounded-xl text-xs font-semibold text-zinc-800 hover:text-orange-600 transition-all cursor-pointer active:scale-95 shadow-2xs"
+                className="px-3 py-1.5 bg-white border border-zinc-200 rounded-xl text-xs font-semibold text-zinc-800 select-none shadow-2xs pointer-events-none"
+                style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+                draggable={false}
               >
                 {tag}
               </span>
@@ -162,8 +127,8 @@ export default function HashtagsSlide({ hashtags, onCopySuccess }) {
           </div>
         </div>
 
-        {/* 3 Columns Organized with Orange Badges faithful to PDF (Desktop md:grid) */}
-        <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 relative">
+        {/* 3 Columns Organized with Orange Badges faithful to PDF (Desktop md:grid) (Protected from copy) */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 relative select-none">
           {categories.map((cat, idx) => (
             <div key={cat.id} className="flex flex-col relative">
               {/* Category Pill Tag */}
@@ -174,32 +139,18 @@ export default function HashtagsSlide({ hashtags, onCopySuccess }) {
                     {cat.title}
                   </span>
                 </div>
-
-                <button
-                  onClick={() => handleCopyTags(cat.title, cat.tags)}
-                  className="p-1.5 text-zinc-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition-colors"
-                  title="Copiar grupo"
-                >
-                  {copiedGroup === cat.title ? (
-                    <Check className="w-4 h-4 text-emerald-600" />
-                  ) : (
-                    <Copy className="w-4 h-4" />
-                  )}
-                </button>
+                <span className="text-[11px] text-zinc-400 font-medium">{cat.tags.length} tags</span>
               </div>
 
-              {/* Tags List */}
-              <div className="bg-zinc-50/70 border border-zinc-200/80 rounded-2xl p-5 flex-1 shadow-sm">
+              {/* Tags List (Uncopyable) */}
+              <div className="bg-zinc-50/70 border border-zinc-200/80 rounded-2xl p-5 flex-1 shadow-sm select-none">
                 <ul className="space-y-3">
                   {cat.tags.map((tag, tIdx) => (
                     <li
                       key={tIdx}
-                      className="text-sm font-semibold text-zinc-800 hover:text-orange-600 transition-colors cursor-pointer"
-                      onClick={() => {
-                        navigator.clipboard.writeText(tag);
-                        if (onCopySuccess) onCopySuccess(`"${tag}" copiado`);
-                      }}
-                      title="Clic para copiar este tag"
+                      className="text-sm font-semibold text-zinc-800 select-none transition-colors pointer-events-none"
+                      style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+                      onCopy={(e) => e.preventDefault()}
                     >
                       {tag}
                     </li>
