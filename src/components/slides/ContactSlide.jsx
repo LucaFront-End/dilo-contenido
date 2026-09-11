@@ -32,30 +32,35 @@ export default function ContactSlide() {
 
   return (
     <div className="slide-content contact-slide relative w-full h-full flex flex-col justify-between p-6 sm:p-8 md:p-14 overflow-hidden select-none bg-white">
-      {/* Decorative Vectors Faithful to Slide 1 */}
+      {/* Original Dilo Vector Graphics Faithful to PDF Page 30 */}
 
-      {/* Top Left Squiggle */}
-      <div className="decor-curves absolute -top-12 -left-12 w-28 h-28 md:w-44 md:h-44 pointer-events-none opacity-40 md:opacity-85">
-        <svg viewBox="0 0 200 200" fill="none" className="w-full h-full text-zinc-900">
-          <path
-            d="M20 50 C40 10 90 20 70 80 C50 140 10 100 30 150 C50 200 120 180 140 140"
-            stroke="currentColor"
-            strokeWidth="9"
-            strokeLinecap="round"
-          />
-        </svg>
-      </div>
+      {/* Top Left: Authentic Curves + Magnifying Glass (element-04) */}
+      <img
+        src="/assets/graphics/element-04.png"
+        alt=""
+        className="absolute -top-4 -left-4 md:-top-2 md:-left-2 w-28 sm:w-36 md:w-48 lg:w-56 object-contain pointer-events-none select-none z-0 opacity-90"
+      />
 
-      {/* Top Left Accent Shapes (Orange Square & Triangles) */}
-      <div className="absolute top-10 left-32 hidden md:flex items-center gap-3 pointer-events-none">
-        <div className="w-8 h-8 rounded-lg bg-orange-500 shadow-sm relative flex items-center justify-center">
-          <div className="w-4 h-4 rounded-full border-2 border-white" />
-        </div>
-        <div className="flex items-center gap-0.5">
-          <div className="w-0 h-0 border-y-[6px] border-y-transparent border-l-[10px] border-l-zinc-900" />
-          <div className="w-0 h-0 border-y-[6px] border-y-transparent border-l-[10px] border-l-orange-500" />
-        </div>
-      </div>
+      {/* Top Left: Authentic Black & Orange Arrows (element-05) */}
+      <img
+        src="/assets/graphics/element-05.png"
+        alt=""
+        className="absolute top-20 sm:top-24 md:top-32 left-16 sm:left-24 md:left-32 w-8 sm:w-10 md:w-14 object-contain pointer-events-none select-none z-0"
+      />
+
+      {/* Bottom Left: Authentic Orange Square with Crosshair (element-08) */}
+      <img
+        src="/assets/graphics/element-08.png"
+        alt=""
+        className="absolute -bottom-6 -left-6 md:bottom-2 md:left-2 w-14 sm:w-18 md:w-24 object-contain pointer-events-none select-none opacity-80 z-0"
+      />
+
+      {/* Right Side: Authentic Signature Dilo Right Motif (Arch, Pen Tool, Square, Dots) */}
+      <img
+        src="/assets/graphics/dilo-right-motif.png"
+        alt=""
+        className="absolute top-4 sm:top-8 md:top-10 -right-2 md:right-4 h-[65%] sm:h-[72%] md:h-[80%] max-h-[580px] object-contain pointer-events-none select-none hidden lg:block z-0"
+      />
 
       {/* Main Center Area: Left-Structured Layout matching Slide 1 */}
       <div className="relative z-10 my-auto w-full max-w-6xl mx-auto py-2 md:py-4">

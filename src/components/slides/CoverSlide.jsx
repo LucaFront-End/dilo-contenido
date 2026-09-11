@@ -4,55 +4,35 @@ import { ArrowRight, Sparkles } from 'lucide-react';
 export default function CoverSlide({ clientTitle, clientMonth, clientYear, onStart }) {
   return (
     <div className="slide-content cover-slide-container relative w-full h-full flex flex-col justify-between p-6 sm:p-8 md:p-14 overflow-hidden select-none bg-white">
-      {/* Decorative Vectors Faithful to PDF Page 1 */}
+      {/* Original Dilo Vector Graphics Faithful to PDF Page 1 */}
 
-      {/* Top Left Squiggle */}
-      <div className="decor-curves absolute -top-12 -left-12 w-28 h-28 md:w-44 md:h-44 pointer-events-none opacity-40 md:opacity-85">
-        <svg viewBox="0 0 200 200" fill="none" className="w-full h-full text-zinc-900">
-          <path
-            d="M20 50 C40 10 90 20 70 80 C50 140 10 100 30 150 C50 200 120 180 140 140"
-            stroke="currentColor"
-            strokeWidth="9"
-            strokeLinecap="round"
-          />
-        </svg>
-      </div>
+      {/* Top Left: Authentic Curves + Magnifying Glass (element-04) */}
+      <img
+        src="/assets/graphics/element-04.png"
+        alt=""
+        className="absolute -top-4 -left-4 md:-top-2 md:-left-2 w-28 sm:w-36 md:w-48 lg:w-56 object-contain pointer-events-none select-none z-0 opacity-90"
+      />
 
-      {/* Top Left Accent Shapes (Orange Square & Triangles) */}
-      <div className="absolute top-10 left-32 hidden md:flex items-center gap-3 pointer-events-none">
-        <div className="w-8 h-8 rounded-lg bg-orange-500 shadow-sm relative flex items-center justify-center">
-          <div className="w-4 h-4 rounded-full border-2 border-white" />
-        </div>
-        <div className="flex items-center gap-0.5">
-          <div className="w-0 h-0 border-y-[6px] border-y-transparent border-l-[10px] border-l-zinc-900" />
-          <div className="w-0 h-0 border-y-[6px] border-y-transparent border-l-[10px] border-l-orange-500" />
-        </div>
-      </div>
+      {/* Top Left: Authentic Black & Orange Arrows (element-05) */}
+      <img
+        src="/assets/graphics/element-05.png"
+        alt=""
+        className="absolute top-20 sm:top-24 md:top-32 left-16 sm:left-24 md:left-32 w-8 sm:w-10 md:w-14 object-contain pointer-events-none select-none z-0"
+      />
 
-      {/* Right Side: Pen Tool (Desktop only to prevent mobile overlap) */}
-      <div className="decor-pen-tool absolute top-10 right-14 pointer-events-none hidden lg:block">
-        <svg width="75" height="75" viewBox="0 0 100 100" fill="none">
-          <circle cx="50" cy="50" r="4" fill="#FF5A00" />
-          <path d="M20 70 C40 30 70 30 85 50" stroke="#18181b" strokeWidth="2" strokeDasharray="3 3" />
-          <path d="M60 25 L75 40 L50 65 L35 50 Z" fill="#fff" stroke="#18181b" strokeWidth="2.5" />
-          <path d="M35 50 L30 68 L48 63 Z" fill="#18181b" />
-          <rect x="80" y="20" width="10" height="10" fill="#FF5A00" />
-        </svg>
-      </div>
+      {/* Bottom Left: Authentic Orange Square with Crosshair (element-08) */}
+      <img
+        src="/assets/graphics/element-08.png"
+        alt=""
+        className="absolute -bottom-6 -left-6 md:bottom-2 md:left-2 w-14 sm:w-18 md:w-24 object-contain pointer-events-none select-none opacity-80 z-0"
+      />
 
-      {/* Right Side: Architectural Arch with Dots (Desktop only to prevent mobile overlap) */}
-      <div className="decor-arch absolute top-28 right-8 pointer-events-none hidden lg:block">
-        <svg width="120" height="230" viewBox="0 0 120 230" fill="none">
-          <path d="M100 170 V80 C100 30 20 30 20 80 V170" stroke="#18181b" strokeWidth="12" strokeLinecap="round" />
-          <rect x="42" y="90" width="22" height="22" stroke="#18181b" strokeWidth="2.5" fill="none" />
-          <path d="M100 160 C100 190 70 210 40 200" stroke="#18181b" strokeWidth="10" strokeLinecap="round" />
-          {/* Vertical Dotted Column (2 black, 2 orange) */}
-          <circle cx="85" cy="185" r="5.5" fill="#18181b" />
-          <circle cx="85" cy="200" r="5.5" fill="#FF5A00" />
-          <circle cx="85" cy="215" r="5.5" fill="#18181b" />
-          <circle cx="85" cy="230" r="5.5" fill="#FF5A00" />
-        </svg>
-      </div>
+      {/* Right Side: Authentic Signature Dilo Right Motif (Arch, Pen Tool, Square, Dots) */}
+      <img
+        src="/assets/graphics/dilo-right-motif.png"
+        alt=""
+        className="absolute top-4 sm:top-8 md:top-10 -right-2 md:right-4 h-[65%] sm:h-[72%] md:h-[80%] max-h-[580px] object-contain pointer-events-none select-none hidden lg:block z-0"
+      />
 
       {/* Main Center Area */}
       <div className="relative z-10 my-auto max-w-4xl py-2 md:py-4 w-full">

@@ -20,8 +20,9 @@
 }
 
 .dilo-header-line {
-  height: 1px;
-  background: #e4e4e7;
+  height: 1.5px;
+  background: #FF5900;
+  opacity: 0.7;
 }
 
 /* Left Black Rounded Category Pill (Faithful to PDF, responsive) */

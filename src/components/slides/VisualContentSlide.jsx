@@ -108,15 +108,12 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
         </span>
       </div>
 
-      {/* Decorative Vectors on Right (Desktop only) */}
-      <div className="decor-arch absolute top-20 right-4 pointer-events-none opacity-80 hidden lg:block">
-        <svg width="100" height="180" viewBox="0 0 120 220" fill="none">
-          <path d="M100 180 V80 C100 30 20 30 20 80 V180" stroke="#18181b" strokeWidth="10" strokeLinecap="round" />
-          <rect x="40" y="90" width="25" height="25" stroke="#18181b" strokeWidth="2.5" fill="none" />
-          <circle cx="70" cy="190" r="5" fill="#18181b" />
-          <circle cx="70" cy="210" r="5" fill="#FF5A00" />
-        </svg>
-      </div>
+      {/* Authentic Dilo Graphics on Right (Desktop only) */}
+      <img
+        src="/assets/graphics/dilo-right-motif.png"
+        alt=""
+        className="absolute top-8 md:top-12 -right-2 md:right-4 h-[65%] sm:h-[72%] md:h-[78%] max-h-[560px] object-contain pointer-events-none select-none hidden lg:block z-0 opacity-80"
+      />
 
       {/* Slide Inner Body */}
       <div className="flex-1 flex flex-col lg:flex-row items-center justify-around gap-3 md:gap-6 p-2 sm:p-4 md:py-2.5 md:px-6 overflow-y-auto lg:overflow-hidden max-w-6xl mx-auto w-full scrollbar-none">

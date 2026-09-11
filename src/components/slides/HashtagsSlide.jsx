@@ -61,15 +61,19 @@ export default function HashtagsSlide({ hashtags }) {
         </span>
       </div>
 
-      {/* Decorative Vectors on Right (Desktop only) */}
-      <div className="decor-arch absolute top-20 right-8 pointer-events-none opacity-80 hidden lg:block">
-        <svg width="120" height="220" viewBox="0 0 120 220" fill="none">
-          <path d="M100 180 V80 C100 30 20 30 20 80 V180" stroke="#18181b" strokeWidth="12" strokeLinecap="round" />
-          <rect x="40" y="90" width="25" height="25" stroke="#18181b" strokeWidth="2.5" fill="none" />
-          <circle cx="70" cy="190" r="6" fill="#18181b" />
-          <circle cx="70" cy="210" r="5" fill="#FF5A00" />
-        </svg>
-      </div>
+      {/* Authentic Dilo Graphics on Right (Desktop only) */}
+      <img
+        src="/assets/graphics/dilo-right-motif.png"
+        alt=""
+        className="absolute top-8 md:top-12 -right-2 md:right-4 h-[65%] sm:h-[72%] md:h-[78%] max-h-[560px] object-contain pointer-events-none select-none hidden lg:block z-0 opacity-80"
+      />
+
+      {/* Subtle authentic dot matrix grid pattern (element-10) */}
+      <img
+        src="/assets/graphics/element-10.png"
+        alt=""
+        className="absolute bottom-6 right-36 w-16 md:w-20 object-contain pointer-events-none select-none hidden 2xl:block opacity-25 z-0"
+      />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col justify-start md:justify-center p-3 sm:p-6 md:p-14 max-w-6xl mx-auto w-full z-10 overflow-y-auto">
