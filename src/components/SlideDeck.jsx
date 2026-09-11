@@ -49,6 +49,17 @@ export default function SlideDeck({
     }
   };
 
+  const goToSlideByPageNumber = (pageNumber) => {
+    const targetIdx = (clientData?.slides || []).findIndex(
+      (s) => s.pageNumber === pageNumber
+    );
+    if (targetIdx !== -1) {
+      goToSlide(targetIdx);
+    } else if (pageNumber - 1 >= 0 && pageNumber - 1 < totalSlides) {
+      goToSlide(pageNumber - 1);
+    }
+  };
+
   const nextSlide = () => {
     setCurrentSlideIndex((prev) => (prev < totalSlides - 1 ? prev + 1 : prev));
   };
@@ -121,7 +132,7 @@ export default function SlideDeck({
           clientTitle={clientData.title}
           instagram={clientData.instagram}
           clientData={clientData}
-          onNavigateToSlide={(slideNum) => goToSlide(slideNum - 1)}
+          onNavigateToSlide={(slideNum) => goToSlideByPageNumber(slideNum)}
         />
       );
     }

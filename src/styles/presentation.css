@@ -193,11 +193,11 @@
 
 /* Smartphone Mockup - Optimized scaled dimensions to prevent clipping */
 .smartphone-mockup {
-  width: 230px;
-  height: 460px;
+  width: 240px;
+  height: 480px;
   max-width: 100%;
   background: #18181b;
-  border-radius: 34px;
+  border-radius: 36px;
   padding: 6px;
   box-shadow: 0 20px 50px -15px rgba(0, 0, 0, 0.35), 0 0 0 3px #27272a;
   position: relative;
@@ -207,19 +207,19 @@
 
 @media (min-width: 640px) {
   .smartphone-mockup {
-    width: 250px;
-    height: 500px;
-    border-radius: 36px;
+    width: 260px;
+    height: 510px;
+    border-radius: 38px;
     padding: 7px;
   }
 }
 
 @media (min-width: 1280px) {
   .smartphone-mockup {
-    width: 275px;
+    width: 285px;
     height: 540px;
-    border-radius: 38px;
-    padding: 7px;
+    border-radius: 40px;
+    padding: 8px;
   }
 }
 
