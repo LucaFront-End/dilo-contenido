@@ -65,7 +65,7 @@ export default function CoverSlide({ clientTitle, clientMonth, clientYear, onSta
           />
           <div className="flex flex-col justify-center">
             <span className="text-[9px] sm:text-[11px] md:text-xs font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-zinc-400">
-              Agencia de Crecimiento Digital
+              Agencia de Marketing Digital
             </span>
             <span className="text-lg sm:text-2xl md:text-3xl font-black text-zinc-950 tracking-tight font-space leading-none mt-0.5">
               DILO <span className="text-orange-500">DIGITAL</span>
@@ -110,7 +110,7 @@ export default function CoverSlide({ clientTitle, clientMonth, clientYear, onSta
       <div className="relative z-10 flex items-center justify-between text-xs font-semibold text-zinc-400 tracking-wider pt-3 sm:pt-4 border-t border-zinc-100 mt-3 md:mt-0">
         <div className="flex items-center gap-1.5 sm:gap-2">
           <span className="text-orange-500 font-black text-base sm:text-lg leading-none select-none">+</span>
-          <span className="uppercase text-zinc-500 font-bold text-[9px] sm:text-xs">Agencia de Crecimiento Digital</span>
+          <span className="uppercase text-zinc-500 font-bold text-[9px] sm:text-xs">Agencia de Marketing Digital</span>
         </div>
         <div className="flex items-center gap-1.5 text-zinc-400 text-[10px] sm:text-[11px] font-medium">
           <span className="hidden sm:inline">Usa las flechas</span>

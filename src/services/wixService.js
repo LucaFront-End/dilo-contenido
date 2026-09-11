@@ -269,19 +269,39 @@ export async function getParrillaBySlug(slug) {
       rawGeneral: matchedGeneral,
       // Diapositivas completas (usando las 30 diapositivas del PDF enriquecidas con los datos de Wix)
       slides: fallbackCuauhtliData.slides.map((s, idx) => {
-        // Si hay un post de Wix correspondiente a esta temática
-        const wixMatch = wixPosts[0]; // Por ejemplo el primer post de valor configurado en Wix
+        // Post configurado en Wix (por orden o coincidencia)
+        const wixMatch = wixPosts.find(p => Number(p.orden) === idx + 1) || wixPosts[0];
+        const wixVideoMatch = wixPosts.find(p => p.tipoDePost?.toLowerCase().includes('video') || p.tipoDePost?.toLowerCase().includes('reel'));
+
+        // Si esta lámina es video (por Wix o demostración en lámina #5)
+        const isVideoSlide = (idx === 4 && wixVideoMatch) || s.pageNumber === 5 || s.type?.toUpperCase().includes('VIDEO');
+        const resolvedVideoUrl = (wixVideoMatch && resolveWixMediaUrl(wixVideoMatch.contenido?.[0]?.src)) || '/assets/video/sample_reel.mp4';
+
         if (idx === 3 && wixMatch) {
           const wixCopy = extractTextFromWixDoc(wixMatch.descripcin);
-          const wixImages = (wixMatch.contenido || []).map(c => resolveWixMediaUrl(c.src));
+          const wixImages = (wixMatch.contenido || []).map(c => resolveWixMediaUrl(c.src)).filter(Boolean);
           return {
             ...s,
             type: wixMatch.tipoDePost?.toUpperCase() || s.type,
             copy: wixCopy || s.copy,
             images: wixImages.length > 0 ? wixImages : (s.postImages || [s.image]),
-            postImages: wixImages.length > 0 ? wixImages : (s.postImages || [s.image])
+            postImages: wixImages.length > 0 ? wixImages : (s.postImages || [s.image]),
+            isVideo: isVideoSlide,
+            videoUrl: isVideoSlide ? resolvedVideoUrl : null
           };
         }
+
+        if (isVideoSlide) {
+          return {
+            ...s,
+            type: 'VIDEO / REEL',
+            isVideo: true,
+            videoUrl: resolvedVideoUrl,
+            copy: (wixVideoMatch ? extractTextFromWixDoc(wixVideoMatch.descripcin) : null) || s.copy,
+            postImages: s.postImages || [s.image]
+          };
+        }
+
         return {
           ...s,
           postImages: s.postImages || [s.image]
@@ -333,33 +353,62 @@ export async function saveComment(slug, commentData) {
     const updated = [newComment, ...existing];
     localStorage.setItem(key, JSON.stringify(updated));
 
-    // Opcional: Intentar sincronizar con Wix Headless si existe colección de comentarios
+    // Formato estructurado para persistir en el campo único de comentarios de Wix CMS
+    const serializedLog = updated
+      .map(c => {
+        const d = new Date(c.createdAt || Date.now());
+        const dateStr = d.toLocaleDateString('es-MX', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        return `[${dateStr}] ${c.author} (Lámina #${c.slideNumber || 'General'}) [${c.category || 'Nota'}]: "${c.text}"`;
+      })
+      .join('\n---\n');
+
+    // Intentar sincronizar con Wix Headless en ParrillasdeContenido o ParrillaGeneral
     try {
       const token = await getWixToken();
       if (token) {
-        // Enviar a colección ComentariosParrilla en Wix si estuviera configurada
-        fetch('https://www.wixapis.com/wix-data/v2/items', {
+        // Enviar a colección ComentariosParrilla o actualizar campo en ParrillaGeneral
+        fetch('https://www.wixapis.com/wix-data/v2/items/query', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': token
           },
           body: JSON.stringify({
-            dataCollectionId: 'ComentariosParrilla',
-            dataItem: {
-              data: {
-                slug: slug,
-                slideNumber: newComment.slideNumber,
-                author: newComment.author,
-                category: newComment.category,
-                comentario: newComment.text,
-                fecha: newComment.createdAt
-              }
+            dataCollectionId: 'ParrillaGeneral',
+            query: { filter: { slug: slug } }
+          })
+        })
+          .then(r => r.json())
+          .then(res => {
+            const item = res?.dataItems?.[0];
+            if (item && item.id) {
+              fetch(`https://www.wixapis.com/wix-data/v2/items/${item.id}`, {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': token
+                },
+                body: JSON.stringify({
+                  dataCollectionId: 'ParrillaGeneral',
+                  dataItem: {
+                    data: {
+                      ...item.data,
+                      comentarios: serializedLog,
+                      comentariosCliente: serializedLog,
+                      historialComentarios: JSON.stringify(updated)
+                    }
+                  }
+                })
+              }).catch(() => {});
             }
           })
-        }).catch(() => {
-          // Si la colección aún no existe en Wix, no interrumpe el flujo del cliente
-        });
+          .catch(() => {});
       }
     } catch (_) {}
 

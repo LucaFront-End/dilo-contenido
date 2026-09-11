@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, ThumbsUp, MessageSquare, ZoomIn, ChevronLeft, ChevronRight, Layers, Sparkles } from 'lucide-react';
+import { Check, ThumbsUp, MessageSquare, ZoomIn, ChevronLeft, ChevronRight, Layers, Sparkles, Play } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import CommentsModal from '../CommentsModal';
 
@@ -9,10 +9,10 @@ export default function PostSlide({
   comments = [],
   onAddComment,
   onDeleteComment,
-  clientTitle
+  clientTitle,
+  isApproved = false,
+  onToggleApprove
 }) {
-  const [copied, setCopied] = useState(false);
-  const [approved, setApproved] = useState(false);
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
@@ -32,35 +32,36 @@ export default function PostSlide({
   const images = viewMode === 'creative' ? postImages : [slide.image];
   const isCarousel = images.length > 1;
 
-  const handleCopy = () => {
-    const fullText = `${slide.copy || ''}\n\n${slide.hashtags || ''}`.trim();
-    navigator.clipboard.writeText(fullText).then(() => {
-      setCopied(true);
-      if (onCopySuccess) onCopySuccess('¡Copy copiado al portapapeles con éxito!');
-      setTimeout(() => setCopied(false), 2500);
-    });
-  };
+  // Video post check
+  const isVideo =
+    slide.isVideo ||
+    !!slide.videoUrl ||
+    slide.type?.toUpperCase().includes('VIDEO') ||
+    slide.type?.toUpperCase().includes('REEL') ||
+    slide.pageNumber === 5; // Demonstration video post
+
+  const videoUrl = slide.videoUrl || '/assets/video/sample_reel.mp4';
 
   const handleApprove = () => {
-    const newStatus = !approved;
-    setApproved(newStatus);
-    if (newStatus) {
+    if (onToggleApprove) {
+      onToggleApprove(slide.pageNumber);
+    }
+    if (!isApproved) {
       confetti({
         particleCount: 70,
         spread: 60,
         origin: { y: 0.8 },
         colors: ['#FF5A00', '#111111', '#10B981']
       });
-      if (onCopySuccess) onCopySuccess('¡Publicación aprobada por el cliente! 🎉');
     }
   };
 
   return (
-    <div className="slide-content post-slide flex w-full h-full relative overflow-hidden bg-white select-text">
+    <div className="slide-content post-slide flex w-full h-full relative overflow-hidden bg-white select-none">
       {/* Black Left Rounded Category Pill */}
       <div className="pdf-side-pill shrink-0 flex items-center justify-between md:justify-center">
         <span className="pdf-side-pill-text tracking-widest font-black uppercase text-xs sm:text-sm md:text-2xl font-space">
-          {slide.type || 'POST'}
+          {isVideo ? 'VIDEO / REEL' : (slide.type || 'POST')}
         </span>
         {/* Mobile View Toggle: Post Creative vs Full PDF Slide */}
         <div className="flex md:hidden items-center bg-zinc-800 p-0.5 rounded-lg border border-zinc-700 text-[10px] font-bold">
@@ -99,72 +100,96 @@ export default function PostSlide({
 
       {/* Slide Body: 2 Columns on desktop, clean vertical stack on mobile */}
       <div className="flex-1 flex flex-col lg:flex-row items-stretch lg:items-center justify-start lg:justify-between gap-3 sm:gap-6 p-2.5 sm:p-6 md:p-8 lg:p-12 overflow-y-auto max-w-7xl mx-auto w-full z-10">
-        {/* Left Column: Media Presentation */}
+        {/* Left Column: Media Presentation in 4:5 with arrows OUTSIDE the image */}
         <div className="w-full lg:w-1/2 flex flex-col items-center justify-center">
-          <div className="relative w-full max-w-xs sm:max-w-md md:max-w-lg aspect-square bg-zinc-100 rounded-xl sm:rounded-2xl overflow-hidden border border-zinc-200/80 shadow-md md:shadow-xl flex items-center justify-center group mx-auto">
-            <img
-              src={images[activeImageIdx]}
-              alt={`Slide ${slide.pageNumber}`}
-              className="w-full h-full object-contain cursor-zoom-in group-hover:scale-[1.01] transition-transform duration-300"
-              onClick={() => setIsLightboxOpen(true)}
-            />
-
-            {/* Lightbox button overlay */}
-            <button
-              onClick={() => setIsLightboxOpen(true)}
-              className="absolute top-2.5 right-2.5 p-1.5 sm:p-2 bg-black/60 hover:bg-black/80 text-white rounded-lg sm:rounded-xl backdrop-blur-sm opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity"
-              title="Ampliar creatividad"
-            >
-              <ZoomIn className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </button>
-
-            {/* Carousel navigation buttons */}
+          <div className="flex items-center justify-center gap-1.5 sm:gap-3 w-full">
+            {/* Carousel navigation arrow: Left (Outside the image) */}
             {isCarousel && (
-              <>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveImageIdx((prev) => (prev > 0 ? prev - 1 : images.length - 1));
-                  }}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 bg-black/60 hover:bg-black/80 text-white rounded-full backdrop-blur-sm transition-all"
-                  title="Anterior lámina del carrusel"
-                >
-                  <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveImageIdx((prev) => (prev < images.length - 1 ? prev + 1 : 0));
-                  }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 sm:p-2 bg-black/60 hover:bg-black/80 text-white rounded-full backdrop-blur-sm transition-all"
-                  title="Siguiente lámina del carrusel"
-                >
-                  <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                </button>
-              </>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveImageIdx((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+                }}
+                className="p-2 sm:p-2.5 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 hover:text-zinc-900 border border-zinc-200 shadow-sm transition-all shrink-0 cursor-pointer hover:scale-105 active:scale-95"
+                title="Lámina anterior"
+              >
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
             )}
 
-            {/* Badge Indicator */}
+            {/* Clean 4:5 Media Frame (Seamless, unboxed) */}
+            <div className="relative w-full max-w-[320px] sm:max-w-[380px] md:max-w-[410px] aspect-[4/5] rounded-2xl overflow-hidden flex items-center justify-center group bg-transparent">
+              {isVideo ? (
+                <div className="w-full h-full bg-zinc-950 rounded-2xl overflow-hidden flex items-center justify-center relative">
+                  <video
+                    src={videoUrl}
+                    controls
+                    playsInline
+                    loop
+                    className="w-full h-full object-cover rounded-2xl"
+                    poster={images[0]}
+                  />
+                  <span className="absolute top-3 left-3 px-2.5 py-1 bg-black/75 backdrop-blur-sm text-white text-[10px] font-bold rounded-lg pointer-events-none flex items-center gap-1">
+                    <Play className="w-3 h-3 text-orange-500 fill-orange-500" />
+                    <span>Video / Reel</span>
+                  </span>
+                </div>
+              ) : (
+                <img
+                  src={images[activeImageIdx]}
+                  alt={`Slide ${slide.pageNumber}`}
+                  className="w-full h-full object-contain cursor-zoom-in group-hover:scale-[1.01] transition-transform duration-300"
+                  onClick={() => setIsLightboxOpen(true)}
+                />
+              )}
+
+              {/* Lightbox zoom button overlay (images only) */}
+              {!isVideo && (
+                <button
+                  onClick={() => setIsLightboxOpen(true)}
+                  className="absolute top-2.5 right-2.5 p-1.5 sm:p-2 bg-black/60 hover:bg-black/80 text-white rounded-xl backdrop-blur-sm opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  title="Ampliar creatividad"
+                >
+                  <ZoomIn className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </button>
+              )}
+
+              {/* Carousel Slide Counter Badge */}
+              {isCarousel && !isVideo && (
+                <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 sm:px-3 sm:py-1 bg-black/75 backdrop-blur-sm rounded-full text-white text-[10px] sm:text-xs font-semibold flex items-center gap-1.5 pointer-events-none">
+                  <Layers className="w-3 h-3 text-orange-400" />
+                  <span>
+                    Lámina {activeImageIdx + 1} de {images.length}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Carousel navigation arrow: Right (Outside the image) */}
             {isCarousel && (
-              <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 sm:px-3 sm:py-1 bg-black/70 backdrop-blur-sm rounded-full text-white text-[10px] sm:text-xs font-semibold flex items-center gap-1.5">
-                <Layers className="w-3 h-3 text-orange-400" />
-                <span>
-                  Lámina {activeImageIdx + 1} de {images.length}
-                </span>
-              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveImageIdx((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+                }}
+                className="p-2 sm:p-2.5 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 hover:text-zinc-900 border border-zinc-200 shadow-sm transition-all shrink-0 cursor-pointer hover:scale-105 active:scale-95"
+                title="Siguiente lámina"
+              >
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
             )}
           </div>
 
-          {/* Carousel thumbnails strip */}
-          {isCarousel && (
-            <div className="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-3 overflow-x-auto max-w-full pb-1">
+          {/* Carousel thumbnails strip (Gallery underneath) */}
+          {isCarousel && !isVideo && (
+            <div className="flex items-center justify-center gap-1.5 sm:gap-2 mt-2.5 sm:mt-3.5 overflow-x-auto max-w-full pb-1">
               {images.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveImageIdx(idx)}
-                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden border-2 transition-all shrink-0 ${
+                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
                     idx === activeImageIdx
-                      ? 'border-orange-500 scale-105 shadow-md'
+                      ? 'border-orange-500 scale-105 shadow-md shadow-orange-500/20'
                       : 'border-transparent opacity-60 hover:opacity-100'
                   }`}
                 >
@@ -175,54 +200,33 @@ export default function PostSlide({
           )}
 
           {/* Action Bar directly under the post on Mobile (<lg) */}
-          <div className="grid grid-cols-3 gap-1.5 w-full max-w-xs sm:max-w-md mt-2.5 lg:hidden">
+          <div className="grid grid-cols-2 gap-2 w-full max-w-xs sm:max-w-md mt-3 lg:hidden">
             <button
               onClick={handleApprove}
-              className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border ${
-                approved
+              className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border ${
+                isApproved
                   ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm'
                   : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 border-zinc-200'
               }`}
             >
-              <ThumbsUp className="w-3.5 h-3.5" />
-              <span>{approved ? 'Aprobado ✓' : 'Aprobar'}</span>
+              <ThumbsUp className="w-4 h-4" />
+              <span>{isApproved ? 'Aprobado ✓' : 'Aprobar Post'}</span>
             </button>
 
             <button
               onClick={() => setIsCommentModalOpen(true)}
-              className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer border ${
+              className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border ${
                 commentsCount > 0
                   ? 'bg-amber-50 text-amber-900 border-amber-300 shadow-sm'
                   : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
               }`}
             >
-              <MessageSquare className="w-3.5 h-3.5 text-orange-600" />
+              <MessageSquare className="w-4 h-4 text-orange-600" />
               <span>Comentarios</span>
               {commentsCount > 0 && (
-                <span className="px-1 py-0.2 bg-orange-500 text-white text-[9px] font-black rounded-full">
+                <span className="px-1.5 py-0.2 bg-orange-500 text-white text-[10px] font-black rounded-full">
                   {commentsCount}
                 </span>
-              )}
-            </button>
-
-            <button
-              onClick={handleCopy}
-              className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
-                copied
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'bg-orange-500 hover:bg-orange-600 text-white shadow-sm'
-              }`}
-            >
-              {copied ? (
-                <>
-                  <Check className="w-3.5 h-3.5" />
-                  <span>¡Copiado!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>Copiar</span>
-                </>
               )}
             </button>
           </div>
@@ -260,44 +264,22 @@ export default function PostSlide({
                 )}
               </button>
 
-              {/* Approval status button */}
+              {/* Independent Approval status button */}
               <button
                 onClick={handleApprove}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                  approved
-                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20'
-                    : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 border border-zinc-200'
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
+                  isApproved
+                    ? 'bg-emerald-500 text-white border-emerald-600 shadow-md shadow-emerald-500/20'
+                    : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 border-zinc-200'
                 }`}
               >
                 <ThumbsUp className="w-3.5 h-3.5" />
-                <span>{approved ? 'Aprobado ✓' : 'Aprobar Post'}</span>
-              </button>
-
-              {/* Copy copy button */}
-              <button
-                onClick={handleCopy}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                  copied
-                    ? 'bg-emerald-600 text-white shadow-md'
-                    : 'bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-500/25'
-                }`}
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-4 h-4" />
-                    <span>¡Copiado!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    <span>Copiar Copy</span>
-                  </>
-                )}
+                <span>{isApproved ? 'Aprobado ✓' : 'Aprobar Post'}</span>
               </button>
             </div>
           </div>
 
-          {/* If there are comments on this slide, show visible confirmation bar! */}
+          {/* If there are comments on this slide, show visible confirmation bar */}
           {commentsCount > 0 && (
             <div
               onClick={() => setIsCommentModalOpen(true)}
@@ -317,21 +299,20 @@ export default function PostSlide({
             </div>
           )}
 
-          {/* Copy Text Body */}
-          <div className="bg-zinc-50/70 border border-zinc-200/80 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 text-xs sm:text-sm text-zinc-800 leading-relaxed max-h-[340px] sm:max-h-[380px] overflow-y-auto font-sans shadow-inner space-y-2 sm:space-y-3">
+          {/* Copy Text Body (PROTECTED FROM COPYING) */}
+          <div
+            className="bg-zinc-50/70 border border-zinc-200/80 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 text-xs sm:text-sm text-zinc-800 leading-relaxed max-h-[340px] sm:max-h-[380px] overflow-y-auto font-sans shadow-inner space-y-2 sm:space-y-3 select-none"
+            style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none', msUserSelect: 'none' }}
+            onCopy={(e) => { e.preventDefault(); return false; }}
+            onContextMenu={(e) => e.preventDefault()}
+          >
             <div className="flex items-center justify-between pb-2 border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
               <span>Copy de la Publicación</span>
-              <button
-                onClick={handleCopy}
-                className="text-[10px] text-orange-600 font-bold hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <Copy className="w-3 h-3" />
-                <span>{copied ? '¡Copiado!' : 'Copiar'}</span>
-              </button>
+              <span className="text-[10px] text-zinc-400 font-normal">Solo lectura</span>
             </div>
             {slide.copy ? (
               slide.copy.split('\n\n').map((paragraph, pIdx) => (
-                <p key={pIdx} className="whitespace-pre-line">
+                <p key={pIdx} className="whitespace-pre-line select-none" onCopy={(e) => e.preventDefault()}>
                   {paragraph}
                 </p>
               ))
@@ -341,7 +322,7 @@ export default function PostSlide({
 
             {/* Hashtags Section */}
             {slide.hashtags && (
-              <div className="pt-2.5 border-t border-zinc-200/80 text-[11px] sm:text-xs text-orange-600 font-medium">
+              <div className="pt-2.5 border-t border-zinc-200/80 text-[11px] sm:text-xs text-orange-600 font-medium select-none" onCopy={(e) => e.preventDefault()}>
                 <p className="leading-relaxed font-mono">{slide.hashtags}</p>
               </div>
             )}
@@ -369,7 +350,7 @@ export default function PostSlide({
             />
             <button
               onClick={() => setIsLightboxOpen(false)}
-              className="mt-4 px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full text-xs font-bold transition-colors"
+              className="mt-4 px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full text-xs font-bold transition-colors cursor-pointer"
             >
               Cerrar visualizador (Esc)
             </button>

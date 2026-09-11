@@ -71,7 +71,7 @@ export default function ContactSlide() {
               />
               <div>
                 <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-zinc-400 block">
-                  Agencia de Crecimiento
+                  Agencia de Marketing Digital
                 </span>
                 <span className="text-xl sm:text-3xl font-black text-zinc-950 tracking-tight block leading-none font-space mt-0.5 sm:mt-1">
                   DILO <span className="text-orange-500">DIGITAL</span>

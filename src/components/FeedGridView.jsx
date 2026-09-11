@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Copy, Check, Filter, Layers, ExternalLink, ThumbsUp, MessageSquare } from 'lucide-react';
+import { Check, Filter, Layers, ExternalLink, ThumbsUp, MessageSquare } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import CommentsModal from './CommentsModal';
 
@@ -10,52 +10,61 @@ export default function FeedGridView({
   onSelectSlide,
   comments = [],
   onAddComment,
-  onDeleteComment
+  onDeleteComment,
+  approvedPosts = {},
+  onToggleApprove
 }) {
   const [activeFilter, setActiveFilter] = useState('ALL');
-  const [approvedPosts, setApprovedPosts] = useState({});
   const [activeCommentSlide, setActiveCommentSlide] = useState(null);
 
   // Filter posts (ignore cover, strategy, hashtags, contact for feed view or display them optionally)
-  const contentSlides = slides.filter(s => s.pageNumber >= 4 && s.pageNumber <= 28);
+  const contentSlides = slides.filter((s) => s.pageNumber >= 4 && s.pageNumber <= 28);
+  const totalContentPosts = contentSlides.length || 25;
+  const approvedCount = contentSlides.filter((s) => !!approvedPosts[s.pageNumber]).length;
+  const approvalPercent = totalContentPosts > 0 ? Math.round((approvedCount / totalContentPosts) * 100) : 0;
 
-  const filtered = contentSlides.filter(s => {
+  const filtered = contentSlides.filter((s) => {
     if (activeFilter === 'ALL') return true;
     return s.type === activeFilter;
   });
 
-  const handleCopy = (slide) => {
-    const text = `${slide.copy || ''}\n\n${slide.hashtags || ''}`.trim();
-    navigator.clipboard.writeText(text).then(() => {
-      if (onCopyToast) onCopyToast(`Copy de la lámina #${slide.pageNumber} copiado!`);
-    });
-  };
-
-  const toggleApprove = (slideId) => {
-    setApprovedPosts(prev => {
-      const nextState = !prev[slideId];
-      if (nextState) {
-        confetti({
-          particleCount: 50,
-          spread: 50,
-          origin: { y: 0.7 },
-          colors: ['#FF5A00', '#10B981']
-        });
-      }
-      return { ...prev, [slideId]: nextState };
-    });
+  const handleToggle = (pageNumber) => {
+    if (onToggleApprove) {
+      onToggleApprove(pageNumber);
+    }
+    if (!approvedPosts[pageNumber]) {
+      confetti({
+        particleCount: 50,
+        spread: 50,
+        origin: { y: 0.7 },
+        colors: ['#FF5A00', '#10B981']
+      });
+    }
   };
 
   return (
-    <div className="feed-grid-view w-full max-w-7xl mx-auto p-4 md:p-8">
+    <div className="feed-grid-view w-full max-w-7xl mx-auto p-4 md:p-8 select-none">
       {/* Top Filter Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm">
         <div>
-          <h2 className="text-2xl font-black text-zinc-900 font-space tracking-tight">
-            Mosaico de Publicaciones
-          </h2>
-          <p className="text-xs text-zinc-500">
-            Vista general de todas las publicaciones programadas para {clientTitle}.
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-black text-zinc-900 font-space tracking-tight">
+              Mosaico de Publicaciones
+            </h2>
+            <div
+              className={`px-2.5 py-1 rounded-full text-xs font-bold border ${
+                approvalPercent === 100
+                  ? 'bg-emerald-500 text-white border-emerald-600'
+                  : approvalPercent > 0
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                  : 'bg-zinc-50 text-zinc-600 border-zinc-200'
+              }`}
+            >
+              ✓ {approvalPercent}% Aprobado ({approvedCount}/{totalContentPosts})
+            </div>
+          </div>
+          <p className="text-xs text-zinc-500 mt-0.5">
+            Vista general de todas las publicaciones programadas en formato 4:5 para {clientTitle}.
           </p>
         </div>
 
@@ -94,10 +103,11 @@ export default function FeedGridView({
         </div>
       </div>
 
-      {/* Grid of Posts */}
+      {/* Grid of Posts in 4:5 Instagram proportion */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filtered.map((slide) => {
-          const isApproved = !!approvedPosts[slide.id];
+          const isApproved = !!approvedPosts[slide.pageNumber];
+          const isVideo = slide.isVideo || slide.videoUrl || slide.type?.toUpperCase().includes('VIDEO') || slide.pageNumber === 5;
           return (
             <div
               key={slide.id}
@@ -118,7 +128,7 @@ export default function FeedGridView({
                     #{slide.pageNumber}
                   </span>
                   <span className="px-2.5 py-1 bg-orange-600 text-white font-bold text-[10px] uppercase rounded-lg">
-                    {slide.type}
+                    {isVideo ? 'VIDEO' : slide.type}
                   </span>
                 </div>
 
@@ -130,14 +140,24 @@ export default function FeedGridView({
                 )}
               </div>
 
-              {/* Card Body */}
+              {/* Card Content & Details (Protected from copying) */}
               <div className="p-5 flex-1 flex flex-col justify-between">
-                <div className="space-y-2">
-                  <p className="text-xs text-zinc-700 line-clamp-3 leading-relaxed">
+                <div>
+                  <div className="flex items-center justify-between text-xs text-zinc-400 mb-2">
+                    <span>Publicación #{slide.pageNumber}</span>
+                    <span className="font-semibold text-orange-600">{slide.category || 'Contenido'}</span>
+                  </div>
+
+                  <p
+                    className="text-xs text-zinc-700 line-clamp-3 leading-relaxed select-none"
+                    style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
+                    onCopy={(e) => e.preventDefault()}
+                  >
                     {slide.copy || 'Sin copy disponible.'}
                   </p>
+
                   {slide.hashtags && (
-                    <p className="text-[11px] text-orange-600 font-mono line-clamp-1">
+                    <p className="text-[11px] text-orange-600 font-mono line-clamp-1 mt-2 select-none">
                       {slide.hashtags}
                     </p>
                   )}
@@ -145,26 +165,26 @@ export default function FeedGridView({
 
                 {/* Actions */}
                 <div className="mt-4 pt-4 border-t border-zinc-100 flex items-center justify-between gap-1.5 flex-wrap">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 w-full justify-between">
                     <button
-                      onClick={() => toggleApprove(slide.id)}
-                      className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer ${
+                      onClick={() => handleToggle(slide.pageNumber)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border ${
                         isApproved
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                          : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
                       }`}
                     >
                       <ThumbsUp className="w-3.5 h-3.5" />
-                      <span>{isApproved ? 'Aprobado' : 'Aprobar'}</span>
+                      <span>{isApproved ? 'Aprobado ✓' : 'Aprobar Post'}</span>
                     </button>
 
                     {/* Comments button on card */}
                     {(() => {
-                      const slideCommentsCount = comments.filter(c => c.slideNumber === slide.pageNumber).length;
+                      const slideCommentsCount = comments.filter((c) => c.slideNumber === slide.pageNumber).length;
                       return (
                         <button
                           onClick={() => setActiveCommentSlide(slide)}
-                          className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer border ${
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer border ${
                             slideCommentsCount > 0
                               ? 'bg-amber-50 text-amber-900 border-amber-300'
                               : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
@@ -172,6 +192,7 @@ export default function FeedGridView({
                           title="Comentarios de este post"
                         >
                           <MessageSquare className="w-3.5 h-3.5 text-orange-600" />
+                          <span>Comentarios</span>
                           {slideCommentsCount > 0 && (
                             <span className="px-1.5 py-0.2 bg-orange-500 text-white text-[10px] font-black rounded-full">
                               {slideCommentsCount}
@@ -181,14 +202,6 @@ export default function FeedGridView({
                       );
                     })()}
                   </div>
-
-                  <button
-                    onClick={() => handleCopy(slide)}
-                    className="px-2.5 py-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-orange-700 text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Copiar</span>
-                  </button>
                 </div>
               </div>
             </div>

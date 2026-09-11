@@ -40,6 +40,45 @@ export default function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [toast, setToast] = useState(null);
   const [brandFilter, setBrandFilter] = useState(null);
+  
+  // Independent post approvals stored per client slug in localStorage
+  const [approvedPosts, setApprovedPosts] = useState(() => {
+    try {
+      const initialSlug = extractSlugFromPath();
+      const saved = localStorage.getItem(`dilo_approvals_${initialSlug}`);
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    if (currentSlug) {
+      try {
+        const saved = localStorage.getItem(`dilo_approvals_${currentSlug}`);
+        setApprovedPosts(saved ? JSON.parse(saved) : {});
+      } catch {
+        setApprovedPosts({});
+      }
+    }
+  }, [currentSlug]);
+
+  const handleToggleApprove = (slideNumber) => {
+    const nextVal = !approvedPosts[slideNumber];
+    const updated = { ...approvedPosts, [slideNumber]: nextVal };
+    setApprovedPosts(updated);
+    try {
+      localStorage.setItem(`dilo_approvals_${clientData.slug || currentSlug}`, JSON.stringify(updated));
+    } catch (e) {
+      console.warn('Error guardando aprobación:', e);
+    }
+    showToast(
+      nextVal
+        ? `Lámina #${slideNumber} aprobada por el cliente 🎉`
+        : `Lámina #${slideNumber} marcada como pendiente`,
+      'info'
+    );
+  };
   const [showPortalHome, setShowPortalHome] = useState(() => {
     let path = window.location.pathname.replace(/^\/|\/$/g, '');
     const searchParams = new URLSearchParams(window.location.search);
@@ -276,6 +315,8 @@ export default function App() {
             comments={comments}
             onAddComment={handleAddComment}
             onDeleteComment={handleDeleteComment}
+            approvedPosts={approvedPosts}
+            onToggleApprove={handleToggleApprove}
           />
         ) : (
           <FeedGridView
@@ -285,6 +326,8 @@ export default function App() {
             comments={comments}
             onAddComment={handleAddComment}
             onDeleteComment={handleDeleteComment}
+            approvedPosts={approvedPosts}
+            onToggleApprove={handleToggleApprove}
             onSelectSlide={(slideIdx) => {
               setViewMode('slides');
             }}

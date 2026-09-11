@@ -230,7 +230,7 @@ export default function HomePortal({ onSelectSlug, defaultSlug, brandFilter, onC
 
       {/* Footer */}
       <footer className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-zinc-500 border-t border-zinc-900 pt-6">
-        <span>Dilo Digital © 2026 · Agencia de Crecimiento Digital</span>
+        <span>Dilo Digital © 2026 · Agencia de Marketing Digital</span>
         <span>WhatsApp Soporte: +52 55 9244 1070</span>
       </footer>
     </div>
