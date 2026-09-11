@@ -65,7 +65,7 @@ export default function ContactSlide() {
             {/* Official Dilo Digital Logo */}
             <div className="flex items-center gap-3 sm:gap-3.5 mb-3 sm:mb-5">
               <img
-                src="/assets/logo/dilo-logo-orange.png"
+                src="/assets/logo/dilo-logo-black.png"
                 alt="Dilo Digital"
                 className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain drop-shadow-sm select-none"
               />

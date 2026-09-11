@@ -27,7 +27,7 @@ export default function Header({
           >
             <div className="dilo-brand-logo flex items-center">
               <img
-                src="/assets/logo/dilo-logo-orange.png"
+                src="/assets/logo/dilo-logo-black.png"
                 alt="Dilo Digital"
                 className="w-5 h-5 sm:w-6 sm:h-6 object-contain"
               />

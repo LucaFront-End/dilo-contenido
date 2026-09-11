@@ -59,7 +59,7 @@ export default function CoverSlide({ clientTitle, clientMonth, clientYear, onSta
         {/* Official Dilo Digital Logo */}
         <div className="flex items-center gap-2.5 sm:gap-3.5 mb-3 sm:mb-4 md:mb-6">
           <img
-            src="/assets/logo/dilo-logo-orange.png"
+            src="/assets/logo/dilo-logo-black.png"
             alt="Dilo Digital"
             className="w-10 h-10 sm:w-14 sm:h-14 md:w-20 md:h-20 object-contain drop-shadow-sm select-none"
           />
