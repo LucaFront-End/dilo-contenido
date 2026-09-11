@@ -190,6 +190,68 @@ export async function getParrillaBySlug(slug) {
     // Si encontramos posts en Wix, los ensamblamos; si no o faltan slides, combinamos con el fallback enriquecido
     const resolvedMockup = resolveWixMediaUrl(matchedGeneral.mockup) || fallbackCuauhtliData.slides[1]?.image;
 
+    // Resolver logo del cliente y datos del teléfono configurados en Wix
+    const resolvedLogo = resolveWixMediaUrl(
+      matchedGeneral.logo ||
+      matchedGeneral.logoTelefono ||
+      matchedGeneral.logoCliente ||
+      matchedGeneral.avatar ||
+      matchedGeneral.perfilLogo ||
+      matchedGeneral.fotoPerfil ||
+      matchedGeneral.logotipo ||
+      matchedGeneral.imagenLogo
+    );
+
+    const dynamicInstagram = {
+      ...fallbackCuauhtliData.instagram,
+      logo: resolvedLogo || '/assets/logo/cuauhtli-logo.png',
+      avatar: resolvedLogo || '/assets/logo/cuauhtli-logo.png',
+      username:
+        matchedGeneral.usuarioInstagram ||
+        matchedGeneral.instagramUser ||
+        matchedGeneral.usuario ||
+        matchedGeneral.tituloTelefono ||
+        matchedGeneral.nombreTelefono ||
+        fallbackCuauhtliData.instagram.username,
+      displayName:
+        matchedGeneral.tituloTelefono ||
+        matchedGeneral.nombreTelefono ||
+        matchedGeneral.displayName ||
+        matchedGeneral.perfilTitulo ||
+        matchedGeneral.title ||
+        fallbackCuauhtliData.instagram.displayName,
+      bio:
+        matchedGeneral.bioTelefono ||
+        matchedGeneral.descripcionTelefono ||
+        matchedGeneral.bio ||
+        (matchedGeneral.descripcin ? extractTextFromWixDoc(matchedGeneral.descripcin) : null) ||
+        fallbackCuauhtliData.instagram.bio,
+      postsCount:
+        matchedGeneral.publicaciones ||
+        matchedGeneral.postsCount ||
+        matchedGeneral.numeroPublicaciones ||
+        fallbackCuauhtliData.instagram.postsCount,
+      followersCount:
+        matchedGeneral.seguidores ||
+        matchedGeneral.followersCount ||
+        matchedGeneral.numeroSeguidores ||
+        fallbackCuauhtliData.instagram.followersCount,
+      followingCount:
+        matchedGeneral.seguidos ||
+        matchedGeneral.followingCount ||
+        matchedGeneral.numeroSeguidos ||
+        fallbackCuauhtliData.instagram.followingCount,
+      link:
+        matchedGeneral.enlaceTelefono ||
+        matchedGeneral.linkTelefono ||
+        matchedGeneral.telefonoLink ||
+        matchedGeneral.linkWhatsapp ||
+        matchedGeneral.link ||
+        fallbackCuauhtliData.instagram.link ||
+        'wa.link/hpxqqv',
+      highlights: fallbackCuauhtliData.instagram.highlights
+    };
+
     // Construir la estructura completa de la parrilla
     const clientGrid = {
       id: matchedGeneral._id,
@@ -198,11 +260,13 @@ export async function getParrillaBySlug(slug) {
       mes: matchedGeneral.mes || 'Septiembre',
       ano: 2026,
       contrasea: matchedGeneral.contrasea || '',
+      logo: resolvedLogo || '/assets/logo/cuauhtli-logo.png',
       mockupUrl: resolvedMockup,
       estrategiaTexto: matchedGeneral.estartegiaInicial || extractTextFromWixDoc(matchedGeneral.estrategia),
       estrategia: fallbackCuauhtliData.estrategia,
       hashtags: fallbackCuauhtliData.hashtags,
-      instagram: fallbackCuauhtliData.instagram,
+      instagram: dynamicInstagram,
+      rawGeneral: matchedGeneral,
       // Diapositivas completas (usando las 30 diapositivas del PDF enriquecidas con los datos de Wix)
       slides: fallbackCuauhtliData.slides.map((s, idx) => {
         // Si hay un post de Wix correspondiente a esta temática

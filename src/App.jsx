@@ -39,6 +39,7 @@ export default function App() {
   const [viewMode, setViewMode] = useState('slides'); // 'slides' | 'grid'
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [toast, setToast] = useState(null);
+  const [brandFilter, setBrandFilter] = useState(null);
   const [showPortalHome, setShowPortalHome] = useState(() => {
     let path = window.location.pathname.replace(/^\/|\/$/g, '');
     const searchParams = new URLSearchParams(window.location.search);
@@ -182,17 +183,23 @@ export default function App() {
     });
   };
 
-  // Handle choosing a client slug
-  const handleSelectSlug = (slug) => {
+  // Handle choosing a client slug with optional password requirement
+  const handleSelectSlug = (slug, requirePassword = false) => {
     let cleanSlug = slug;
     if (cleanSlug.includes('/parrillas/')) {
       cleanSlug = cleanSlug.split('/parrillas/')[1];
     }
     cleanSlug = cleanSlug.replace(/^\/|\/$/g, '');
 
+    if (requirePassword) {
+      sessionStorage.removeItem(`dilo_unlocked_${cleanSlug}`);
+      setIsUnlocked(false);
+    }
+
     window.history.pushState({}, '', `/parrillas/${cleanSlug}`);
     setCurrentSlug(cleanSlug);
     setShowPortalHome(false);
+    setBrandFilter(null);
   };
 
   if (showPortalHome) {
@@ -200,6 +207,8 @@ export default function App() {
       <HomePortal
         onSelectSlug={handleSelectSlug}
         defaultSlug={currentSlug}
+        brandFilter={brandFilter}
+        onClearBrandFilter={() => setBrandFilter(null)}
       />
     );
   }
@@ -237,6 +246,12 @@ export default function App() {
         isWixLive={isWixLive}
         onRefreshWix={handleRefreshWix}
         onOpenPortal={() => {
+          setBrandFilter(null);
+          window.history.pushState({}, '', '/parrillas/portal');
+          setShowPortalHome(true);
+        }}
+        onOpenBrandPortal={() => {
+          setBrandFilter(clientData.title);
           window.history.pushState({}, '', '/parrillas/portal');
           setShowPortalHome(true);
         }}

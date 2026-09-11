@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, ShieldCheck, Sparkles, ExternalLink, Search, Lock, Layers, RefreshCw } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Sparkles, ExternalLink, Search, Lock, Layers, RefreshCw, ChevronLeft } from 'lucide-react';
 import { getParrillasGenerales, resolveWixMediaUrl } from '../services/wixService';
 
-export default function HomePortal({ onSelectSlug, defaultSlug }) {
+export default function HomePortal({ onSelectSlug, defaultSlug, brandFilter, onClearBrandFilter }) {
   const [slugInput, setSlugInput] = useState('');
   const [liveGrids, setLiveGrids] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,9 +62,16 @@ export default function HomePortal({ onSelectSlug, defaultSlug }) {
   const handleSearch = (e) => {
     e.preventDefault();
     if (slugInput.trim()) {
-      onSelectSlug(slugInput.trim());
+      // Force password gate when accessing from portal
+      onSelectSlug(slugInput.trim(), true);
     }
   };
+
+  // Filter by brand title if brandFilter is provided
+  const allGrids = liveGrids.length > 0 ? liveGrids : fallbackGrids;
+  const displayedGrids = brandFilter
+    ? allGrids.filter((g) => g.title?.toLowerCase().includes(brandFilter.toLowerCase()))
+    : allGrids;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex flex-col justify-between p-6 md:p-12 relative overflow-hidden select-none">
@@ -93,12 +100,22 @@ export default function HomePortal({ onSelectSlug, defaultSlug }) {
         </div>
 
         <div className="flex items-center gap-3">
+          {brandFilter && onClearBrandFilter && (
+            <button
+              onClick={onClearBrandFilter}
+              className="px-3 py-2 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-zinc-800 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              title="Ver todas las marcas"
+            >
+              <span>Ver Todos los Clientes</span>
+            </button>
+          )}
           {defaultSlug && (
             <button
-              onClick={() => onSelectSlug(defaultSlug)}
-              className="px-3.5 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-lg shadow-orange-600/20"
+              onClick={() => onSelectSlug(defaultSlug, false)}
+              className="px-3.5 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-lg shadow-orange-600/20 cursor-pointer"
             >
-              <span>← Volver a la Parrilla</span>
+              <ChevronLeft className="w-3.5 h-3.5" />
+              <span>Volver a la Parrilla</span>
             </button>
           )}
           <span className="text-xs text-zinc-400 hidden sm:inline">@dilodigitalmx</span>
@@ -119,22 +136,32 @@ export default function HomePortal({ onSelectSlug, defaultSlug }) {
         <div className="text-center max-w-2xl mx-auto mb-12">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-bold uppercase tracking-wider mb-4">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Portal de Presentación Dinámica</span>
+            <span>
+              {brandFilter ? `Parrillas de ${brandFilter}` : 'Portal de Presentación Dinámica'}
+            </span>
           </div>
           <h1 className="text-4xl md:text-6xl font-black tracking-tight font-space text-white">
-            Parrillas de Contenido
+            {brandFilter ? (
+              <>
+                Parrillas de <span className="text-orange-500">{brandFilter}</span>
+              </>
+            ) : (
+              'Parrillas de Contenido'
+            )}
           </h1>
           <p className="text-base text-zinc-400 mt-4 leading-relaxed">
-            Plataforma interactiva para clientes de Dilo Digital. Visualiza tu calendario mensual, copies estratégicos y creatividades en tiempo real.
+            {brandFilter
+              ? `Historial de calendarios y publicaciones mensuales de ${brandFilter}. Al ingresar se requerirá la contraseña de acceso correspondiente.`
+              : 'Plataforma interactiva para clientes de Dilo Digital. Visualiza tu calendario mensual, copies estratégicos y creatividades en tiempo real.'}
           </p>
         </div>
 
-        {/* Featured Grids */}
+        {/* Featured Grids (Filtered to brand or general) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-10">
-          {(liveGrids.length > 0 ? liveGrids : fallbackGrids).map((g) => (
+          {displayedGrids.map((g) => (
             <div
               key={g.slug}
-              onClick={() => onSelectSlug(g.slug)}
+              onClick={() => onSelectSlug(g.slug, true /* force password check */)}
               className="bg-zinc-900/80 hover:bg-zinc-900 border border-zinc-800 hover:border-orange-500/50 rounded-3xl p-6 transition-all duration-300 shadow-xl cursor-pointer group flex flex-col justify-between"
             >
               <div>
@@ -145,7 +172,7 @@ export default function HomePortal({ onSelectSlug, defaultSlug }) {
                   {g.hasPassword && (
                     <span className="flex items-center gap-1 text-xs text-zinc-500">
                       <Lock className="w-3.5 h-3.5 text-zinc-400" />
-                      <span>Protegido</span>
+                      <span>Protegido con Clave</span>
                     </span>
                   )}
                 </div>
@@ -172,7 +199,7 @@ export default function HomePortal({ onSelectSlug, defaultSlug }) {
               <div className="mt-6 pt-4 border-t border-zinc-800/80 flex items-center justify-between text-xs font-semibold">
                 <span className="text-zinc-500">{g.postsCount} publicaciones</span>
                 <span className="text-orange-400 group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                  <span>Abrir Presentación</span>
+                  <span>Ingresar a Parrilla</span>
                   <ArrowRight className="w-4 h-4" />
                 </span>
               </div>
@@ -188,7 +215,7 @@ export default function HomePortal({ onSelectSlug, defaultSlug }) {
               type="text"
               value={slugInput}
               onChange={(e) => setSlugInput(e.target.value)}
-              placeholder="Ingresa código o slug del cliente..."
+              placeholder="Ingresa código o slug de la parrilla..."
               className="w-full bg-transparent px-3 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none"
             />
             <button

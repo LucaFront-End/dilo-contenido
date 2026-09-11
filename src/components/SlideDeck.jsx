@@ -111,6 +111,7 @@ export default function SlideDeck({
         <VisualContentSlide
           clientTitle={clientData.title}
           instagram={clientData.instagram}
+          clientData={clientData}
           onNavigateToSlide={(slideNum) => goToSlide(slideNum - 1)}
         />
       );

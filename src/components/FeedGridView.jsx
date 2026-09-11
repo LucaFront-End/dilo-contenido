@@ -103,15 +103,15 @@ export default function FeedGridView({
               key={slide.id}
               className="bg-white rounded-2xl border border-zinc-200/90 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group"
             >
-              {/* Card Media Preview */}
+              {/* Card Media Preview in 4:5 format */}
               <div
                 onClick={() => onSelectSlide && onSelectSlide(slide.pageNumber - 1)}
-                className="relative aspect-square bg-zinc-100 overflow-hidden cursor-pointer"
+                className="relative aspect-[4/5] bg-zinc-100 overflow-hidden cursor-pointer flex items-center justify-center"
               >
                 <img
                   src={slide.image}
                   alt={`Slide ${slide.pageNumber}`}
-                  className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+                  className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-300"
                 />
                 <div className="absolute top-3 left-3 flex items-center gap-2">
                   <span className="px-2.5 py-1 bg-black/80 backdrop-blur-md rounded-lg text-white font-mono text-xs font-bold">

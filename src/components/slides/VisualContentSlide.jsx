@@ -2,7 +2,7 @@ import React from 'react';
 import { ExternalLink, Grid, ShieldCheck, Phone, Check, Bell, Key, Zap, Camera, Compass } from 'lucide-react';
 import { InstagramIcon } from '../Icons';
 
-export default function VisualContentSlide({ clientTitle, instagram, onNavigateToSlide }) {
+export default function VisualContentSlide({ clientTitle, instagram, clientData, onNavigateToSlide }) {
   // 9 visual items for the feed grid (from PDF page 2)
   const feedItems = [
     {
@@ -70,6 +70,35 @@ export default function VisualContentSlide({ clientTitle, instagram, onNavigateT
     }
   ];
 
+  // Dynamic avatar / logo from Wix CMS with clean fallback
+  const brandAvatarUrl =
+    instagram?.logo ||
+    instagram?.avatar ||
+    clientData?.logo ||
+    '/assets/logo/cuauhtli-logo.png';
+
+  const brandUsername =
+    instagram?.username ||
+    clientData?.instagramUser ||
+    clientData?.usuarioInstagram ||
+    'sistemascuauhtli';
+
+  const brandDisplayName =
+    instagram?.displayName ||
+    clientData?.tituloTelefono ||
+    clientData?.title ||
+    'Sistemas Cuauhtli | Instalación de CCTV Y ALARMAS';
+
+  const brandBio =
+    instagram?.bio ||
+    clientData?.bioTelefono ||
+    'Ciencia, tecnología e ingeniería\nSistemas de seguridad para empresas: #CCTV, #Alarmas, #ControldeAcceso y #Cercaselectricas\nServicio en #CDMX y #EDOMEX';
+
+  const brandLink =
+    instagram?.link ||
+    clientData?.enlaceTelefono ||
+    'wa.link/hpxqqv';
+
   return (
     <div className="slide-content visual-content-slide flex w-full h-full relative overflow-hidden bg-white">
       {/* Black Left Rounded Category Pill faithful to PDF */}
@@ -91,7 +120,7 @@ export default function VisualContentSlide({ clientTitle, instagram, onNavigateT
 
       {/* Slide Inner Body */}
       <div className="flex-1 flex flex-col lg:flex-row items-center justify-between gap-4 md:gap-6 p-3 sm:p-6 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
-        {/* Left Side: 3x3 High-Res Grid (Enhanced for mobile & desktop) */}
+        {/* Left Side: 3x3 High-Res Grid in 4:5 Instagram proportion (Centered & uncropped) */}
         <div className="w-full lg:w-1/2 flex flex-col justify-center">
           <div className="mb-3 flex items-center justify-between">
             <div>
@@ -99,25 +128,32 @@ export default function VisualContentSlide({ clientTitle, instagram, onNavigateT
                 Vista de Feed Instagram
               </h3>
               <p className="text-[11px] sm:text-xs text-zinc-500 font-medium">
-                Parrilla mensual de publicaciones interconectadas. Toca para ver su detalle.
+                Parrilla mensual de publicaciones interconectadas en formato 4:5. Toca para ver su detalle.
               </p>
             </div>
             <span className="text-[10px] sm:text-xs font-bold px-2.5 py-1 bg-orange-100 text-orange-700 rounded-full shrink-0">
-              9 Diseños
+              9 Diseños · 4:5
             </span>
           </div>
 
           {/* Instagram mini-profile banner for mobile */}
           <div className="flex lg:hidden items-center justify-between p-2.5 mb-2.5 bg-zinc-50 rounded-xl border border-zinc-200 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-500 to-rose-500 p-[1.5px]">
-                <div className="w-full h-full bg-white rounded-full flex items-center justify-center font-bold text-[9px] text-zinc-800 uppercase">
-                  DILO
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-500 to-rose-500 p-[1.5px] shrink-0">
+                <div className="w-full h-full bg-white rounded-full flex items-center justify-center p-0.5 overflow-hidden">
+                  <img
+                    src={brandAvatarUrl}
+                    alt={brandDisplayName}
+                    className="w-full h-full object-contain rounded-full"
+                    onError={(e) => {
+                      e.target.src = '/assets/logo/cuauhtli-logo.png';
+                    }}
+                  />
                 </div>
               </div>
               <div>
                 <span className="font-bold text-zinc-900 block leading-tight">
-                  @{instagram?.username || 'sistemascuauhtli'}
+                  @{brandUsername}
                 </span>
                 <span className="text-[10px] text-zinc-500">
                   {instagram?.postsCount || 336} posts · {instagram?.followersCount || 92} seguidores
@@ -129,17 +165,18 @@ export default function VisualContentSlide({ clientTitle, instagram, onNavigateT
             </span>
           </div>
 
+          {/* 3x3 Grid with 4:5 Instagram vertical format */}
           <div className="grid grid-cols-3 gap-2 md:gap-3 bg-zinc-100 p-2 sm:p-3 rounded-2xl border border-zinc-200 shadow-inner">
             {feedItems.map((item) => (
               <div
                 key={item.id}
                 onClick={() => onNavigateToSlide && onNavigateToSlide(item.targetSlide)}
-                className="group relative aspect-square bg-zinc-200 rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl hover:scale-102 transition-all duration-300 border border-zinc-300/60"
+                className="group relative aspect-[4/5] bg-zinc-200 rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl hover:scale-102 transition-all duration-300 border border-zinc-300/60 flex items-center justify-center"
               >
                 <img
                   src={item.image}
                   alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                   onError={(e) => {
                     e.target.src = `/assets/slides/slide_${String(item.targetSlide).padStart(2, '0')}.png`;
                   }}
@@ -165,7 +202,7 @@ export default function VisualContentSlide({ clientTitle, instagram, onNavigateT
           </div>
         </div>
 
-        {/* Right Side: Realistic Instagram Smartphone Mockup (Desktop only to prevent redundant vertical scroll on mobile) */}
+        {/* Right Side: Realistic Instagram Smartphone Mockup */}
         <div className="hidden lg:flex w-full lg:w-1/2 justify-center items-center">
           <div className="smartphone-mockup shadow-2xl">
             {/* Dynamic Island / Speaker */}
@@ -185,24 +222,24 @@ export default function VisualContentSlide({ clientTitle, instagram, onNavigateT
               {/* Instagram App Top Bar */}
               <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-100">
                 <span className="text-base font-bold tracking-tight">
-                  {instagram?.username || 'sistemascuauhtli'}
+                  {brandUsername}
                 </span>
                 <div className="flex items-center gap-3">
                   <span className="text-zinc-500 font-bold">•••</span>
                 </div>
               </div>
 
-              {/* Profile Header */}
+              {/* Profile Header with dynamic logo */}
               <div className="px-4 py-3 flex items-center justify-between gap-4">
                 <div className="relative">
-                  <div className="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600">
+                  <div className="w-16 h-16 rounded-full p-[2px] bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 shrink-0">
                     <div className="w-full h-full rounded-full bg-white p-[2px] flex items-center justify-center overflow-hidden">
                       <img
-                        src="/assets/posts/p04_img01.jpeg"
-                        alt="Avatar"
-                        className="w-full h-full object-cover rounded-full"
+                        src={brandAvatarUrl}
+                        alt={brandDisplayName}
+                        className="w-full h-full object-contain rounded-full p-0.5"
                         onError={(e) => {
-                          e.target.src = '/favicon.svg';
+                          e.target.src = '/assets/logo/cuauhtli-logo.png';
                         }}
                       />
                     </div>
@@ -234,17 +271,21 @@ export default function VisualContentSlide({ clientTitle, instagram, onNavigateT
               {/* Bio Details */}
               <div className="px-4 pb-3 text-left">
                 <p className="font-bold text-xs text-zinc-900">
-                  {instagram?.displayName || 'Sistemas Cuauhtli | Instalación de CCTV Y ALARMAS'}
+                  {brandDisplayName}
                 </p>
                 <p className="text-[11px] text-zinc-500 mt-0.5">Ciencia, tecnología e ingeniería</p>
-                <p className="text-[11px] text-zinc-700 leading-snug mt-1">
-                  Sistemas de seguridad para empresas: <span className="text-blue-600">#CCTV</span>, <span className="text-blue-600">#Alarmas</span>, <span className="text-blue-600">#ControldeAcceso</span> y <span className="text-blue-600">#Cercaselectricas</span>
-                </p>
-                <p className="text-[11px] text-zinc-700">Servicio en <span className="text-blue-600">#CDMX</span> y <span className="text-blue-600">#EDOMEX</span></p>
+                <div className="text-[11px] text-zinc-700 leading-snug mt-1 whitespace-pre-line">
+                  {brandBio}
+                </div>
                 <div className="mt-1 flex items-center gap-1 text-[11px] text-blue-600 font-medium">
                   <span>Cotiza Ahora 👇</span>
-                  <a href="https://wa.link/hpxqqv" target="_blank" rel="noopener noreferrer" className="hover:underline">
-                    wa.link/hpxqqv
+                  <a
+                    href={brandLink.startsWith('http') ? brandLink : `https://${brandLink}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    {brandLink.replace(/^https?:\/\//, '')}
                   </a>
                 </div>
               </div>
@@ -283,18 +324,18 @@ export default function VisualContentSlide({ clientTitle, instagram, onNavigateT
                 ))}
               </div>
 
-              {/* Feed Grid Inside Phone */}
+              {/* Feed Grid Inside Phone (4:5 Format) */}
               <div className="grid grid-cols-3 gap-0.5 p-1 bg-zinc-100 flex-1">
                 {feedItems.map((item) => (
                   <div
                     key={item.id}
                     onClick={() => onNavigateToSlide && onNavigateToSlide(item.targetSlide)}
-                    className="aspect-square bg-zinc-200 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+                    className="aspect-[4/5] bg-zinc-200 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity flex items-center justify-center"
                   >
                     <img
                       src={item.image}
                       alt={item.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover object-center"
                       onError={(e) => {
                         e.target.src = `/assets/slides/slide_${String(item.targetSlide).padStart(2, '0')}.png`;
                       }}
