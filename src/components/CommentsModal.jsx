@@ -12,7 +12,8 @@ export default function CommentsModal({
   onNavigateToSlide,
   clientTitle = 'Cliente',
   isGlobalView = false,
-  isSlideApproved = false
+  isSlideApproved = false,
+  wixPostId = null
 }) {
   const [author, setAuthor] = useState(clientTitle);
   const [category, setCategory] = useState('Cambio de Copy');
@@ -46,7 +47,8 @@ export default function CommentsModal({
       slideType: slideType || 'POST',
       author: author.trim() || clientTitle,
       category,
-      text: commentText.trim()
+      text: commentText.trim(),
+      wixPostId: wixPostId || null
     };
 
     onAddComment(newComment);

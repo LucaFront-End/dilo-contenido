@@ -379,6 +379,7 @@ export default function PostSlide({
         clientTitle={clientTitle}
         isGlobalView={false}
         isSlideApproved={isApproved}
+        wixPostId={slide.wixPostId || slide.id}
       />
     </div>
   );

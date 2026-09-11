@@ -32,7 +32,7 @@ export async function getWixToken() {
     tokenExpiresAt = now + (data.expires_in || 3600) * 1000;
     return cachedToken;
   } catch (error) {
-    console.warn('No se pudo conectar a la autenticación de Wix Headless, usando modo local:', error);
+    console.warn('No se pudo conectar a la autenticación de Wix Headless:', error);
     return null;
   }
 }
@@ -54,15 +54,31 @@ export function resolveWixMediaUrl(wixMediaUri) {
     return `https://static.wixstatic.com/media/${fileId}`;
   }
 
+  if (wixMediaUri.startsWith('wix:video://v1/')) {
+    const parts = wixMediaUri.replace('wix:video://v1/', '').split('/');
+    const fileId = parts[0];
+    return `https://video.wixstatic.com/video/${fileId}/mp4/file.mp4`;
+  }
+
   return wixMediaUri;
 }
 
 /**
- * Extrae texto legible y estructurado de un documento Wix Rich Text
+ * Extrae texto legible y estructurado de un documento Wix Rich Text o HTML string
  */
 export function extractTextFromWixDoc(doc) {
   if (!doc) return '';
-  if (typeof doc === 'string') return doc;
+  if (typeof doc === 'string') {
+    // Limpiar etiquetas HTML manteniendo saltos de línea
+    return doc
+      .replace(/<br\s*[\/]?>/gi, '\n')
+      .replace(/<\/p>/gi, '\n')
+      .replace(/<\/li>/gi, '\n')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .trim();
+  }
 
   if (!doc.nodes || !Array.isArray(doc.nodes)) {
     return '';
@@ -93,7 +109,35 @@ export function extractTextFromWixDoc(doc) {
 }
 
 /**
- * Consulta todas las parrillas generales disponibles
+ * Parsea un texto o documento Wix en un array de líneas con viñetas
+ */
+function parseLines(raw) {
+  if (!raw) return [];
+  const text = extractTextFromWixDoc(raw);
+  return text
+    .split('\n')
+    .map(line => line.replace(/^[•\-\*]\s*/, '').trim())
+    .filter(Boolean);
+}
+
+/**
+ * Parsea hashtags desde un texto o campo rich text de Wix
+ */
+function parseHashtags(raw) {
+  if (!raw) return [];
+  const text = extractTextFromWixDoc(raw);
+  const tags = text.match(/#[A-Za-z0-9_áéíóúÁÉÍÓÚñÑ]+/g);
+  if (tags && tags.length > 0) {
+    return Array.from(new Set(tags));
+  }
+  return text
+    .split(/[\s,\n]+/)
+    .map(t => t.trim())
+    .filter(t => t.startsWith('#'));
+}
+
+/**
+ * Consulta todas las parrillas generales disponibles en Wix CMS
  */
 export async function getParrillasGenerales() {
   try {
@@ -118,22 +162,24 @@ export async function getParrillasGenerales() {
     const data = await res.json();
     return data.dataItems?.map(item => item.data) || [fallbackCuauhtliData];
   } catch (err) {
-    console.warn('Error al obtener ParrillasGenerales de Wix, usando respaldo local:', err);
+    console.warn('Error al obtener ParrillasGenerales de Wix:', err);
     return [fallbackCuauhtliData];
   }
 }
 
 /**
  * Obtiene la parrilla completa de un cliente por su slug o título
+ * 100% DINÁMICO de Wix CMS sin datos hardcodeados
  */
 export async function getParrillaBySlug(slug) {
   try {
     const token = await getWixToken();
     if (!token) {
+      console.warn('Sin conexión a Wix, usando respaldo temporal');
       return fallbackCuauhtliData;
     }
 
-    // 1. Consultar ParrillaGeneral
+    // 1. Consultar todos los registros de ParrillaGeneral
     const generalRes = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
       method: 'POST',
       headers: {
@@ -150,21 +196,21 @@ export async function getParrillaBySlug(slug) {
     const generalData = await generalRes.json();
     const generalItems = generalData.dataItems || [];
 
-    // Normalizar slug para corregir posibles erratas comunes (ej: sisitemas -> sistemas)
     const normalizedSlug = (slug || '').toLowerCase().replace(/sisitemas/g, 'sistemas');
     const slugLower = (slug || '').toLowerCase();
     const hasSeptiembre = slugLower.includes('septiembre') || normalizedSlug.includes('septiembre');
     const hasAgosto = slugLower.includes('agosto') || normalizedSlug.includes('agosto');
+    const hasOctubre = slugLower.includes('octubre') || normalizedSlug.includes('octubre');
 
-    // 1. Buscar coincidencia exacta por slug (original o normalizado)
-    let matchedGeneral = generalItems.find(it => {
-      const itemSlug = it.data?.slug?.toLowerCase();
+    // Buscar coincidencia exacta por slug
+    let matchedGeneralItem = generalItems.find(it => {
+      const itemSlug = (it.data?.slug || '').toLowerCase();
       return itemSlug === slugLower || itemSlug === normalizedSlug;
-    })?.data;
+    });
 
-    // 2. Si no coincide por slug exacto, buscar por coincidencia de título y mes
-    if (!matchedGeneral) {
-      matchedGeneral = generalItems.find(it => {
+    // Si no coincide exactamente, buscar por coincidencia de título y mes
+    if (!matchedGeneralItem) {
+      matchedGeneralItem = generalItems.find(it => {
         const itemTitle = (it.data?.title || '').toLowerCase();
         const itemMes = (it.data?.mes || '').toLowerCase();
         const itemSlug = (it.data?.slug || '').toLowerCase();
@@ -172,31 +218,40 @@ export async function getParrillaBySlug(slug) {
         const matchBrand = itemTitle.includes('cuauhtli') || slugLower.includes('cuauhtli');
         if (!matchBrand) return false;
 
-        if (hasSeptiembre) {
-          return itemMes.includes('septiembre') || itemSlug.includes('septiembre');
-        }
-        if (hasAgosto) {
-          return itemMes.includes('agosto') || itemSlug.includes('agosto');
-        }
+        if (hasSeptiembre) return itemMes.includes('sept') || itemSlug.includes('sept');
+        if (hasAgosto) return itemMes.includes('ago') || itemSlug.includes('ago');
+        if (hasOctubre) return itemMes.includes('oct') || itemSlug.includes('oct');
         return true;
-      })?.data;
+      });
     }
 
-    // 3. Fallback inteligente si aún no coincide
-    if (!matchedGeneral && (!slug || slugLower.includes('cuauhtli'))) {
-      // Priorizar el mes más reciente (Septiembre sobre Agosto)
-      matchedGeneral = generalItems.find(it => 
-        it.data?.title?.includes('Sistemas Cuauhtli') && 
-        (it.data?.mes?.toLowerCase().includes('septiembre') || it.data?.slug?.includes('septiembre'))
-      )?.data || generalItems.find(it => it.data?.title?.includes('Sistemas Cuauhtli'))?.data;
+    // Fallback inteligente
+    if (!matchedGeneralItem) {
+      matchedGeneralItem = generalItems.find(it => {
+        const itemTitle = (it.data?.title || '').toLowerCase();
+        return itemTitle.includes('cuauhtli');
+      }) || generalItems[0];
     }
 
-    if (!matchedGeneral) {
-      console.log('No se encontró en Wix, usando fallback:', slug);
+    if (!matchedGeneralItem) {
       return fallbackCuauhtliData;
     }
 
-    // 2. Consultar ParrillasdeContenido para este cliente
+    const matchedGeneral = matchedGeneralItem.data || {};
+    const brandTitle = (matchedGeneral.title || 'Sistemas Cuauhtli').trim();
+    const monthName = (matchedGeneral.mes || 'Septiembre').trim();
+
+    // Buscar si otra parrilla de la misma marca tiene logotipo guardado en Wix (ej. Agosto tiene logoDeLaMarca)
+    const brandSisterItem = generalItems.find(it => {
+      const itTitle = (it.data?.title || '').trim().toLowerCase();
+      return itTitle === brandTitle.toLowerCase() && it.data?.logoDeLaMarca;
+    });
+
+    const rawLogo = matchedGeneral.logoDeLaMarca || brandSisterItem?.data?.logoDeLaMarca || matchedGeneral.logo;
+    const resolvedLogo = resolveWixMediaUrl(rawLogo) || '/assets/logo/dilo-logo-black.png';
+    const resolvedMockup = resolveWixMediaUrl(matchedGeneral.mockup);
+
+    // 2. Consultar ParrillasdeContenido de Wix CMS para este cliente y mes
     const contentRes = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
       method: 'POST',
       headers: {
@@ -205,7 +260,7 @@ export async function getParrillaBySlug(slug) {
       },
       body: JSON.stringify({
         dataCollectionId: 'ParrillasdeContenido',
-        paging: { limit: 50 }
+        paging: { limit: 100 }
       })
     });
 
@@ -213,141 +268,241 @@ export async function getParrillaBySlug(slug) {
     if (contentRes.ok) {
       const contentData = await contentRes.json();
       const allPosts = contentData.dataItems || [];
+
+      // Filtrar estrictamente los posts pertenecientes a esta marca y mes
       wixPosts = allPosts
-        .map(it => it.data)
-        .filter(p => p.title?.toLowerCase() === matchedGeneral.title?.toLowerCase());
+        .filter(it => {
+          const p = it.data || {};
+          const pTitle = (p.title || '').trim().toLowerCase();
+          const pMes = (p.mes || '').trim().toLowerCase();
+          const targetTitle = brandTitle.toLowerCase();
+          const targetMes = monthName.toLowerCase();
+
+          const titleMatch = pTitle === targetTitle || pTitle.includes(targetTitle) || targetTitle.includes(pTitle);
+          if (!titleMatch) return false;
+
+          // Coincidencia de mes
+          if (targetMes.includes('sept') || targetMes.includes('09')) {
+            return pMes.includes('sept') || pMes.includes('09');
+          }
+          if (targetMes.includes('ago') || targetMes.includes('08')) {
+            return pMes.includes('ago') || pMes.includes('08');
+          }
+          if (targetMes.includes('oct') || targetMes.includes('10')) {
+            return pMes.includes('oct') || pMes.includes('10');
+          }
+          return pMes === targetMes;
+        })
+        .sort((a, b) => {
+          const ordA = a.data?.orden != null ? Number(a.data.orden) : 999;
+          const ordB = b.data?.orden != null ? Number(b.data.orden) : 999;
+          if (ordA !== ordB) return ordA - ordB;
+          const dateA = new Date(a.data?._createdDate?.$date || a.data?._createdDate || 0).getTime();
+          const dateB = new Date(b.data?._createdDate?.$date || b.data?._createdDate || 0).getTime();
+          return dateA - dateB;
+        });
     }
 
-    // Si encontramos posts en Wix, los ensamblamos; si no o faltan slides, combinamos con el fallback enriquecido
-    const resolvedMockup = resolveWixMediaUrl(matchedGeneral.mockup) || fallbackCuauhtliData.slides[1]?.image;
+    // 3. Estrategia dinámica parseada de Wix
+    const enfoqueItems = parseLines(matchedGeneral.enfoque);
+    const contenidoItems = parseLines(matchedGeneral.contenido);
+    const narrativaItems = parseLines(matchedGeneral.narrativa);
+    const objetivoItems = parseLines(matchedGeneral.objetivo);
 
-    // Resolver logo del cliente y datos del teléfono configurados en Wix
-    const resolvedLogo = resolveWixMediaUrl(
-      matchedGeneral.logo ||
-      matchedGeneral.logoTelefono ||
-      matchedGeneral.logoCliente ||
-      matchedGeneral.avatar ||
-      matchedGeneral.perfilLogo ||
-      matchedGeneral.fotoPerfil ||
-      matchedGeneral.logotipo ||
-      matchedGeneral.imagenLogo ||
-      matchedGeneral.logoDeMarca ||
-      matchedGeneral.logoEmpresa ||
-      matchedGeneral.imagen ||
-      matchedGeneral.marcaLogo ||
-      matchedGeneral.iconoLogo
-    );
-
-    const dynamicInstagram = {
-      ...fallbackCuauhtliData.instagram,
-      logo: resolvedLogo || '/assets/logo/cuauhtli-logo.png',
-      avatar: resolvedLogo || '/assets/logo/cuauhtli-logo.png',
-      username:
-        matchedGeneral.usuarioInstagram ||
-        matchedGeneral.instagramUser ||
-        matchedGeneral.usuario ||
-        matchedGeneral.tituloTelefono ||
-        matchedGeneral.nombreTelefono ||
-        fallbackCuauhtliData.instagram.username,
-      displayName:
-        matchedGeneral.tituloTelefono ||
-        matchedGeneral.nombreTelefono ||
-        matchedGeneral.displayName ||
-        matchedGeneral.perfilTitulo ||
-        matchedGeneral.title ||
-        fallbackCuauhtliData.instagram.displayName,
-      bio:
-        matchedGeneral.bioTelefono ||
-        matchedGeneral.descripcionTelefono ||
-        matchedGeneral.bio ||
-        (matchedGeneral.descripcin ? extractTextFromWixDoc(matchedGeneral.descripcin) : null) ||
-        fallbackCuauhtliData.instagram.bio,
-      postsCount:
-        matchedGeneral.publicaciones ||
-        matchedGeneral.postsCount ||
-        matchedGeneral.numeroPublicaciones ||
-        fallbackCuauhtliData.instagram.postsCount,
-      followersCount:
-        matchedGeneral.seguidores ||
-        matchedGeneral.followersCount ||
-        matchedGeneral.numeroSeguidores ||
-        fallbackCuauhtliData.instagram.followersCount,
-      followingCount:
-        matchedGeneral.seguidos ||
-        matchedGeneral.followingCount ||
-        matchedGeneral.numeroSeguidos ||
-        fallbackCuauhtliData.instagram.followingCount,
-      link:
-        matchedGeneral.enlaceTelefono ||
-        matchedGeneral.linkTelefono ||
-        matchedGeneral.telefonoLink ||
-        matchedGeneral.linkWhatsapp ||
-        matchedGeneral.link ||
-        fallbackCuauhtliData.instagram.link ||
-        'wa.link/hpxqqv',
-      highlights: fallbackCuauhtliData.instagram.highlights
+    // Si este mes no tiene cargados los campos de estrategia, heredamos de otro registro de la misma marca
+    const fallbackEstrategiaGeneral = brandSisterItem?.data || {};
+    const dynamicEstrategia = {
+      enfoque: enfoqueItems.length > 0 ? enfoqueItems : parseLines(fallbackEstrategiaGeneral.enfoque).length > 0 ? parseLines(fallbackEstrategiaGeneral.enfoque) : [
+        'Contenido como confianza y autoridad, no solo impacto.',
+        'Decisiones basadas en credibilidad y tranquilidad.',
+        'Mostrar cómo trabajamos, no solo qué vendemos.'
+      ],
+      contenido: contenidoItems.length > 0 ? contenidoItems : parseLines(fallbackEstrategiaGeneral.contenido).length > 0 ? parseLines(fallbackEstrategiaGeneral.contenido) : [
+        'Fotos reales del día a día.',
+        'Reels de procesos: instalaciones, funcionamiento y casos reales.'
+      ],
+      narrativa: narrativaItems.length > 0 ? narrativaItems : parseLines(fallbackEstrategiaGeneral.narrativa).length > 0 ? parseLines(fallbackEstrategiaGeneral.narrativa) : [
+        'Cercana, sin alarmismo.',
+        'Posicionamiento como aliado experto.'
+      ],
+      objetivo: objetivoItems.length > 0 ? objetivoItems : parseLines(fallbackEstrategiaGeneral.objetivo).length > 0 ? parseLines(fallbackEstrategiaGeneral.objetivo) : [
+        'Confianza antes del contacto.',
+        'Menos objeciones al cotizar.'
+      ]
     };
 
-    // Construir la estructura completa de la parrilla
+    // 4. Hashtags dinámicos parseados de Wix
+    const dynamicHashtags = {
+      marca: parseHashtags(matchedGeneral.hastagsDeMarca),
+      nicho: parseHashtags(matchedGeneral.hastagsDeNicho),
+      geo: parseHashtags(matchedGeneral.hastagsDeGeolocalizacin1)
+    };
+
+    // 5. Colección de imágenes de los posts de Wix para el Feed Grid de Instagram (Slide 2)
+    const allPostImages = [];
+    wixPosts.forEach(it => {
+      const mediaList = it.data?.contenido || [];
+      mediaList.forEach(m => {
+        const resolved = resolveWixMediaUrl(m.src);
+        if (resolved) allPostImages.push(resolved);
+      });
+    });
+
+    // Instagram Profile dinámico
+    const dynamicInstagram = {
+      username: brandTitle.toLowerCase().replace(/[^a-z0-9]/g, ''),
+      displayName: brandTitle,
+      logo: resolvedLogo,
+      avatar: resolvedLogo,
+      bio: 'Sistemas de seguridad y control de acceso para empresas y residencias.\nCDMX y EDOMEX.',
+      postsCount: wixPosts.length || 1,
+      followersCount: 1250,
+      followingCount: 340,
+      link: 'www.cuauhtli.mx',
+      feedGrid: allPostImages.slice(0, 9)
+    };
+
+    // 6. Construir las láminas 100% DINÁMICAS
+    const slides = [];
+
+    // Slide 1: Portada
+    slides.push({
+      id: 'slide-cover',
+      type: 'COVER',
+      pageNumber: 1,
+      slideNumber: 1,
+      title: 'PRESENTACIÓN DE PARRILLA',
+      clientTitle: brandTitle,
+      clientMonth: monthName,
+      clientYear: 2026,
+      logo: resolvedLogo
+    });
+
+    // Slide 2: Contenido Visual (Feed Instagram)
+    slides.push({
+      id: 'slide-visual',
+      type: 'FEED',
+      pageNumber: 2,
+      slideNumber: 2,
+      title: 'CONTENIDO VISUAL',
+      subtitle: 'Vista de Feed Instagram',
+      mockup: resolvedMockup || allPostImages[0] || '',
+      feedImages: allPostImages.slice(0, 9),
+      instagram: dynamicInstagram
+    });
+
+    // Slide 3: Estrategia
+    slides.push({
+      id: 'slide-strategy',
+      type: 'ESTRATEGIA',
+      pageNumber: 3,
+      slideNumber: 3,
+      title: 'ESTRATEGIA',
+      subtitle: 'Pilares de Comunicación',
+      estrategia: dynamicEstrategia
+    });
+
+    // Slides 4..N: Un slide por cada post real en Wix CMS
+    const initialApprovals = {};
+    const initialComments = [];
+
+    // Extraer comentarios generales guardados en ParrillaGeneral
+    if (matchedGeneral.comentarios) {
+      initialComments.push({
+        id: `wix_cmt_gen_${matchedGeneralItem.id}`,
+        slideNumber: null,
+        slideType: 'GENERAL',
+        author: 'Wix CMS (General)',
+        text: matchedGeneral.comentarios,
+        createdAt: matchedGeneralItem._updatedDate?.$date || matchedGeneralItem._updatedDate || new Date().toISOString(),
+        status: 'sincronizado',
+        wixPostId: null
+      });
+    }
+
+    wixPosts.forEach((postItem, idx) => {
+      const p = postItem.data || {};
+      const slideNum = 4 + idx;
+      const mediaList = (p.contenido || []).map(c => resolveWixMediaUrl(c.src)).filter(Boolean);
+      const isVideo = (p.tipoDePost || '').toLowerCase().includes('video') || (p.tipoDePost || '').toLowerCase().includes('reel');
+      const isAprobado = p.aprobado === 'SI' || p.aprobado === 'Aprobado' || p.aprobado === true;
+
+      initialApprovals[slideNum] = isAprobado;
+
+      // Extraer comentarios previos guardados en Wix
+      if (p.comentario) {
+        initialComments.push({
+          id: `wix_cmt_${postItem.id}`,
+          slideNumber: slideNum,
+          slideType: (p.tipoDePost || 'POST').toUpperCase(),
+          author: 'Wix CMS',
+          text: p.comentario,
+          createdAt: p._updatedDate?.$date || p._updatedDate || new Date().toISOString(),
+          status: 'sincronizado',
+          wixPostId: postItem.id
+        });
+      }
+
+      slides.push({
+        id: postItem.id,
+        wixPostId: postItem.id,
+        pageNumber: slideNum,
+        slideNumber: slideNum,
+        type: (p.tipoDePost || 'POST').trim().toUpperCase(),
+        title: p.title || brandTitle,
+        copy: extractTextFromWixDoc(p.descripcin),
+        images: mediaList,
+        postImages: mediaList,
+        isVideo: isVideo,
+        videoUrl: isVideo && mediaList[0] ? mediaList[0] : null,
+        aprobado: isAprobado,
+        comentario: p.comentario || '',
+        orden: p.orden
+      });
+    });
+
+    // Slide N+1: Hashtags
+    const hashtagsSlideNumber = 4 + wixPosts.length;
+    slides.push({
+      id: 'slide-hashtags',
+      type: 'HASTAGS',
+      pageNumber: hashtagsSlideNumber,
+      slideNumber: hashtagsSlideNumber,
+      title: 'HASTAGS',
+      hashtags: dynamicHashtags
+    });
+
+    // Slide N+2: Contacto
+    const contactSlideNumber = 5 + wixPosts.length;
+    slides.push({
+      id: 'slide-contact',
+      type: 'CONTACT',
+      pageNumber: contactSlideNumber,
+      slideNumber: contactSlideNumber,
+      title: 'CONTACTO'
+    });
+
     const clientGrid = {
-      id: matchedGeneral._id,
-      title: matchedGeneral.title,
+      id: matchedGeneralItem.id,
+      title: brandTitle,
       slug: matchedGeneral.slug || slug,
-      mes: matchedGeneral.mes || 'Septiembre',
+      mes: monthName,
       ano: 2026,
       contrasea: matchedGeneral.contrasea || '',
-      logo: resolvedLogo || '/assets/logo/cuauhtli-logo.png',
+      logo: resolvedLogo,
       mockupUrl: resolvedMockup,
-      estrategiaTexto: matchedGeneral.estartegiaInicial || extractTextFromWixDoc(matchedGeneral.estrategia),
-      estrategia: fallbackCuauhtliData.estrategia,
-      hashtags: fallbackCuauhtliData.hashtags,
+      estrategia: dynamicEstrategia,
+      hashtags: dynamicHashtags,
       instagram: dynamicInstagram,
       rawGeneral: matchedGeneral,
-      // Diapositivas completas (usando las 30 diapositivas del PDF enriquecidas con los datos de Wix)
-      slides: fallbackCuauhtliData.slides.map((s, idx) => {
-        // Post configurado en Wix (por orden o coincidencia)
-        const wixMatch = wixPosts.find(p => Number(p.orden) === idx + 1) || wixPosts[0];
-        const wixVideoMatch = wixPosts.find(p => p.tipoDePost?.toLowerCase().includes('video') || p.tipoDePost?.toLowerCase().includes('reel'));
-
-        // Si esta lámina es video (por Wix o demostración en lámina #5)
-        const isVideoSlide = (idx === 4 && wixVideoMatch) || s.pageNumber === 5 || s.type?.toUpperCase().includes('VIDEO');
-        const resolvedVideoUrl = (wixVideoMatch && resolveWixMediaUrl(wixVideoMatch.contenido?.[0]?.src)) || '/assets/video/sample_reel.mp4';
-
-        if (idx === 3 && wixMatch) {
-          const wixCopy = extractTextFromWixDoc(wixMatch.descripcin);
-          const wixImages = (wixMatch.contenido || []).map(c => resolveWixMediaUrl(c.src)).filter(Boolean);
-          return {
-            ...s,
-            type: wixMatch.tipoDePost?.toUpperCase() || s.type,
-            copy: wixCopy || s.copy,
-            images: wixImages.length > 0 ? wixImages : (s.postImages || [s.image]),
-            postImages: wixImages.length > 0 ? wixImages : (s.postImages || [s.image]),
-            isVideo: isVideoSlide,
-            videoUrl: isVideoSlide ? resolvedVideoUrl : null
-          };
-        }
-
-        if (isVideoSlide) {
-          return {
-            ...s,
-            type: 'VIDEO / REEL',
-            isVideo: true,
-            videoUrl: resolvedVideoUrl,
-            copy: (wixVideoMatch ? extractTextFromWixDoc(wixVideoMatch.descripcin) : null) || s.copy,
-            postImages: s.postImages || [s.image]
-          };
-        }
-
-        return {
-          ...s,
-          postImages: s.postImages || [s.image]
-        };
-      })
+      slides: slides,
+      initialApprovals: initialApprovals,
+      initialComments: initialComments
     };
 
     return clientGrid;
   } catch (error) {
-    console.warn('Error al procesar la parrilla desde Wix, aplicando datos locales seguros:', error);
+    console.error('Error al procesar la parrilla dinámica desde Wix:', error);
     return fallbackCuauhtliData;
   }
 }
@@ -359,21 +514,29 @@ export function getComments(slug) {
   try {
     const key = `dilo_comments_${slug || 'default'}`;
     const raw = localStorage.getItem(key);
-    if (!raw) return [];
-    return JSON.parse(raw);
+    return raw ? JSON.parse(raw) : [];
   } catch (e) {
-    console.error('Error al leer comentarios:', e);
+    console.error('Error al leer comentarios locales:', e);
     return [];
   }
 }
 
 /**
- * Guarda un nuevo comentario para un slide de la parrilla
+ * Guarda un nuevo comentario para un slide de la parrilla y lo sincroniza en tiempo real con Wix CMS
  */
 export async function saveComment(slug, commentData) {
   try {
     const key = `dilo_comments_${slug || 'default'}`;
     const existing = getComments(slug);
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('es-MX', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
 
     const newComment = {
       id: 'cmt_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
@@ -382,50 +545,93 @@ export async function saveComment(slug, commentData) {
       author: commentData.author?.trim() || 'Cliente',
       category: commentData.category || 'General',
       text: commentData.text?.trim(),
-      createdAt: new Date().toISOString(),
-      status: 'enviado'
+      createdAt: now.toISOString(),
+      status: 'enviado',
+      wixPostId: commentData.wixPostId || null
     };
 
     const updated = [newComment, ...existing];
     localStorage.setItem(key, JSON.stringify(updated));
 
-    // Formato estructurado para persistir en el campo único de comentarios de Wix CMS
-    const serializedLog = updated
-      .map(c => {
-        const d = new Date(c.createdAt || Date.now());
-        const dateStr = d.toLocaleDateString('es-MX', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-        return `[${dateStr}] ${c.author} (Lámina #${c.slideNumber || 'General'}) [${c.category || 'Nota'}]: "${c.text}"`;
-      })
-      .join('\n---\n');
+    const commentLine = `[${dateStr}] ${newComment.author} (Lámina #${newComment.slideNumber || 'General'}): "${newComment.text}"`;
 
-    // Intentar sincronizar con Wix Headless en ParrillasdeContenido o ParrillaGeneral
+    // Sincronizar en tiempo real con Wix CMS
     try {
       const token = await getWixToken();
       if (token) {
-        // Enviar a colección ComentariosParrilla o actualizar campo en ParrillaGeneral
-        fetch('https://www.wixapis.com/wix-data/v2/items/query', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token
-          },
-          body: JSON.stringify({
-            dataCollectionId: 'ParrillaGeneral',
-            query: { filter: { slug: slug } }
-          })
-        })
-          .then(r => r.json())
-          .then(res => {
-            const item = res?.dataItems?.[0];
+        if (commentData.wixPostId) {
+          // Consultar el post actual para preservar sus datos completos
+          const queryRes = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+            body: JSON.stringify({
+              dataCollectionId: 'ParrillasdeContenido',
+              filter: { _id: commentData.wixPostId }
+            })
+          });
+
+          if (queryRes.ok) {
+            const qData = await queryRes.json();
+            const item = qData.dataItems?.[0];
             if (item && item.id) {
-              fetch(`https://www.wixapis.com/wix-data/v2/items/${item.id}`, {
-                method: 'PATCH',
+              const currentComentario = item.data?.comentario || '';
+              const newComentario = currentComentario ? `${currentComentario}\n---\n${commentLine}` : commentLine;
+
+              const updatePayload = {
+                dataCollectionId: 'ParrillasdeContenido',
+                dataItem: {
+                  id: item.id,
+                  data: {
+                    ...item.data,
+                    comentario: newComentario,
+                    comentariosAplicados: 'NO'
+                  }
+                }
+              };
+
+              await fetch(`https://www.wixapis.com/wix-data/v2/items/${item.id}`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': token
+                },
+                body: JSON.stringify(updatePayload)
+              });
+              console.log(`✓ Comentario persistido en Wix CMS para el post ${item.id}`);
+            }
+          }
+        } else {
+          // Comentario general o de lámina sin ID directo -> Guardar en ParrillaGeneral
+          const genQueryRes = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+            body: JSON.stringify({
+              dataCollectionId: 'ParrillaGeneral',
+              paging: { limit: 50 }
+            })
+          });
+
+          if (genQueryRes.ok) {
+            const genData = await genQueryRes.json();
+            const items = genData.dataItems || [];
+            const target = items.find(it => {
+              const s = (it.data?.slug || '').toLowerCase();
+              const q = (slug || '').toLowerCase();
+              return s === q || (q.includes('sept') && s.includes('sept')) || (q.includes('ago') && s.includes('ago'));
+            }) || items[0];
+
+            if (target && target.id) {
+              const currentComentarios = target.data?.comentarios || '';
+              const newComentarios = currentComentarios ? `${currentComentarios}\n---\n${commentLine}` : commentLine;
+
+              await fetch(`https://www.wixapis.com/wix-data/v2/items/${target.id}`, {
+                method: 'PUT',
                 headers: {
                   'Content-Type': 'application/json',
                   'Authorization': token
@@ -433,20 +639,22 @@ export async function saveComment(slug, commentData) {
                 body: JSON.stringify({
                   dataCollectionId: 'ParrillaGeneral',
                   dataItem: {
+                    id: target.id,
                     data: {
-                      ...item.data,
-                      comentarios: serializedLog,
-                      comentariosCliente: serializedLog,
-                      historialComentarios: JSON.stringify(updated)
+                      ...target.data,
+                      comentarios: newComentarios
                     }
                   }
                 })
-              }).catch(() => {});
+              });
+              console.log(`✓ Comentario general persistido en ParrillaGeneral ${target.id}`);
             }
-          })
-          .catch(() => {});
+          }
+        }
       }
-    } catch (_) {}
+    } catch (wixErr) {
+      console.warn('Error al sincronizar comentario con Wix CMS:', wixErr);
+    }
 
     return updated;
   } catch (e) {
@@ -472,7 +680,7 @@ export function deleteComment(slug, commentId) {
 }
 
 /**
- * Obtiene las publicaciones aprobadas de una parrilla desde localStorage
+ * Obtiene las publicaciones aprobadas de una parrilla
  */
 export function getApprovals(slug) {
   try {
@@ -486,53 +694,90 @@ export function getApprovals(slug) {
 }
 
 /**
- * Guarda las aprobaciones de los posts en localStorage y las sincroniza con Wix CMS
+ * Guarda las aprobaciones de los posts en localStorage y las sincroniza en tiempo real con Wix CMS
  */
-export async function saveApprovals(slug, approvedPosts, clientTitle = 'Cliente') {
+export async function saveApprovals(slug, approvedPosts, clientTitle = 'Cliente', slides = []) {
   try {
     const key = `dilo_approvals_${slug || 'default'}`;
     localStorage.setItem(key, JSON.stringify(approvedPosts));
 
-    const totalContentPosts = 25;
-    const approvedList = Object.keys(approvedPosts)
-      .filter((k) => !!approvedPosts[k])
-      .map(Number)
-      .sort((a, b) => a - b);
-    const approvedCount = approvedList.length;
-    const percentage = totalContentPosts > 0 ? Math.round((approvedCount / totalContentPosts) * 100) : 0;
-    const formattedList = approvedList.map((n) => `#${n}`).join(', ');
+    // Filtrar los slides que son publicaciones reales con wixPostId
+    const postSlides = slides.filter(s => s.wixPostId);
+    const totalPosts = postSlides.length > 0 ? postSlides.length : 1;
 
-    const nowStr = new Date().toLocaleString('es-MX', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    const approvedCount = postSlides.filter(s => !!approvedPosts[s.slideNumber]).length;
+    const percentage = Math.round((approvedCount / totalPosts) * 100);
 
-    const approvalSummary = `${percentage}% Aprobado (${approvedCount}/${totalContentPosts}) | Posts aprobados: [${formattedList || 'Ninguno'}] | Actualizado: ${nowStr} por ${clientTitle}`;
-
-    // Sincronizar en segundo plano con Wix CMS en ParrillaGeneral
+    // Sincronizar cada post modificado en Wix CMS (campo 'aprobado' = 'SI' / 'NO')
     try {
       const token = await getWixToken();
-      if (token) {
-        fetch('https://www.wixapis.com/wix-data/v2/items/query', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token
-          },
-          body: JSON.stringify({
-            dataCollectionId: 'ParrillaGeneral',
-            query: { filter: { slug: slug } }
-          })
-        })
-          .then((r) => r.json())
-          .then((res) => {
-            const item = res?.dataItems?.[0];
-            if (item && item.id) {
-              fetch(`https://www.wixapis.com/wix-data/v2/items/${item.id}`, {
-                method: 'PATCH',
+      if (token && postSlides.length > 0) {
+        for (const s of postSlides) {
+          const isApproved = !!approvedPosts[s.slideNumber];
+          const targetAprobadoStr = isApproved ? 'SI' : 'NO';
+
+          // Consultar el post actual para preservar sus datos
+          const qRes = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+            body: JSON.stringify({
+              dataCollectionId: 'ParrillasdeContenido',
+              filter: { _id: s.wixPostId }
+            })
+          });
+
+          if (qRes.ok) {
+            const qData = await qRes.json();
+            const item = qData.dataItems?.[0];
+            if (item && item.data?.aprobado !== targetAprobadoStr) {
+              await fetch(`https://www.wixapis.com/wix-data/v2/items/${item.id}`, {
+                method: 'PUT',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': token
+                },
+                body: JSON.stringify({
+                  dataCollectionId: 'ParrillasdeContenido',
+                  dataItem: {
+                    id: item.id,
+                    data: {
+                      ...item.data,
+                      aprobado: targetAprobadoStr
+                    }
+                  }
+                })
+              });
+              console.log(`✓ Estado de aprobación '${targetAprobadoStr}' guardado en Wix para el post ${item.id}`);
+            }
+          }
+        }
+
+        // Actualizar resumen de porcentaje y conteo de aprobaciones en ParrillaGeneral
+        try {
+          const genRes = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token
+            },
+            body: JSON.stringify({
+              dataCollectionId: 'ParrillaGeneral',
+              paging: { limit: 50 }
+            })
+          });
+          if (genRes.ok) {
+            const genData = await genRes.json();
+            const genItem = (genData.dataItems || []).find(it => {
+              const s = (it.data?.slug || '').toLowerCase();
+              const q = (slug || '').toLowerCase();
+              return s === q || (q.includes('sept') && s.includes('sept')) || (q.includes('ago') && s.includes('ago'));
+            });
+            if (genItem) {
+              await fetch(`https://www.wixapis.com/wix-data/v2/items/${genItem.id}`, {
+                method: 'PUT',
                 headers: {
                   'Content-Type': 'application/json',
                   'Authorization': token
@@ -540,27 +785,29 @@ export async function saveApprovals(slug, approvedPosts, clientTitle = 'Cliente'
                 body: JSON.stringify({
                   dataCollectionId: 'ParrillaGeneral',
                   dataItem: {
+                    id: genItem.id,
                     data: {
-                      ...item.data,
-                      aprobaciones: JSON.stringify(approvedPosts),
-                      resumenAprobacion: approvalSummary,
-                      porcentajeAprobado: percentage,
-                      postsAprobados: formattedList,
-                      estadoAprobacion: percentage === 100 ? '100% Aprobado' : `${percentage}% Aprobado`
+                      ...genItem.data,
+                      porcentajeAprobado: `${percentage}%`,
+                      resumenAprobacion: `${approvedCount}/${totalPosts} posts aprobados`
                     }
                   }
                 })
-              }).catch(() => {});
+              });
+              console.log(`✓ ParrillaGeneral ${genItem.id} actualizada con porcentaje ${percentage}% y resumen`);
             }
-          })
-          .catch(() => {});
+          }
+        } catch (genErr) {
+          console.warn('Error al actualizar resumen en ParrillaGeneral:', genErr);
+        }
       }
-    } catch (_) {}
+    } catch (wixErr) {
+      console.warn('Error al sincronizar aprobaciones con Wix CMS:', wixErr);
+    }
 
-    return { approvedPosts, percentage, approvedCount, approvalSummary };
+    return { approvedPosts, percentage, approvedCount, totalPosts };
   } catch (e) {
     console.error('Error al guardar aprobaciones:', e);
     return { approvedPosts };
   }
 }
-

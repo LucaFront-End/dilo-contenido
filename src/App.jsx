@@ -70,7 +70,7 @@ export default function App() {
     );
 
     // Guardar y sincronizar con Wix CMS
-    await saveApprovals(clientData.slug || currentSlug, updated, clientData.title);
+    await saveApprovals(clientData?.slug || currentSlug, updated, clientData?.title, clientData?.slides);
   };
   const [showPortalHome, setShowPortalHome] = useState(() => {
     let path = window.location.pathname.replace(/^\/|\/$/g, '');
@@ -126,9 +126,18 @@ export default function App() {
         syncBrowserUrl(data.slug || slugToLoad);
       }
 
-      // Load comments for this specific client slug
-      const loadedComments = getComments(data.slug || slugToLoad);
-      setComments(loadedComments);
+      // Load comments for this specific client slug (merging Wix CMS + local)
+      const localComments = getComments(data.slug || slugToLoad);
+      const wixComments = data.initialComments || [];
+      const commentMap = new Map();
+      wixComments.forEach(c => commentMap.set(c.id || `${c.slideNumber}_${c.text}`, c));
+      localComments.forEach(c => commentMap.set(c.id || `${c.slideNumber}_${c.text}`, c));
+      setComments(Array.from(commentMap.values()));
+
+      // Load approvals for this specific client slug (merging Wix CMS + local)
+      const localApprovals = getApprovals(data.slug || slugToLoad);
+      const mergedApprovals = { ...(data.initialApprovals || {}), ...localApprovals };
+      setApprovedPosts(mergedApprovals);
 
       // Check session storage for existing unlocked state
       const sessionKey = `dilo_unlocked_${data.slug || slugToLoad}`;

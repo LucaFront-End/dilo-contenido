@@ -46,9 +46,11 @@ export default function FeedGridView({
   const [cardCarouselIdx, setCardCarouselIdx] = useState({});
   const [expandedCopySlideId, setExpandedCopySlideId] = useState(null);
 
-  // Filter posts (ignore cover, strategy, hashtags, contact for feed view or display them optionally)
-  const contentSlides = slides.filter((s) => s.pageNumber >= 4 && s.pageNumber <= 28);
-  const totalContentPosts = contentSlides.length || 25;
+  // Filter posts (all dynamic post slides from Wix CMS)
+  const contentSlides = slides.filter(
+    (s) => s.wixPostId || (!['COVER', 'FEED', 'ESTRATEGIA', 'HASTAGS', 'HASHTAGS', 'CONTACT', 'CONTACTO'].includes((s.type || '').toUpperCase()))
+  );
+  const totalContentPosts = contentSlides.length;
   const approvedCount = contentSlides.filter((s) => !!approvedPosts[s.pageNumber]).length;
   const approvalPercent = totalContentPosts > 0 ? Math.round((approvedCount / totalContentPosts) * 100) : 0;
 

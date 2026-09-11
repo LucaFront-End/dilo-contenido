@@ -26,11 +26,14 @@ export default function SlideDeck({
   const totalSlides = slides.length;
   const currentSlide = slides[currentSlideIndex];
 
-  // Calculate approval percentage across all content posts (slides 4 to 28)
-  const contentSlides = slides.filter((s) => s.pageNumber >= 4 && s.pageNumber <= 28);
-  const totalContentPosts = contentSlides.length || 25;
+  // Calculate approval percentage across all actual content posts dynamically
+  const nonContentSlideTypes = ['COVER', 'FEED', 'ESTRATEGIA', 'HASTAGS', 'HASHTAGS', 'CONTACT', 'CONTACTO'];
+  const contentSlides = slides.filter(
+    (s) => s.wixPostId || (!nonContentSlideTypes.includes((s.type || '').toUpperCase()) && s.pageNumber >= 4)
+  );
+  const totalContentPosts = contentSlides.length > 0 ? contentSlides.length : 1;
   const approvedCount = contentSlides.filter((s) => !!approvedPosts[s.pageNumber]).length;
-  const approvalPercent = totalContentPosts > 0 ? Math.round((approvedCount / totalContentPosts) * 100) : 0;
+  const approvalPercent = Math.round((approvedCount / totalContentPosts) * 100);
 
   const goToSlide = (index) => {
     if (index >= 0 && index < totalSlides) {
@@ -58,7 +61,6 @@ export default function SlideDeck({
         prevSlide();
       } else if (e.key === 'Escape') {
         setIsDrawerOpen(false);
-        setIsGlobalCommentsOpen(false);
       }
     };
 
@@ -87,13 +89,14 @@ export default function SlideDeck({
     }
   };
 
-  // Render proper slide component
+  // Render proper slide component dynamically
   const renderSlideContent = () => {
     if (!currentSlide) return null;
 
     const pageNum = currentSlide.pageNumber;
+    const slideType = (currentSlide.type || '').toUpperCase();
 
-    if (pageNum === 1) {
+    if (slideType === 'COVER' || pageNum === 1) {
       return (
         <CoverSlide
           clientTitle={clientData.title}
@@ -104,7 +107,7 @@ export default function SlideDeck({
       );
     }
 
-    if (pageNum === 2) {
+    if (slideType === 'FEED' || pageNum === 2) {
       return (
         <VisualContentSlide
           clientTitle={clientData.title}
@@ -115,7 +118,7 @@ export default function SlideDeck({
       );
     }
 
-    if (pageNum === 3) {
+    if (slideType === 'ESTRATEGIA' || pageNum === 3) {
       return (
         <StrategySlide
           estrategia={clientData.estrategia}
@@ -125,15 +128,15 @@ export default function SlideDeck({
       );
     }
 
-    if (pageNum === 29) {
+    if (slideType === 'HASTAGS' || slideType === 'HASHTAGS') {
       return <HashtagsSlide hashtags={clientData.hashtags} onCopySuccess={onCopyToast} />;
     }
 
-    if (pageNum === 30) {
+    if (slideType === 'CONTACT' || slideType === 'CONTACTO') {
       return <ContactSlide />;
     }
 
-    // Standard Post slides (4 through 28)
+    // Dynamic Post slides
     return (
       <PostSlide
         slide={currentSlide}
@@ -315,7 +318,7 @@ export default function SlideDeck({
                     }`}
                   >
                     <img
-                      src={s.image}
+                      src={s.image || s.images?.[0] || s.postImages?.[0] || s.mockup || clientData?.logo || '/assets/logo/dilo-logo-black.png'}
                       alt={`Thumb ${idx + 1}`}
                       className="w-full h-full object-cover block"
                     />
