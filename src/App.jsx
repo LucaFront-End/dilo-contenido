@@ -9,19 +9,28 @@ import { getParrillaBySlug, getComments, saveComment, deleteComment } from './se
 import { fallbackCuauhtliData } from './data/cuauhtliFallbackData';
 import './styles/presentation.css';
 
-export default function App() {
-  // Determine slug from URL or fallback
-  const getInitialSlug = () => {
-    const path = window.location.pathname.replace(/^\/|\/$/g, '');
-    const searchParams = new URLSearchParams(window.location.search);
-    const querySlug = searchParams.get('slug');
-    if (querySlug && querySlug !== 'portal') return querySlug;
-    if (path && path !== '' && path !== 'portal') return path;
-    // Default demo slug: Sistemas Cuauhtli
-    return 'sisitemas-cuauhtli-septiembre-2026';
-  };
+// Determine slug from URL or fallback
+const extractSlugFromPath = () => {
+  let path = window.location.pathname.replace(/^\/|\/$/g, '');
+  
+  // Handle /parrillas/:slug format
+  if (path.startsWith('parrillas/')) {
+    path = path.replace(/^parrillas\//, '');
+  } else if (path === 'parrillas') {
+    path = '';
+  }
 
-  const [currentSlug, setCurrentSlug] = useState(getInitialSlug);
+  const searchParams = new URLSearchParams(window.location.search);
+  const querySlug = searchParams.get('slug');
+  if (querySlug && querySlug !== 'portal') return querySlug;
+  if (path && path !== '' && path !== 'portal') return path;
+  
+  // Default demo slug: Sistemas Cuauhtli
+  return 'sisitemas-cuauhtli-septiembre-2026';
+};
+
+export default function App() {
+  const [currentSlug, setCurrentSlug] = useState(extractSlugFromPath);
   const [clientData, setClientData] = useState(fallbackCuauhtliData);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,15 +40,45 @@ export default function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [toast, setToast] = useState(null);
   const [showPortalHome, setShowPortalHome] = useState(() => {
-    const path = window.location.pathname.replace(/^\/|\/$/g, '');
+    let path = window.location.pathname.replace(/^\/|\/$/g, '');
     const searchParams = new URLSearchParams(window.location.search);
-    return path === 'portal' || searchParams.get('portal') === 'true';
+    return path === 'portal' || path === 'parrillas/portal' || searchParams.get('portal') === 'true';
   });
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
+
+  // Sync browser URL bar to /parrillas/:slug when loading a grid
+  const syncBrowserUrl = (slug) => {
+    if (!slug) return;
+    const targetPath = `/parrillas/${slug}`;
+    if (window.location.pathname !== targetPath) {
+      window.history.replaceState({}, '', targetPath);
+    }
+  };
+
+  // Handle browser back/forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      let path = window.location.pathname.replace(/^\/|\/$/g, '');
+      if (path === 'portal' || path === 'parrillas/portal') {
+        setShowPortalHome(true);
+      } else {
+        if (path.startsWith('parrillas/')) {
+          path = path.replace(/^parrillas\//, '');
+        }
+        if (path && path !== '') {
+          setCurrentSlug(path);
+          setShowPortalHome(false);
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Load client data from Wix Headless or fallback
   const loadGridData = async (slugToLoad) => {
@@ -48,6 +87,11 @@ export default function App() {
       const data = await getParrillaBySlug(slugToLoad);
       setClientData(data);
       setIsWixLive(true);
+
+      // Keep browser address bar clean at /parrillas/:slug
+      if (!showPortalHome) {
+        syncBrowserUrl(data.slug || slugToLoad);
+      }
 
       // Load comments for this specific client slug
       const loadedComments = getComments(data.slug || slugToLoad);
@@ -66,6 +110,9 @@ export default function App() {
       console.warn('Usando respaldo local para la parrilla:', err);
       setClientData(fallbackCuauhtliData);
       setComments(getComments(slugToLoad));
+      if (!showPortalHome) {
+        syncBrowserUrl(fallbackCuauhtliData.slug || slugToLoad);
+      }
     } finally {
       setLoading(false);
     }
@@ -118,9 +165,12 @@ export default function App() {
 
   // Share link
   const handleShare = () => {
-    const url = window.location.href;
-    navigator.clipboard.writeText(url).then(() => {
-      showToast('Enlace de la parrilla copiado al portapapeles.');
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const baseUrl = isLocal ? window.location.origin : 'https://www.dilodigitalmx.com.mx';
+    const slug = clientData.slug || currentSlug;
+    const canonicalUrl = `${baseUrl}/parrillas/${slug}`;
+    navigator.clipboard.writeText(canonicalUrl).then(() => {
+      showToast(`Enlace copiado: ${canonicalUrl}`);
     });
   };
 
@@ -134,8 +184,14 @@ export default function App() {
 
   // Handle choosing a client slug
   const handleSelectSlug = (slug) => {
-    window.history.pushState({}, '', `/${slug}`);
-    setCurrentSlug(slug);
+    let cleanSlug = slug;
+    if (cleanSlug.includes('/parrillas/')) {
+      cleanSlug = cleanSlug.split('/parrillas/')[1];
+    }
+    cleanSlug = cleanSlug.replace(/^\/|\/$/g, '');
+
+    window.history.pushState({}, '', `/parrillas/${cleanSlug}`);
+    setCurrentSlug(cleanSlug);
     setShowPortalHome(false);
   };
 
@@ -180,7 +236,10 @@ export default function App() {
         onShare={handleShare}
         isWixLive={isWixLive}
         onRefreshWix={handleRefreshWix}
-        onOpenPortal={() => setShowPortalHome(true)}
+        onOpenPortal={() => {
+          window.history.pushState({}, '', '/parrillas/portal');
+          setShowPortalHome(true);
+        }}
       />
 
       {/* Password Gate Overlay if locked */}
