@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Calendar as CalendarIcon,
   CheckCircle2,
   Clock,
   Play,
-  Layers,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Layers,
+  ChevronRight
 } from 'lucide-react';
 
 const WEEKDAYS = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
@@ -22,6 +23,8 @@ export default function CalendarSlide({
   approvedPosts = {},
   onSelectSlide
 }) {
+  const [hoveredDay, setHoveredDay] = useState(null);
+
   const allSlides = clientData?.slides || [];
   const contentPosts = allSlides.filter((s) => s.wixPostId);
 
@@ -31,7 +34,7 @@ export default function CalendarSlide({
 
   // Calcular índice del mes (0-11)
   const mLower = monthName.toLowerCase();
-  let monthIdx = 8; // Septiembre por defecto (0-indexed)
+  let monthIdx = 8; // Septiembre por defecto
   MONTH_NAMES_ES.forEach((name, idx) => {
     if (mLower.includes(name.toLowerCase().slice(0, 3))) {
       monthIdx = idx;
@@ -41,8 +44,7 @@ export default function CalendarSlide({
   // Días en el mes
   const daysInMonth = new Date(year, monthIdx + 1, 0).getDate();
   
-  // Primer día de la semana (0 = Domingo, 1 = Lunes, ..., 6 = Sábado)
-  // Adaptado a Lunes como 0, Domingo como 6
+  // Primer día de la semana (Lunes como 0, Domingo como 6)
   const firstDaySundayBased = new Date(year, monthIdx, 1).getDay();
   const firstDayMondayBased = firstDaySundayBased === 0 ? 6 : firstDaySundayBased - 1;
 
@@ -69,50 +71,48 @@ export default function CalendarSlide({
   const approvedCount = contentPosts.filter((p) => !!approvedPosts[p.pageNumber]).length;
   const approvalPercent = totalPosts > 0 ? Math.round((approvedCount / totalPosts) * 100) : 0;
 
-  // Total de celdas en la cuadrícula (semanas completas)
-  const totalSlots = Math.ceil((firstDayMondayBased + daysInMonth) / 7) * 7;
+  // Número exacto de semanas para el grid (5 o 6)
+  const numRows = Math.ceil((firstDayMondayBased + daysInMonth) / 7);
+  const totalSlots = numRows * 7;
 
   return (
     <div
-      className="w-full max-w-[1500px] h-full min-h-[620px] max-h-[88vh] bg-white rounded-3xl border border-zinc-200/90 shadow-2xl relative overflow-hidden flex flex-col p-5 sm:p-7 md:p-8 select-none"
+      className="w-full max-w-[1500px] h-full bg-white rounded-3xl border border-zinc-200/90 shadow-2xl relative overflow-hidden flex flex-col p-4 sm:p-5 md:p-6 select-none"
       style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
     >
       {/* Motivo gráfico esquina superior izquierda */}
       <img
         src="/assets/graphics/left-swirl.png"
         alt=""
-        className="absolute top-0 left-0 w-28 md:w-36 lg:w-44 opacity-10 pointer-events-none z-0 select-none"
+        className="absolute top-0 left-0 w-24 md:w-32 lg:w-40 opacity-10 pointer-events-none z-0 select-none"
       />
 
-      {/* Header de la Lámina */}
-      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-100">
+      {/* Header Compacto de la Lámina */}
+      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 pb-2.5 border-b border-zinc-100 shrink-0">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[11px] font-black uppercase tracking-wider flex items-center gap-1">
+            <span className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
               <CalendarIcon className="w-3 h-3 text-orange-600" />
               Cronograma de Publicación
             </span>
-            <span className="text-xs text-zinc-400 font-mono">
+            <span className="text-[11px] text-zinc-400 font-mono">
               {clientData?.title || 'Dilo Digital'}
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-zinc-900 font-space tracking-tight mt-1">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-black text-zinc-900 font-space tracking-tight mt-0.5">
             {MONTH_NAMES_ES[monthIdx].toUpperCase()} {year}
           </h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Calendario de distribución estratégica de publicaciones programadas para el mes.
-          </p>
         </div>
 
         {/* Resumen de aprobación y conteo */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="px-3.5 py-1.5 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-bold flex items-center gap-2">
+          <div className="px-3 py-1 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-bold flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-zinc-500" />
             <span>{totalPosts} Posts Programados</span>
           </div>
 
           <div
-            className={`px-3.5 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-2 ${
+            className={`px-3 py-1 rounded-xl border text-xs font-bold flex items-center gap-1.5 ${
               approvalPercent === 100
                 ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm'
                 : approvalPercent > 0
@@ -132,14 +132,14 @@ export default function CalendarSlide({
         </div>
       </div>
 
-      {/* Grilla del Calendario */}
-      <div className="relative z-10 flex-1 flex flex-col min-h-0">
+      {/* Grilla del Calendario (100% visible sin scroll vertical) */}
+      <div className="relative z-10 flex-1 flex flex-col min-h-0 overflow-visible">
         {/* Cabecera de días de la semana */}
-        <div className="grid grid-cols-7 gap-1.5 sm:gap-2 mb-1.5 text-center">
+        <div className="grid grid-cols-7 gap-1 sm:gap-1.5 mb-1 text-center shrink-0">
           {WEEKDAYS.map((wd, i) => (
             <div
               key={wd}
-              className={`py-1 text-[11px] font-black tracking-wider rounded-lg ${
+              className={`py-1 text-[10px] sm:text-[11px] font-black tracking-wider rounded-lg ${
                 i >= 5 ? 'text-zinc-400 bg-zinc-50/60' : 'text-zinc-600 bg-zinc-100/80 font-mono'
               }`}
             >
@@ -148,20 +148,26 @@ export default function CalendarSlide({
           ))}
         </div>
 
-        {/* Celdas de días del mes */}
-        <div className="grid grid-cols-7 gap-1.5 sm:gap-2 flex-1 min-h-0 overflow-y-auto pr-0.5">
+        {/* Celdas de días del mes con altura proporcional exacta (sin scroll) */}
+        <div
+          className="grid grid-cols-7 gap-1 sm:gap-1.5 flex-1 min-h-0"
+          style={{ gridTemplateRows: `repeat(${numRows}, minmax(0, 1fr))` }}
+        >
           {Array.from({ length: totalSlots }).map((_, slotIdx) => {
             const dayNumber = slotIdx - firstDayMondayBased + 1;
             const isCurrentMonth = dayNumber >= 1 && dayNumber <= daysInMonth;
             const isWeekend = slotIdx % 7 === 5 || slotIdx % 7 === 6;
             const dayPosts = isCurrentMonth ? postsByDay[dayNumber] || [] : [];
             const hasPosts = dayPosts.length > 0;
+            const isHovered = hoveredDay === dayNumber;
+            const rowIndex = Math.floor(slotIdx / 7);
+            const isTopHalf = rowIndex <= 2;
 
             if (!isCurrentMonth) {
               return (
                 <div
                   key={`empty-${slotIdx}`}
-                  className="bg-zinc-50/40 rounded-xl border border-dashed border-zinc-200/50 p-1 opacity-40 min-h-[60px]"
+                  className="bg-zinc-50/40 rounded-xl border border-dashed border-zinc-200/50 opacity-40"
                 />
               );
             }
@@ -169,18 +175,20 @@ export default function CalendarSlide({
             return (
               <div
                 key={`day-${dayNumber}`}
-                className={`rounded-xl border transition-all flex flex-col p-1.5 sm:p-2 min-h-[65px] sm:min-h-[75px] relative group ${
+                onMouseEnter={() => hasPosts && setHoveredDay(dayNumber)}
+                onMouseLeave={() => setHoveredDay(null)}
+                className={`rounded-xl border transition-all flex flex-col p-1 sm:p-1.5 relative overflow-visible ${
                   hasPosts
-                    ? 'bg-orange-50/30 border-orange-300/80 hover:border-orange-500 hover:shadow-md shadow-2xs'
+                    ? 'bg-orange-50/35 border-orange-300/90 hover:border-orange-500 hover:shadow-md shadow-2xs'
                     : isWeekend
                     ? 'bg-zinc-50/50 border-zinc-200/60'
                     : 'bg-white border-zinc-200/80 hover:border-zinc-300'
                 }`}
               >
-                {/* Número del día */}
-                <div className="flex items-center justify-between mb-1">
+                {/* Número del día y badge */}
+                <div className="flex items-center justify-between shrink-0 mb-0.5">
                   <span
-                    className={`text-xs font-mono font-bold ${
+                    className={`text-[11px] sm:text-xs font-mono font-bold leading-none ${
                       hasPosts
                         ? 'text-orange-600 font-black'
                         : isWeekend
@@ -192,13 +200,21 @@ export default function CalendarSlide({
                   </span>
 
                   {hasPosts && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+                    <span className="flex items-center gap-1">
+                      {dayPosts.length > 1 && (
+                        <span className="text-[9px] font-black px-1 py-0.2 rounded-full bg-orange-500 text-white leading-none">
+                          {dayPosts.length}
+                        </span>
+                      )}
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+                    </span>
                   )}
                 </div>
 
-                {/* Posts en este día */}
-                <div className="flex-1 flex flex-col gap-1 overflow-y-auto scrollbar-none">
-                  {dayPosts.map((post) => {
+                {/* Contenido del Día (Sin scroll interno) */}
+                <div className="flex-1 min-h-0 flex flex-col justify-center gap-1">
+                  {dayPosts.length === 1 && (() => {
+                    const post = dayPosts[0];
                     const isApproved = !!approvedPosts[post.pageNumber];
                     const thumbImg =
                       post.posterUrl ||
@@ -208,75 +224,196 @@ export default function CalendarSlide({
 
                     return (
                       <div
-                        key={post.id}
-                        onClick={() => {
-                          if (onSelectSlide) {
-                            onSelectSlide(post.pageNumber - 1);
-                          }
-                        }}
-                        className={`p-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 select-none ${
+                        onClick={() => onSelectSlide && onSelectSlide(post.pageNumber - 1)}
+                        className={`w-full h-full max-h-[46px] p-0.5 sm:p-1 rounded-lg border transition-all cursor-pointer flex items-center gap-1 sm:gap-1.5 overflow-hidden ${
                           isApproved
-                            ? 'bg-white/90 border-emerald-300 hover:border-emerald-500 hover:bg-emerald-50/50'
-                            : 'bg-white/90 border-orange-200 hover:border-orange-400 hover:bg-orange-50/60'
+                            ? 'bg-white border-emerald-300 hover:border-emerald-500 hover:bg-emerald-50/60'
+                            : 'bg-white border-orange-200 hover:border-orange-400 hover:bg-orange-50/70'
                         }`}
-                        title={`Lámina #${post.pageNumber}: ${post.rawType || post.type}. Haz clic para saltar al post.`}
+                        title={`Lámina #${post.pageNumber}: ${post.rawType || post.type}. Clic para ir al post.`}
                       >
-                        {/* Miniatura cuadrada */}
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md overflow-hidden bg-zinc-900 shrink-0 relative">
-                          <img
-                            src={thumbImg}
-                            alt=""
-                            className="w-full h-full object-cover"
-                          />
+                        <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-md overflow-hidden bg-zinc-900 shrink-0 relative">
+                          <img src={thumbImg} alt="" className="w-full h-full object-cover" />
                           {post.isVideo && (
                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                              <Play className="w-2.5 h-2.5 text-white fill-white" />
+                              <Play className="w-2 h-2 text-white fill-white" />
                             </div>
                           )}
                         </div>
 
-                        {/* Datos del Post */}
-                        <div className="flex-1 min-w-0 flex flex-col">
-                          <div className="flex items-center justify-between gap-1">
+                        <div className="flex-1 min-w-0 flex flex-col justify-center">
+                          <div className="flex items-center justify-between gap-0.5 leading-none">
                             <span className="text-[10px] font-black text-zinc-900 truncate">
                               #{post.pageNumber}
                             </span>
                             {isApproved ? (
-                              <span className="text-[9px] font-bold text-emerald-700 bg-emerald-100/80 px-1 py-0.1 rounded">
+                              <span className="text-[8px] font-bold text-emerald-700 bg-emerald-100/80 px-1 py-0.2 rounded">
                                 ✓
                               </span>
                             ) : (
-                              <span className="text-[9px] font-semibold text-zinc-400">
+                              <span className="text-[8px] font-semibold text-zinc-400">
                                 Pend.
                               </span>
                             )}
                           </div>
-                          <span className="text-[9px] font-semibold text-orange-600 truncate uppercase">
+                          <span className="text-[8px] sm:text-[9px] font-semibold text-orange-600 truncate uppercase mt-0.5">
                             {post.rawType || post.type}
                           </span>
                         </div>
                       </div>
                     );
-                  })}
+                  })()}
+
+                  {dayPosts.length >= 2 && (
+                    <div
+                      onClick={() => onSelectSlide && onSelectSlide(dayPosts[0].pageNumber - 1)}
+                      className="w-full h-full max-h-[46px] p-1 rounded-lg border border-orange-200 bg-white/95 hover:border-orange-400 hover:bg-orange-50/60 transition-all cursor-pointer flex items-center justify-between gap-1 overflow-hidden"
+                      title={`${dayPosts.length} publicaciones programadas. Pasa el cursor para ver todas o haz clic para ir.`}
+                    >
+                      {/* Avatar Stack de miniaturas solapadas */}
+                      <div className="flex items-center -space-x-2 shrink-0">
+                        {dayPosts.slice(0, 3).map((p, pIdx) => {
+                          const thumb =
+                            p.posterUrl ||
+                            p.images?.[0] ||
+                            p.postImages?.[0] ||
+                            '/assets/logo/dilo-logo-black.png';
+                          return (
+                            <div
+                              key={p.id || pIdx}
+                              className="w-6 h-6 rounded-md overflow-hidden bg-zinc-900 ring-2 ring-white relative shadow-xs"
+                            >
+                              <img src={thumb} alt="" className="w-full h-full object-cover" />
+                              {p.isVideo && (
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                  <Play className="w-1.5 h-1.5 text-white fill-white" />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="flex-1 min-w-0 flex flex-col items-end leading-none">
+                        <span className="text-[10px] font-black text-orange-600 truncate">
+                          {dayPosts.length} posts
+                        </span>
+                        <span className="text-[8px] text-zinc-400 font-bold mt-0.5">
+                          Ver todos ↗
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
+
+                {/* Popover flotante en HOVER para ver múltiples publicaciones sin scroll */}
+                {hasPosts && isHovered && (
+                  <div
+                    onMouseEnter={() => setHoveredDay(dayNumber)}
+                    onMouseLeave={() => setHoveredDay(null)}
+                    className={`absolute z-50 left-1/2 -translate-x-1/2 w-64 sm:w-72 bg-white/98 backdrop-blur-md rounded-2xl shadow-2xl border border-orange-300 p-2.5 flex flex-col gap-2 pointer-events-auto transition-all animate-in fade-in zoom-in-95 duration-150 ${
+                      isTopHalf ? 'top-[calc(100%+4px)]' : 'bottom-[calc(100%+4px)]'
+                    }`}
+                  >
+                    {/* Encabezado del Popover */}
+                    <div className="flex items-center justify-between pb-1.5 border-b border-zinc-100">
+                      <div className="flex items-center gap-1.5">
+                        <CalendarIcon className="w-3.5 h-3.5 text-orange-600" />
+                        <span className="text-xs font-black text-zinc-900 font-space">
+                          {dayNumber} de {MONTH_NAMES_ES[monthIdx]}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-orange-100 text-orange-700">
+                        {dayPosts.length} {dayPosts.length === 1 ? 'post' : 'posts'}
+                      </span>
+                    </div>
+
+                    {/* Lista completa de publicaciones para ese día */}
+                    <div className="flex flex-col gap-1.5 max-h-60 overflow-y-auto pr-0.5 scrollbar-none">
+                      {dayPosts.map((post) => {
+                        const isApproved = !!approvedPosts[post.pageNumber];
+                        const thumbImg =
+                          post.posterUrl ||
+                          post.images?.[0] ||
+                          post.postImages?.[0] ||
+                          '/assets/logo/dilo-logo-black.png';
+
+                        return (
+                          <div
+                            key={post.id}
+                            onClick={() => {
+                              setHoveredDay(null);
+                              if (onSelectSlide) {
+                                onSelectSlide(post.pageNumber - 1);
+                              }
+                            }}
+                            className={`p-2 rounded-xl border transition-all cursor-pointer flex items-center gap-2 hover:scale-[1.01] ${
+                              isApproved
+                                ? 'bg-emerald-50/40 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-50/80'
+                                : 'bg-orange-50/40 border-orange-200 hover:border-orange-400 hover:bg-orange-50/80'
+                            }`}
+                          >
+                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-zinc-900 shrink-0 relative shadow-sm">
+                              <img src={thumbImg} alt="" className="w-full h-full object-cover" />
+                              {post.isVideo && (
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                  <Play className="w-3 h-3 text-white fill-white" />
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="flex-1 min-w-0 flex flex-col">
+                              <div className="flex items-center justify-between gap-1">
+                                <span className="text-xs font-black text-zinc-900 truncate">
+                                  Lámina #{post.pageNumber}
+                                </span>
+                                {isApproved ? (
+                                  <span className="text-[9px] font-black text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded-full">
+                                    ✓ Aprobado
+                                  </span>
+                                ) : (
+                                  <span className="text-[9px] font-semibold text-zinc-500 bg-zinc-100 px-1.5 py-0.2 rounded-full">
+                                    Pendiente
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-[10px] font-semibold text-orange-600 truncate uppercase mt-0.5">
+                                {post.rawType || post.type}
+                              </span>
+                              {post.copy && (
+                                <p className="text-[10px] text-zinc-500 line-clamp-1 mt-0.5">
+                                  {post.copy}
+                                </p>
+                              )}
+                            </div>
+
+                            <ChevronRight className="w-4 h-4 text-zinc-400 shrink-0" />
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="text-[10px] text-center text-zinc-400 font-medium pt-0.5">
+                      Haz clic en cualquier post para abrir su lámina
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Pie de Lámina */}
-      <div className="relative z-10 pt-3 border-t border-zinc-100 flex items-center justify-between text-xs text-zinc-400 mt-2">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-orange-500 inline-block" />
+      {/* Pie de Lámina Compacto */}
+      <div className="relative z-10 pt-2 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-400 shrink-0 mt-1">
+        <div className="flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-orange-500 inline-block" />
           <span>
-            Haz clic sobre cualquier publicación del calendario para saltar directamente a su lámina.
+            Pasa el cursor sobre los días para ver detalles completos o haz clic para saltar a la lámina.
           </span>
         </div>
-        <div className="flex items-center gap-3 font-mono text-[11px] text-zinc-500">
-          <span>
-            Diapositiva #{slide?.pageNumber || 'Final'} · Dilo Digital
-          </span>
+        <div className="font-mono text-zinc-500">
+          Diapositiva #{slide?.pageNumber || 'Final'} · Dilo Digital
         </div>
       </div>
     </div>
