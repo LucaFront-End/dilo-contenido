@@ -37,6 +37,7 @@ export default function App() {
   const [isWixLive, setIsWixLive] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [viewMode, setViewMode] = useState('slides'); // 'slides' | 'grid'
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [toast, setToast] = useState(null);
   const [brandFilter, setBrandFilter] = useState(null);
@@ -319,6 +320,7 @@ export default function App() {
             onDeleteComment={handleDeleteComment}
             approvedPosts={approvedPosts}
             onToggleApprove={handleToggleApprove}
+            initialSlideIndex={activeSlideIndex}
           />
         ) : (
           <FeedGridView
@@ -331,6 +333,7 @@ export default function App() {
             approvedPosts={approvedPosts}
             onToggleApprove={handleToggleApprove}
             onSelectSlide={(slideIdx) => {
+              setActiveSlideIndex(slideIdx);
               setViewMode('slides');
             }}
           />

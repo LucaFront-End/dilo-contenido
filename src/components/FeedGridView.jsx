@@ -13,17 +13,11 @@ import {
 import confetti from 'canvas-confetti';
 import CommentsModal from './CommentsModal';
 
-function formatTypeLabel(raw) {
-  if (!raw) return 'Post Simple';
-  const upper = raw.toUpperCase().trim();
-  if (upper === 'POST' || upper === 'POST SIMPLE') return 'Posts Simples';
-  if (upper === 'POST DE VALOR' || upper === 'VALOR') return 'Posts de Valor';
-  if (upper === 'VIDEO' || upper === 'REEL' || upper.includes('VIDEO') || upper.includes('REEL')) return 'Videos / Reels';
-  if (upper === 'CARRUSEL' || upper === 'CAROUSEL') return 'Carruseles';
-  if (upper === 'HISTORIA' || upper === 'STORY' || upper === 'STORIES') return 'Historias';
-  if (upper === 'EDUCATIVO') return 'Educativos';
-  if (upper === 'INTERACTIVO') return 'Interactivos';
-  return raw
+function formatTypeLabel(raw, rawType) {
+  if (rawType && rawType.trim()) return rawType.trim();
+  if (!raw) return 'Post';
+  const clean = raw.trim();
+  return clean
     .toLowerCase()
     .split(' ')
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
@@ -54,16 +48,16 @@ export default function FeedGridView({
   const approvedCount = contentSlides.filter((s) => !!approvedPosts[s.pageNumber]).length;
   const approvalPercent = totalContentPosts > 0 ? Math.round((approvedCount / totalContentPosts) * 100) : 0;
 
-  // Dynamic categories/types from content slides (supports up to 6+ content types comfortably)
+  // Dynamic categories/types directly from Wix CMS content slides
   const availableTypes = React.useMemo(() => {
     const counts = {};
     contentSlides.forEach((s) => {
-      const raw = (s.type || 'POST').trim();
-      const normKey = raw.toUpperCase();
+      const displayLabel = (s.rawType || s.type || 'Post').trim();
+      const normKey = displayLabel.toUpperCase();
       if (!counts[normKey]) {
         counts[normKey] = {
           key: normKey,
-          label: formatTypeLabel(raw),
+          label: displayLabel,
           count: 0
         };
       }
@@ -74,8 +68,8 @@ export default function FeedGridView({
 
   const filtered = contentSlides.filter((s) => {
     if (activeFilter === 'ALL') return true;
-    const itemType = (s.type || 'POST').trim().toUpperCase();
-    return itemType === activeFilter.toUpperCase();
+    const itemLabel = (s.rawType || s.type || 'POST').trim().toUpperCase();
+    return itemLabel === activeFilter.toUpperCase();
   });
 
   const handleToggle = (pageNumber) => {
@@ -219,15 +213,14 @@ export default function FeedGridView({
               >
                 {isVideo ? (
                   <div className="relative w-full h-full flex items-center justify-center bg-zinc-950">
-                    <video
-                      src={slide.videoUrl || '/assets/video/sample_reel.mp4'}
-                      className="w-full h-full object-cover"
-                      muted
-                      playsInline
+                    <img
+                      src={slide.posterUrl || currentImg || '/assets/logo/dilo-logo-black.png'}
+                      alt={`Slide ${slide.pageNumber} video poster`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
                     />
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                      <div className="w-12 h-12 rounded-full bg-white/90 text-zinc-900 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                        <Play className="w-6 h-6 fill-zinc-900 translate-x-0.5" />
+                    <div className="absolute inset-0 bg-black/35 flex items-center justify-center">
+                      <div className="w-12 h-12 rounded-full bg-white/90 text-zinc-900 flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white transition-all">
+                        <Play className="w-5 h-5 fill-current translate-x-0.5" />
                       </div>
                     </div>
                   </div>
@@ -246,7 +239,7 @@ export default function FeedGridView({
                     #{slide.pageNumber}
                   </span>
                   <span className="px-2.5 py-1 bg-orange-600 text-white font-bold text-[10px] uppercase rounded-lg shadow-sm">
-                    {isVideo ? 'VIDEO' : isCarousel ? 'CARRUSEL' : slide.type}
+                    {slide.rawType || (isVideo ? 'VIDEO' : isCarousel ? 'CARRUSEL' : slide.type)}
                   </span>
                 </div>
 
@@ -328,7 +321,7 @@ export default function FeedGridView({
                   <div className="flex items-center justify-between text-xs text-zinc-400 mb-2">
                     <span>Publicación #{slide.pageNumber}</span>
                     <span className="font-semibold text-orange-600">
-                      {slide.category || 'Contenido'}
+                      {slide.rawType || slide.category || 'Contenido'}
                     </span>
                   </div>
 

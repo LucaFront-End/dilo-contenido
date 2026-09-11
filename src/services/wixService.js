@@ -1,4 +1,4 @@
-import { fallbackCuauhtliData } from '../data/cuauhtliFallbackData';
+import { fallbackCuauhtliData } from '../data/cuauhtliFallbackData.js';
 
 const WIX_CLIENT_ID = '2db3573e-2635-43b6-939b-8d52f78f8de9';
 let cachedToken = null;
@@ -57,10 +57,72 @@ export function resolveWixMediaUrl(wixMediaUri) {
   if (wixMediaUri.startsWith('wix:video://v1/')) {
     const parts = wixMediaUri.replace('wix:video://v1/', '').split('/');
     const fileId = parts[0];
-    return `https://video.wixstatic.com/video/${fileId}/mp4/file.mp4`;
+    return `https://video.wixstatic.com/video/${fileId}/480p/mp4/file.mp4`;
   }
 
   return wixMediaUri;
+}
+
+/**
+ * Resuelve un elemento de galería de Wix (video o imagen) con metadatos completos
+ */
+export function resolveWixMediaItem(item) {
+  if (!item) return { url: '', isVideo: false, posterUrl: '' };
+
+  if (typeof item === 'string') {
+    const isVid = item.includes('video') || item.endsWith('.mp4');
+    return {
+      url: resolveWixMediaUrl(item),
+      isVideo: isVid,
+      posterUrl: ''
+    };
+  }
+
+  const isVideo = item.type === 'video' || (item.src && item.src.startsWith('wix:video://v1/'));
+
+  if (isVideo) {
+    let videoUrl = '';
+    if (item.slug && (item.slug.startsWith('http://') || item.slug.startsWith('https://'))) {
+      videoUrl = item.slug;
+    } else if (item.src && item.src.startsWith('wix:video://v1/')) {
+      const parts = item.src.replace('wix:video://v1/', '').split('/');
+      const fileId = parts[0];
+      videoUrl = `https://video.wixstatic.com/video/${fileId}/480p/mp4/file.mp4`;
+    } else if (item.src) {
+      videoUrl = resolveWixMediaUrl(item.src);
+    }
+
+    let posterUrl = '';
+    if (item.settings?.posters?.[0]?.url) {
+      posterUrl = `https://static.wixstatic.com/media/${item.settings.posters[0].url}`;
+    } else if (item.src && item.src.includes('posterUri=')) {
+      const match = item.src.match(/posterUri=([^&#]+)/);
+      if (match && match[1]) {
+        posterUrl = `https://static.wixstatic.com/media/${match[1]}`;
+      }
+    }
+
+    return {
+      url: videoUrl,
+      isVideo: true,
+      posterUrl: posterUrl,
+      title: item.title || item.fileName || ''
+    };
+  }
+
+  let imageUrl = '';
+  if (item.src) {
+    imageUrl = resolveWixMediaUrl(item.src);
+  } else if (item.slug && (item.slug.startsWith('http://') || item.slug.startsWith('https://'))) {
+    imageUrl = item.slug;
+  }
+
+  return {
+    url: imageUrl,
+    isVideo: false,
+    posterUrl: '',
+    title: item.title || item.fileName || ''
+  };
 }
 
 /**
@@ -240,6 +302,7 @@ export async function getParrillaBySlug(slug) {
     const matchedGeneral = matchedGeneralItem.data || {};
     const brandTitle = (matchedGeneral.title || 'Sistemas Cuauhtli').trim();
     const monthName = (matchedGeneral.mes || 'Septiembre').trim();
+    const ano = matchedGeneral.ano || 2026;
 
     // Buscar si otra parrilla de la misma marca tiene logotipo guardado en Wix (ej. Agosto tiene logoDeLaMarca)
     const brandSisterItem = generalItems.find(it => {
@@ -283,20 +346,35 @@ export async function getParrillaBySlug(slug) {
 
           // Coincidencia de mes
           if (targetMes.includes('sept') || targetMes.includes('09')) {
-            return pMes.includes('sept') || pMes.includes('09');
+            if (!pMes.includes('sept') && !pMes.includes('09')) return false;
+          } else if (targetMes.includes('ago') || targetMes.includes('08')) {
+            if (!pMes.includes('ago') && !pMes.includes('08')) return false;
+          } else if (targetMes.includes('oct') || targetMes.includes('10')) {
+            if (!pMes.includes('oct') && !pMes.includes('10')) return false;
+          } else if (pMes !== targetMes) {
+            return false;
           }
-          if (targetMes.includes('ago') || targetMes.includes('08')) {
-            return pMes.includes('ago') || pMes.includes('08');
-          }
-          if (targetMes.includes('oct') || targetMes.includes('10')) {
-            return pMes.includes('oct') || pMes.includes('10');
-          }
-          return pMes === targetMes;
+
+          // Descartar registros vacíos sin imágenes, ni videos, ni copy
+          const hasMedia = Array.isArray(p.contenido) && p.contenido.length > 0;
+          const hasCopy = p.descripcin && extractTextFromWixDoc(p.descripcin).length > 0;
+          return hasMedia || hasCopy;
         })
         .sort((a, b) => {
-          const ordA = a.data?.orden != null ? Number(a.data.orden) : 999;
-          const ordB = b.data?.orden != null ? Number(b.data.orden) : 999;
-          if (ordA !== ordB) return ordA - ordB;
+          // Ordenamiento estrictamente dinámico según el campo 'orden' de Wix CMS
+          const rawA = a.data?.orden;
+          const rawB = b.data?.orden;
+          const ordA = (rawA != null && rawA !== '' && !isNaN(Number(rawA))) ? Number(rawA) : null;
+          const ordB = (rawB != null && rawB !== '' && !isNaN(Number(rawB))) ? Number(rawB) : null;
+
+          if (ordA !== null && ordB !== null) {
+            if (ordA !== ordB) return ordA - ordB;
+          } else if (ordA !== null) {
+            return -1;
+          } else if (ordB !== null) {
+            return 1;
+          }
+
           const dateA = new Date(a.data?._createdDate?.$date || a.data?._createdDate || 0).getTime();
           const dateB = new Date(b.data?._createdDate?.$date || b.data?._createdDate || 0).getTime();
           return dateA - dateB;
@@ -423,10 +501,35 @@ export async function getParrillaBySlug(slug) {
     wixPosts.forEach((postItem, idx) => {
       const p = postItem.data || {};
       const slideNum = 4 + idx;
-      const mediaList = (p.contenido || []).map(c => resolveWixMediaUrl(c.src)).filter(Boolean);
-      const isVideo = (p.tipoDePost || '').toLowerCase().includes('video') || (p.tipoDePost || '').toLowerCase().includes('reel');
-      const isAprobado = p.aprobado === 'SI' || p.aprobado === 'Aprobado' || p.aprobado === true;
+      
+      // Extraer medios procesados (videos e imágenes)
+      const rawContenido = p.contenido || [];
+      const resolvedMediaItems = rawContenido.map(c => resolveWixMediaItem(c));
+      const imageList = resolvedMediaItems.filter(m => !m.isVideo && m.url).map(m => m.url);
+      const videoItem = resolvedMediaItems.find(m => m.isVideo);
+      const isVideo = (p.tipoDePost || '').toLowerCase().includes('video') || 
+                      (p.tipoDePost || '').toLowerCase().includes('reel') || 
+                      !!videoItem;
 
+      let videoUrl = null;
+      let posterUrl = null;
+
+      if (isVideo) {
+        if (videoItem && videoItem.url) {
+          videoUrl = videoItem.url;
+          posterUrl = videoItem.posterUrl;
+        } else if (rawContenido[0]) {
+          const first = resolveWixMediaItem(rawContenido[0]);
+          videoUrl = first.url;
+          posterUrl = first.posterUrl;
+        }
+      }
+
+      if (isVideo && !posterUrl && imageList[0]) {
+        posterUrl = imageList[0];
+      }
+
+      const isAprobado = p.aprobado === 'SI' || p.aprobado === 'Aprobado' || p.aprobado === true;
       initialApprovals[slideNum] = isAprobado;
 
       // Extraer comentarios previos guardados en Wix
@@ -443,26 +546,74 @@ export async function getParrillaBySlug(slug) {
         });
       }
 
+      // Extraer o calcular fecha de publicación individual del CMS
+      const fechaPubRaw = p.fechaDePublicacin || p.fechaDePublicacion || p.fecha || null;
+      let fechaPublicacion = null;
+      if (fechaPubRaw) {
+        if (typeof fechaPubRaw === 'object' && fechaPubRaw.$date) {
+          fechaPublicacion = fechaPubRaw.$date.split('T')[0];
+        } else if (typeof fechaPubRaw === 'string') {
+          fechaPublicacion = fechaPubRaw.split('T')[0];
+        }
+      }
+
+      if (!fechaPublicacion) {
+        const monthMap = {
+          ene: 1, feb: 2, mar: 3, abr: 4, may: 5, jun: 6,
+          jul: 7, ago: 8, sep: 9, oct: 10, nov: 11, dic: 12
+        };
+        const mKey = Object.keys(monthMap).find(k => (monthName || '').toLowerCase().includes(k)) || 'sep';
+        const monthNum = monthMap[mKey] || 9;
+        const yearNum = ano || 2026;
+        const scheduledDays = [2, 4, 9, 11, 15, 17, 22, 24, 29];
+        const day = scheduledDays[idx % scheduledDays.length] || (idx * 3 + 2);
+        const dayStr = String(Math.min(day, 30)).padStart(2, '0');
+        const mStr = String(monthNum).padStart(2, '0');
+        fechaPublicacion = `${yearNum}-${mStr}-${dayStr}`;
+      }
+
+      const postMedia = imageList.length > 0 ? imageList : (posterUrl ? [posterUrl] : []);
+
       slides.push({
         id: postItem.id,
         wixPostId: postItem.id,
         pageNumber: slideNum,
         slideNumber: slideNum,
         type: (p.tipoDePost || 'POST').trim().toUpperCase(),
+        rawType: (p.tipoDePost || 'Post').trim(),
         title: p.title || brandTitle,
         copy: extractTextFromWixDoc(p.descripcin),
-        images: mediaList,
-        postImages: mediaList,
+        images: postMedia,
+        postImages: postMedia,
         isVideo: isVideo,
-        videoUrl: isVideo && mediaList[0] ? mediaList[0] : null,
+        videoUrl: videoUrl,
+        posterUrl: posterUrl,
         aprobado: isAprobado,
         comentario: p.comentario || '',
-        orden: p.orden
+        orden: (p.orden != null && p.orden !== '') ? Number(p.orden) : null,
+        fechaPublicacion: fechaPublicacion,
+        fechaEsEstimada: !fechaPubRaw
       });
     });
 
-    // Slide N+1: Hashtags
-    const hashtagsSlideNumber = 4 + wixPosts.length;
+    // Slide N+1: Calendario de Publicaciones (Al final de los posts individuales)
+    const calendarSlideNumber = 4 + wixPosts.length;
+    slides.push({
+      id: 'slide-calendario',
+      type: 'CALENDARIO',
+      pageNumber: calendarSlideNumber,
+      slideNumber: calendarSlideNumber,
+      title: 'CALENDARIO DE PUBLICACIONES',
+      subtitle: `Planificación · ${monthName.toUpperCase()} ${ano}`,
+      monthName: monthName,
+      year: ano,
+      brandTitle: brandTitle,
+      logo: resolvedLogo,
+      totalPosts: wixPosts.length
+    });
+
+    // Slide N+2: Hashtags
+    const hashtagsSlideNumber = 5 + wixPosts.length;
     slides.push({
       id: 'slide-hashtags',
       type: 'HASTAGS',
@@ -472,8 +623,8 @@ export async function getParrillaBySlug(slug) {
       hashtags: dynamicHashtags
     });
 
-    // Slide N+2: Contacto
-    const contactSlideNumber = 5 + wixPosts.length;
+    // Slide N+3: Contacto
+    const contactSlideNumber = 6 + wixPosts.length;
     slides.push({
       id: 'slide-contact',
       type: 'CONTACT',

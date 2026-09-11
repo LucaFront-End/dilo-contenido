@@ -32,15 +32,15 @@ export default function PostSlide({
   const images = viewMode === 'creative' ? postImages : [slide.image];
   const isCarousel = images.length > 1;
 
-  // Video post check
+  // Video post check (100% dinámico desde CMS)
   const isVideo =
     slide.isVideo ||
     !!slide.videoUrl ||
     slide.type?.toUpperCase().includes('VIDEO') ||
-    slide.type?.toUpperCase().includes('REEL') ||
-    slide.pageNumber === 5; // Demonstration video post
+    slide.type?.toUpperCase().includes('REEL');
 
-  const videoUrl = slide.videoUrl || '/assets/video/sample_reel.mp4';
+  const videoUrl = slide.videoUrl || null;
+  const posterUrl = slide.posterUrl || images[0] || '';
 
   const handleApprove = () => {
     if (onToggleApprove) {
@@ -118,15 +118,32 @@ export default function PostSlide({
             <div className="relative w-full max-w-[320px] sm:max-w-[370px] md:max-w-[400px] aspect-[4/5] rounded-2xl overflow-hidden flex items-center justify-center group bg-transparent">
               {isVideo ? (
                 <div className="w-full h-full bg-zinc-950 rounded-2xl overflow-hidden flex items-center justify-center relative">
-                  <video
-                    src={videoUrl}
-                    controls
-                    playsInline
-                    loop
-                    className="w-full h-full object-cover rounded-2xl"
-                    poster={images[0]}
-                  />
-                  <span className="absolute top-3 left-3 px-2.5 py-1 bg-black/75 backdrop-blur-sm text-white text-[10px] font-bold rounded-lg pointer-events-none flex items-center gap-1">
+                  {videoUrl ? (
+                    <video
+                      key={videoUrl}
+                      src={videoUrl}
+                      controls
+                      playsInline
+                      preload="metadata"
+                      className="w-full h-full object-cover rounded-2xl"
+                      poster={posterUrl}
+                    />
+                  ) : posterUrl ? (
+                    <div className="w-full h-full relative">
+                      <img src={posterUrl} alt="Video preview" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <div className="w-12 h-12 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg">
+                          <Play className="w-6 h-6 fill-white ml-0.5" />
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-zinc-400 text-xs flex flex-col items-center gap-2">
+                      <Play className="w-8 h-8 text-zinc-600" />
+                      <span>Video en procesamiento en CMS</span>
+                    </div>
+                  )}
+                  <span className="absolute top-3 left-3 px-2.5 py-1 bg-black/75 backdrop-blur-sm text-white text-[10px] font-bold rounded-lg pointer-events-none flex items-center gap-1 z-10">
                     <Play className="w-3 h-3 text-orange-500 fill-orange-500" />
                     <span>Video / Reel</span>
                   </span>

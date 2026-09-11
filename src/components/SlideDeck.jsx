@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, LayoutGrid, Maximize, ListFilter, Eye, MessageSquare, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LayoutGrid, Maximize, ListFilter, Eye, MessageSquare, Check, Play } from 'lucide-react';
 import CoverSlide from './slides/CoverSlide';
 import VisualContentSlide from './slides/VisualContentSlide';
 import StrategySlide from './slides/StrategySlide';
 import PostSlide from './slides/PostSlide';
+import CalendarSlide from './slides/CalendarSlide';
 import HashtagsSlide from './slides/HashtagsSlide';
 import ContactSlide from './slides/ContactSlide';
 import CommentsModal from './CommentsModal';
@@ -15,12 +16,19 @@ export default function SlideDeck({
   onAddComment,
   onDeleteComment,
   approvedPosts = {},
-  onToggleApprove
+  onToggleApprove,
+  initialSlideIndex = 0
 }) {
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(initialSlideIndex || 0);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isGlobalCommentsOpen, setIsGlobalCommentsOpen] = useState(false);
   const deckRef = useRef(null);
+
+  useEffect(() => {
+    if (typeof initialSlideIndex === 'number' && initialSlideIndex >= 0) {
+      setCurrentSlideIndex(initialSlideIndex);
+    }
+  }, [initialSlideIndex]);
 
   const slides = clientData?.slides || [];
   const totalSlides = slides.length;
@@ -124,6 +132,17 @@ export default function SlideDeck({
           estrategia={clientData.estrategia}
           clientTitle={clientData.title}
           clientLogo={clientData.logo}
+        />
+      );
+    }
+
+    if (slideType === 'CALENDARIO') {
+      return (
+        <CalendarSlide
+          slide={currentSlide}
+          clientData={clientData}
+          approvedPosts={approvedPosts}
+          onSelectSlide={goToSlide}
         />
       );
     }
@@ -318,10 +337,17 @@ export default function SlideDeck({
                     }`}
                   >
                     <img
-                      src={s.image || s.images?.[0] || s.postImages?.[0] || s.mockup || clientData?.logo || '/assets/logo/dilo-logo-black.png'}
+                      src={s.posterUrl || s.image || s.images?.[0] || s.postImages?.[0] || s.mockup || clientData?.logo || '/assets/logo/dilo-logo-black.png'}
                       alt={`Thumb ${idx + 1}`}
                       className="w-full h-full object-cover block"
                     />
+                    {s.isVideo && (
+                      <div className="absolute inset-0 bg-black/30 flex items-center justify-center pointer-events-none">
+                        <div className="w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center">
+                          <Play className="w-3 h-3 fill-white ml-0.5" />
+                        </div>
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <Eye className="w-5 h-5 text-white" />
                     </div>
@@ -329,7 +355,7 @@ export default function SlideDeck({
                       #{idx + 1}
                     </span>
                     <span className="absolute top-1 right-1 px-1 py-0.2 bg-orange-600 rounded text-[8px] font-bold text-white">
-                      {s.type.slice(0, 4)}
+                      {s.rawType ? s.rawType.slice(0, 8) : s.type ? s.type.slice(0, 6) : ''}
                     </span>
                     {/* Badge if approved */}
                     {isPostApproved && (
