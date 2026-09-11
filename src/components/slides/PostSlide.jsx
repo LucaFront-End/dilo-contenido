@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Check, ThumbsUp, MessageSquare, ZoomIn, ChevronLeft, ChevronRight, Layers, Sparkles, Play } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import CommentsModal from '../CommentsModal';
+import { getOptimizedWixImage } from '../../services/wixService';
 
 export default function PostSlide({
   slide,
@@ -150,9 +151,10 @@ export default function PostSlide({
                 </div>
               ) : (
                 <img
-                  src={images[activeImageIdx]}
+                  src={getOptimizedWixImage(images[activeImageIdx], 1080, 1350, 85)}
                   alt={`Slide ${slide.pageNumber}`}
-                  className="w-full h-full object-contain cursor-zoom-in group-hover:scale-[1.01] transition-transform duration-300"
+                  decoding="async"
+                  className="w-full h-full object-contain cursor-zoom-in group-hover:scale-[1.01] transition-transform duration-200"
                   onClick={() => setIsLightboxOpen(true)}
                 />
               )}
@@ -207,7 +209,13 @@ export default function PostSlide({
                       : 'border-transparent opacity-60 hover:opacity-100'
                   }`}
                 >
-                  <img src={img} alt={`Thumb ${idx + 1}`} className="w-full h-full object-cover" />
+                  <img
+                    src={getOptimizedWixImage(img, 140, 175, 75)}
+                    alt={`Thumb ${idx + 1}`}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                  />
                 </button>
               ))}
             </div>

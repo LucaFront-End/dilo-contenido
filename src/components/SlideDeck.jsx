@@ -8,6 +8,7 @@ import CalendarSlide from './slides/CalendarSlide';
 import HashtagsSlide from './slides/HashtagsSlide';
 import ContactSlide from './slides/ContactSlide';
 import CommentsModal from './CommentsModal';
+import { getOptimizedWixImage } from '../services/wixService';
 
 export default function SlideDeck({
   clientData,
@@ -189,7 +190,7 @@ export default function SlideDeck({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="slide-frame-container relative w-full max-w-[1540px] h-auto md:aspect-video md:max-h-[89vh] bg-white rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl overflow-hidden border border-zinc-200/80 transition-all flex flex-col"
+        className="slide-frame-container relative w-full max-w-[1540px] h-auto md:aspect-video md:max-h-[89vh] bg-white rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl overflow-hidden border border-zinc-200/80 transition-shadow duration-200 flex flex-col"
       >
         {renderSlideContent()}
 
@@ -216,7 +217,7 @@ export default function SlideDeck({
       </div>
 
       {/* Bottom Control Bar with Floating Rounded Container */}
-      <div className="deck-control-bar mt-2 md:mt-2.5 flex items-center justify-between gap-2 sm:gap-4 w-full max-w-[1540px] px-3 sm:px-5 py-2 sm:py-2.5 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-lg select-none">
+      <div className="deck-control-bar mt-2 md:mt-2.5 flex items-center justify-between gap-2 sm:gap-4 w-full max-w-[1540px] px-3 sm:px-5 py-2 sm:py-2.5 bg-white rounded-2xl border border-zinc-200 shadow-md select-none">
         {/* Left: Prev / Next Buttons */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           <button
@@ -348,8 +349,10 @@ export default function SlideDeck({
                     }`}
                   >
                     <img
-                      src={s.posterUrl || s.image || s.images?.[0] || s.postImages?.[0] || s.mockup || clientData?.logo || '/assets/logo/dilo-logo-black.png'}
+                      src={getOptimizedWixImage(s.posterUrl || s.image || s.images?.[0] || s.postImages?.[0] || s.mockup || clientData?.logo || '/assets/logo/dilo-logo-black.png', 300, 170, 70)}
                       alt={`Thumb ${idx + 1}`}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover block"
                     />
                     {s.isVideo && (

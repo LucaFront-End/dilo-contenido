@@ -122,35 +122,43 @@
 }
 
 @media (min-width: 1024px) {
-  /* Rescaling desktop down by 20% so everything frames with perfection without needing manual browser zoom */
   .slide-deck-wrapper {
-    zoom: 0.8;
-    padding: 16px 24px;
-    min-height: calc(100vh - 50px);
+    height: calc(100vh - 54px);
+    min-height: calc(100vh - 54px);
+    padding: 10px 24px 8px 24px;
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
   }
 
   .dilo-header {
-    zoom: 0.8;
-    padding: 10px 24px;
+    padding: 8px 24px;
+    height: 54px;
   }
 
   .feed-grid-view {
-    zoom: 0.8;
+    padding: 16px 24px;
   }
 
   .slide-frame-container {
+    width: 100%;
+    max-width: 1460px;
     aspect-ratio: 16 / 9;
-    max-height: 80vh;
-    min-height: 480px;
+    max-height: calc(100vh - 138px);
+    overflow: hidden;
   }
 
   .deck-control-bar {
-    margin-top: 10px;
+    width: 100%;
+    max-width: 1460px;
+    margin-top: 6px;
+    padding: 6px 16px;
   }
 
   .password-gate-card {
-    zoom: 0.8;
+    max-width: 440px;
   }
 }
 

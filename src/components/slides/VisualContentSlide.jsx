@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { ExternalLink, Grid, ShieldCheck, Phone, Check, Bell, Key, Zap, Camera, Compass } from 'lucide-react';
 import { InstagramIcon } from '../Icons';
+import { getOptimizedWixImage } from '../../services/wixService';
 
 export default function VisualContentSlide({ clientTitle, instagram, clientData, onNavigateToSlide }) {
   // Extract real content post slides dynamically from Wix CMS in exact order
@@ -145,17 +146,19 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
               <div
                 key={item.id}
                 onClick={() => onNavigateToSlide && onNavigateToSlide(item.targetSlide)}
-                className="group relative aspect-[4/5] bg-zinc-200 rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl hover:scale-102 transition-all duration-300 border border-zinc-300/60 flex items-center justify-center"
+                className="group relative aspect-[4/5] bg-zinc-200 rounded-xl overflow-hidden cursor-pointer shadow-sm hover:shadow-lg hover:scale-[1.02] transition-transform duration-200 border border-zinc-300/60 flex items-center justify-center"
               >
                 <img
-                  src={item.image}
+                  src={getOptimizedWixImage(item.image, 460, 575, 82)}
                   alt={item.title}
-                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-200"
                   onError={(e) => {
                     e.target.src = `/assets/slides/slide_${String(item.targetSlide).padStart(2, '0')}.png`;
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-1.5 text-white">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-1.5 text-white pointer-events-none">
                   <span className="text-[8px] uppercase font-bold text-orange-400">
                     Slide #{item.targetSlide}
                   </span>
@@ -164,11 +167,11 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
                   </span>
                 </div>
                 {item.badge && (
-                  <span className="absolute top-1 right-1 px-1.5 py-0.5 bg-black/75 backdrop-blur-sm text-white text-[7.5px] font-bold rounded shadow-xs">
+                  <span className="absolute top-1 right-1 px-1.5 py-0.5 bg-black/75 backdrop-blur-sm text-white text-[7.5px] font-bold rounded shadow-xs pointer-events-none">
                     {item.badge}
                   </span>
                 )}
-                <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-orange-600/90 text-white text-[7.5px] font-bold rounded shadow-xs">
+                <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-orange-600/90 text-white text-[7.5px] font-bold rounded shadow-xs pointer-events-none">
                   #{item.targetSlide}
                 </span>
               </div>
@@ -209,8 +212,10 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
                   <div className="w-14 h-14 rounded-full p-[2px] bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 shrink-0 shadow-sm">
                     <div className="w-full h-full rounded-full bg-white p-[2px] flex items-center justify-center overflow-hidden">
                       <img
-                        src={brandAvatarUrl}
+                        src={getOptimizedWixImage(brandAvatarUrl, 140, 140, 85)}
                         alt={brandDisplayName}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-contain rounded-full p-0.5"
                         onError={(e) => {
                           e.target.src = '/assets/logo/cuauhtli-logo.png';
@@ -292,8 +297,10 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
                     className="aspect-square bg-zinc-200 overflow-hidden cursor-pointer hover:opacity-90 transition-opacity flex items-center justify-center relative group"
                   >
                     <img
-                      src={item.image}
+                      src={getOptimizedWixImage(item.image, 240, 240, 78)}
                       alt={item.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-200"
                       onError={(e) => {
                         e.target.src = `/assets/slides/slide_${String(item.targetSlide).padStart(2, '0')}.png`;

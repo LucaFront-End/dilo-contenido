@@ -6,6 +6,7 @@ import {
   Play,
   ChevronRight
 } from 'lucide-react';
+import { getOptimizedWixImage } from '../../services/wixService';
 
 const WEEKDAYS = ['LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB', 'DOM'];
 
@@ -235,7 +236,13 @@ export default function CalendarSlide({
                         title={`Lámina #${post.pageNumber}: ${post.rawType || post.type}. Clic para ir al post.`}
                       >
                         <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-md overflow-hidden bg-zinc-900 shrink-0 relative">
-                          <img src={thumbImg} alt="" className="w-full h-full object-cover" />
+                          <img
+                            src={getOptimizedWixImage(thumbImg, 120, 120, 70)}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-full object-cover"
+                          />
                           {post.isVideo && (
                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                               <Play className="w-2 h-2 text-white fill-white" />
@@ -285,7 +292,13 @@ export default function CalendarSlide({
                               key={p.id || pIdx}
                               className="w-6 h-6 rounded-md overflow-hidden bg-zinc-900 ring-2 ring-white relative shadow-xs"
                             >
-                              <img src={thumb} alt="" className="w-full h-full object-cover" />
+                              <img
+                                src={getOptimizedWixImage(thumb, 100, 100, 70)}
+                                alt=""
+                                loading="lazy"
+                                decoding="async"
+                                className="w-full h-full object-cover"
+                              />
                               {p.isVideo && (
                                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                                   <Play className="w-1.5 h-1.5 text-white fill-white" />
@@ -354,7 +367,13 @@ export default function CalendarSlide({
                             }`}
                           >
                             <div className="w-10 h-10 rounded-lg overflow-hidden bg-zinc-900 shrink-0 relative shadow-sm">
-                              <img src={thumbImg} alt="" className="w-full h-full object-cover" />
+                              <img
+                                src={getOptimizedWixImage(thumbImg, 140, 140, 75)}
+                                alt=""
+                                loading="lazy"
+                                decoding="async"
+                                className="w-full h-full object-cover"
+                              />
                               {post.isVideo && (
                                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                                   <Play className="w-3 h-3 text-white fill-white" />

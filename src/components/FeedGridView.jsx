@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import CommentsModal from './CommentsModal';
+import { getOptimizedWixImage } from '../services/wixService';
 
 function formatTypeLabel(raw, rawType) {
   if (rawType && rawType.trim()) return rawType.trim();
@@ -214,21 +215,25 @@ export default function FeedGridView({
                 {isVideo ? (
                   <div className="relative w-full h-full flex items-center justify-center bg-zinc-950">
                     <img
-                      src={slide.posterUrl || currentImg || '/assets/logo/dilo-logo-black.png'}
+                      src={getOptimizedWixImage(slide.posterUrl || currentImg || '/assets/logo/dilo-logo-black.png', 600, 750, 80)}
                       alt={`Slide ${slide.pageNumber} video poster`}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute inset-0 bg-black/35 flex items-center justify-center">
-                      <div className="w-12 h-12 rounded-full bg-white/90 text-zinc-900 flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white transition-all">
+                      <div className="w-12 h-12 rounded-full bg-white/90 text-zinc-900 flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white transition-transform">
                         <Play className="w-5 h-5 fill-current translate-x-0.5" />
                       </div>
                     </div>
                   </div>
                 ) : (
                   <img
-                    src={currentImg}
+                    src={getOptimizedWixImage(currentImg, 600, 750, 80)}
                     alt={`Slide ${slide.pageNumber} imagen ${currentImgIdx + 1}`}
-                    className="w-full h-full object-cover object-center group-hover:scale-102 transition-all duration-300 pointer-events-none select-none"
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-300 pointer-events-none select-none"
                     draggable={false}
                   />
                 )}
