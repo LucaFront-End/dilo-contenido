@@ -28,3 +28,4 @@ scratch/
 *.tmp
 check_*.py
 find_*.py
+*.zip

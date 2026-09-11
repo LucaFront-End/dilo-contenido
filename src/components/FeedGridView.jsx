@@ -13,6 +13,23 @@ import {
 import confetti from 'canvas-confetti';
 import CommentsModal from './CommentsModal';
 
+function formatTypeLabel(raw) {
+  if (!raw) return 'Post Simple';
+  const upper = raw.toUpperCase().trim();
+  if (upper === 'POST' || upper === 'POST SIMPLE') return 'Posts Simples';
+  if (upper === 'POST DE VALOR' || upper === 'VALOR') return 'Posts de Valor';
+  if (upper === 'VIDEO' || upper === 'REEL' || upper.includes('VIDEO') || upper.includes('REEL')) return 'Videos / Reels';
+  if (upper === 'CARRUSEL' || upper === 'CAROUSEL') return 'Carruseles';
+  if (upper === 'HISTORIA' || upper === 'STORY' || upper === 'STORIES') return 'Historias';
+  if (upper === 'EDUCATIVO') return 'Educativos';
+  if (upper === 'INTERACTIVO') return 'Interactivos';
+  return raw
+    .toLowerCase()
+    .split(' ')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
 export default function FeedGridView({
   slides,
   clientTitle,
@@ -35,9 +52,28 @@ export default function FeedGridView({
   const approvedCount = contentSlides.filter((s) => !!approvedPosts[s.pageNumber]).length;
   const approvalPercent = totalContentPosts > 0 ? Math.round((approvedCount / totalContentPosts) * 100) : 0;
 
+  // Dynamic categories/types from content slides (supports up to 6+ content types comfortably)
+  const availableTypes = React.useMemo(() => {
+    const counts = {};
+    contentSlides.forEach((s) => {
+      const raw = (s.type || 'POST').trim();
+      const normKey = raw.toUpperCase();
+      if (!counts[normKey]) {
+        counts[normKey] = {
+          key: normKey,
+          label: formatTypeLabel(raw),
+          count: 0
+        };
+      }
+      counts[normKey].count += 1;
+    });
+    return Object.values(counts);
+  }, [contentSlides]);
+
   const filtered = contentSlides.filter((s) => {
     if (activeFilter === 'ALL') return true;
-    return s.type === activeFilter;
+    const itemType = (s.type || 'POST').trim().toUpperCase();
+    return itemType === activeFilter.toUpperCase();
   });
 
   const handleToggle = (pageNumber) => {
@@ -60,69 +96,89 @@ export default function FeedGridView({
       style={{ userSelect: 'none', WebkitUserSelect: 'none' }}
       onCopy={(e) => e.preventDefault()}
     >
-      {/* Top Filter Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-4 rounded-2xl border border-zinc-200 shadow-sm">
-        <div>
-          <h2 className="text-2xl font-black text-zinc-900 font-space tracking-tight">
-            Mosaico de Publicaciones
-          </h2>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Vista general de todas las publicaciones programadas en formato carrusel 4:5 para {clientTitle}.
-          </p>
+      {/* Top Filter Bar: Aprobado arriba, Todos y tipos de contenido abajo */}
+      <div className="flex flex-col gap-3.5 mb-6 md:mb-8 bg-white p-4 sm:p-5 rounded-2xl border border-zinc-200 shadow-sm">
+        {/* Fila 1 (Arriba): Título + Progreso y Badge de Aprobado */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-black text-zinc-900 font-space tracking-tight">
+              Mosaico de Publicaciones
+            </h2>
+            <p className="text-xs text-zinc-500 mt-0.5">
+              Vista general de todas las publicaciones programadas en formato carrusel 4:5 para {clientTitle}.
+            </p>
+          </div>
+
+          {/* Porcentaje de Aprobación Arriba */}
+          <div className="flex flex-col sm:items-end gap-1.5 shrink-0">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-semibold text-zinc-500 hidden md:inline">
+                Aprobación general:
+              </span>
+              <div
+                className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 border shadow-2xs transition-all ${
+                  approvalPercent === 100
+                    ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm shadow-emerald-500/20'
+                    : approvalPercent > 0
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                    : 'bg-zinc-100 text-zinc-600 border-zinc-200'
+                }`}
+                title="Porcentaje total de publicaciones aprobadas"
+              >
+                <Check className={`w-3.5 h-3.5 ${approvalPercent === 100 ? 'text-white' : 'text-emerald-600'}`} />
+                <span>{approvalPercent}% Aprobado</span>
+                <span className="text-[10px] opacity-80 font-bold">
+                  ({approvedCount}/{totalContentPosts})
+                </span>
+              </div>
+            </div>
+
+            {/* Mini barra de progreso visual */}
+            <div className="w-full sm:w-48 h-1.5 bg-zinc-100 rounded-full overflow-hidden border border-zinc-200/80">
+              <div
+                className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500 rounded-full"
+                style={{ width: `${approvalPercent}%` }}
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Filters & Approval Percentage badge beside "Todos" */}
-        <div className="flex items-center gap-2.5 flex-wrap">
+        {/* Fila 2 (Abajo): "Todos" y tipos de post dinámicos para que quepan holgadamente */}
+        <div className="border-t border-zinc-100 pt-3 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none w-full">
           <button
             onClick={() => setActiveFilter('ALL')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
               activeFilter === 'ALL'
                 ? 'bg-zinc-900 text-white shadow-sm'
-                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 border border-zinc-200/60'
             }`}
           >
             Todos ({contentSlides.length})
           </button>
 
-          {/* Porcentaje de aprobación al lado de "Todos" */}
-          <div
-            className={`px-3 py-1.5 rounded-xl text-xs font-black flex items-center gap-1.5 border shadow-2xs transition-all ${
-              approvalPercent === 100
-                ? 'bg-emerald-500 text-white border-emerald-600'
-                : approvalPercent > 0
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                : 'bg-zinc-100 text-zinc-600 border-zinc-200'
-            }`}
-            title="Porcentaje total de publicaciones aprobadas"
-          >
-            <Check className="w-3.5 h-3.5 text-emerald-600" />
-            <span>{approvalPercent}% Aprobado</span>
-            <span className="text-[10px] opacity-75 font-bold hidden sm:inline">
-              ({approvedCount}/{totalContentPosts})
-            </span>
-          </div>
-
-          <button
-            onClick={() => setActiveFilter('POST DE VALOR')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeFilter === 'POST DE VALOR'
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
-            }`}
-          >
-            Posts de Valor
-          </button>
-
-          <button
-            onClick={() => setActiveFilter('POST')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeFilter === 'POST'
-                ? 'bg-orange-500 text-white shadow-sm'
-                : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
-            }`}
-          >
-            Posts Simples
-          </button>
+          {availableTypes.map((cat) => {
+            const isSelected = activeFilter.toUpperCase() === cat.key;
+            return (
+              <button
+                key={cat.key}
+                onClick={() => setActiveFilter(cat.key)}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1.5 ${
+                  isSelected
+                    ? 'bg-orange-500 text-white shadow-sm shadow-orange-500/20'
+                    : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 border border-zinc-200/60'
+                }`}
+              >
+                <span>{cat.label}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                    isSelected ? 'bg-orange-600/70 text-white' : 'bg-zinc-200 text-zinc-600'
+                  }`}
+                >
+                  {cat.count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
