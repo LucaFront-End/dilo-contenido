@@ -560,22 +560,17 @@ export async function saveComment(slug, commentData) {
       const token = await getWixToken();
       if (token) {
         if (commentData.wixPostId) {
-          // Consultar el post actual para preservar sus datos completos
-          const queryRes = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
-            method: 'POST',
+          // Consultar el post actual directamente por su ID en Wix Data API v2
+          const getRes = await fetch(`https://www.wixapis.com/wix-data/v2/items/${commentData.wixPostId}?dataCollectionId=ParrillasdeContenido`, {
+            method: 'GET',
             headers: {
-              'Content-Type': 'application/json',
               'Authorization': token
-            },
-            body: JSON.stringify({
-              dataCollectionId: 'ParrillasdeContenido',
-              filter: { _id: commentData.wixPostId }
-            })
+            }
           });
 
-          if (queryRes.ok) {
-            const qData = await queryRes.json();
-            const item = qData.dataItems?.[0];
+          if (getRes.ok) {
+            const resData = await getRes.json();
+            const item = resData.dataItem;
             if (item && item.id) {
               const currentComentario = item.data?.comentario || '';
               const newComentario = currentComentario ? `${currentComentario}\n---\n${commentLine}` : commentLine;
@@ -716,23 +711,18 @@ export async function saveApprovals(slug, approvedPosts, clientTitle = 'Cliente'
           const isApproved = !!approvedPosts[s.slideNumber];
           const targetAprobadoStr = isApproved ? 'SI' : 'NO';
 
-          // Consultar el post actual para preservar sus datos
-          const qRes = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
-            method: 'POST',
+          // Consultar el post actual directamente por su ID en Wix Data API v2
+          const getRes = await fetch(`https://www.wixapis.com/wix-data/v2/items/${s.wixPostId}?dataCollectionId=ParrillasdeContenido`, {
+            method: 'GET',
             headers: {
-              'Content-Type': 'application/json',
               'Authorization': token
-            },
-            body: JSON.stringify({
-              dataCollectionId: 'ParrillasdeContenido',
-              filter: { _id: s.wixPostId }
-            })
+            }
           });
 
-          if (qRes.ok) {
-            const qData = await qRes.json();
-            const item = qData.dataItems?.[0];
-            if (item && item.data?.aprobado !== targetAprobadoStr) {
+          if (getRes.ok) {
+            const resData = await getRes.json();
+            const item = resData.dataItem;
+            if (item && item.id && item.data?.aprobado !== targetAprobadoStr) {
               await fetch(`https://www.wixapis.com/wix-data/v2/items/${item.id}`, {
                 method: 'PUT',
                 headers: {
