@@ -1,6 +1,6 @@
 import React from 'react';
-import { Phone, Globe, ArrowUpRight } from 'lucide-react';
-import { InstagramIcon, FacebookIcon, WhatsAppIcon, DiloMegaphoneIcon } from '../Icons';
+import { ArrowUpRight, Sparkles, Globe } from 'lucide-react';
+import { WhatsAppIcon, InstagramIcon, FacebookIcon } from '../Icons';
 
 export default function ContactSlide() {
   const contacts = [
@@ -11,7 +11,7 @@ export default function ContactSlide() {
       sub: 'WhatsApp Oficial'
     },
     {
-      label: 'dilodigitalmx',
+      label: '@dilodigitalmx',
       href: 'https://instagram.com/dilodigitalmx',
       icon: InstagramIcon,
       sub: 'Instagram'
@@ -26,65 +26,85 @@ export default function ContactSlide() {
       label: 'www.dilodigitalmx.com',
       href: 'https://www.dilodigitalmx.com',
       icon: Globe,
-      sub: 'Sitio Web'
+      sub: 'Sitio Web Oficial'
     }
   ];
 
   return (
-    <div className="slide-content contact-slide flex flex-col justify-between w-full h-full relative overflow-hidden bg-white p-4 sm:p-8 md:p-14 select-none">
-      {/* Decorative Vectors Faithful to PDF */}
-      <div className="decor-curves absolute -top-10 -left-10 w-28 h-28 md:w-48 md:h-48 pointer-events-none opacity-30 md:opacity-90">
+    <div className="slide-content contact-slide relative w-full h-full flex flex-col justify-between p-6 sm:p-8 md:p-14 overflow-hidden select-none bg-white">
+      {/* Decorative Vectors Faithful to Slide 1 */}
+
+      {/* Top Left Squiggle */}
+      <div className="decor-curves absolute -top-12 -left-12 w-28 h-28 md:w-44 md:h-44 pointer-events-none opacity-40 md:opacity-85">
         <svg viewBox="0 0 200 200" fill="none" className="w-full h-full text-zinc-900">
-          <path d="M20 50 C40 10 90 20 70 80 C50 140 10 100 30 150 C50 200 120 180 140 140" stroke="currentColor" strokeWidth="8" strokeLinecap="round" />
+          <path
+            d="M20 50 C40 10 90 20 70 80 C50 140 10 100 30 150 C50 200 120 180 140 140"
+            stroke="currentColor"
+            strokeWidth="9"
+            strokeLinecap="round"
+          />
         </svg>
       </div>
 
-      <div className="decor-pen-tool absolute top-12 right-16 pointer-events-none hidden lg:block">
-        <svg width="70" height="70" viewBox="0 0 100 100" fill="none">
-          <circle cx="50" cy="50" r="4" fill="#FF5A00" />
-          <path d="M20 70 C40 30 70 30 85 50" stroke="#111" strokeWidth="2" strokeDasharray="3 3" />
-          <path d="M60 25 L75 40 L50 65 L35 50 Z" fill="#fff" stroke="#111" strokeWidth="2.5" />
-          <path d="M35 50 L30 68 L48 63 Z" fill="#111" />
-          <rect x="80" y="20" width="10" height="10" fill="#FF5A00" />
-        </svg>
+      {/* Top Left Accent Shapes (Orange Square & Triangles) */}
+      <div className="absolute top-10 left-32 hidden md:flex items-center gap-3 pointer-events-none">
+        <div className="w-8 h-8 rounded-lg bg-orange-500 shadow-sm relative flex items-center justify-center">
+          <div className="w-4 h-4 rounded-full border-2 border-white" />
+        </div>
+        <div className="flex items-center gap-0.5">
+          <div className="w-0 h-0 border-y-[6px] border-y-transparent border-l-[10px] border-l-zinc-900" />
+          <div className="w-0 h-0 border-y-[6px] border-y-transparent border-l-[10px] border-l-orange-500" />
+        </div>
       </div>
 
-      <div className="decor-arch absolute top-32 right-8 pointer-events-none hidden lg:block">
-        <svg width="120" height="220" viewBox="0 0 120 220" fill="none">
-          <path d="M100 180 V80 C100 30 20 30 20 80 V180" stroke="#18181b" strokeWidth="12" strokeLinecap="round" />
-          <rect x="40" y="90" width="25" height="25" stroke="#18181b" strokeWidth="2.5" fill="none" />
-          <circle cx="70" cy="190" r="6" fill="#18181b" />
-          <circle cx="70" cy="210" r="6" fill="#FF5A00" />
-        </svg>
-      </div>
-
-      {/* Main Center Area */}
-      <div className="flex-1 flex flex-col justify-start md:justify-center relative z-10 max-w-4xl mx-auto w-full overflow-y-auto py-2 sm:py-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-10 items-center">
-          {/* Brand & Logo */}
-          <div className="space-y-2 sm:space-y-4">
-            <div className="flex items-center gap-3 sm:gap-4">
+      {/* Main Center Area: Left-Structured Layout matching Slide 1 */}
+      <div className="relative z-10 my-auto w-full max-w-6xl mx-auto py-2 md:py-4">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center">
+          {/* Left Column: Branding, Big Impact Typography & Value proposition (7 cols) */}
+          <div className="lg:col-span-7 flex flex-col justify-center">
+            {/* Official Dilo Digital Logo */}
+            <div className="flex items-center gap-3 sm:gap-3.5 mb-3 sm:mb-5">
               <img
                 src="/assets/logo/dilo-logo-orange.png"
                 alt="Dilo Digital"
-                className="w-12 h-12 sm:w-20 sm:h-20 object-contain drop-shadow-sm select-none"
+                className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-contain drop-shadow-sm select-none"
               />
-              <div>
-                <span className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-zinc-400 block">
+              <div className="flex flex-col justify-center">
+                <span className="text-[9px] sm:text-[11px] md:text-xs font-black uppercase tracking-[0.15em] sm:tracking-[0.2em] text-zinc-400">
                   Agencia de Marketing Digital
                 </span>
-                <span className="text-xl sm:text-3xl font-black text-zinc-950 tracking-tight block leading-none font-space mt-0.5 sm:mt-1">
+                <span className="text-xl sm:text-2xl md:text-3xl font-black text-zinc-950 tracking-tight font-space leading-none mt-0.5">
                   DILO <span className="text-orange-500">DIGITAL</span>
                 </span>
               </div>
             </div>
-            <p className="text-xs sm:text-sm text-zinc-500 max-w-sm pt-1 sm:pt-2">
-              Estrategia, diseño y resultados medibles para impulsar tu marca al siguiente nivel.
+
+            {/* Big Impact Titles faithful to Cover Slide 1 */}
+            <div className="space-y-0.5 sm:space-y-1">
+              <h2 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-black text-zinc-950 uppercase tracking-tight font-space leading-tight">
+                CANALES DE
+              </h2>
+              <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-orange-500 uppercase tracking-tighter font-space leading-none">
+                CONTACTO
+              </h1>
+            </div>
+
+            {/* Tagline & Value Proposition */}
+            <p className="text-xs sm:text-sm md:text-base text-zinc-500 max-w-lg mt-3 sm:mt-5 leading-relaxed font-medium">
+              Estrategia, diseño y resultados medibles para impulsar tu marca al siguiente nivel. Estamos listos para atender cualquier duda o comenzar tu siguiente parrilla.
             </p>
+
+            {/* Trust badge */}
+            <div className="mt-4 sm:mt-6 flex items-center gap-2">
+              <div className="px-3.5 py-1.5 bg-zinc-100 text-zinc-700 font-bold rounded-xl text-xs flex items-center gap-1.5 border border-zinc-200">
+                <Sparkles className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                <span>Atención directa y personalizada</span>
+              </div>
+            </div>
           </div>
 
-          {/* Contact Details faithful to PDF Page 30 */}
-          <div className="grid grid-cols-1 sm:grid-cols-1 gap-2 sm:gap-4">
+          {/* Right Column: Modern, Clean Contact Cards (5 cols) */}
+          <div className="lg:col-span-5 flex flex-col gap-2.5 sm:gap-3.5">
             {contacts.map((c, i) => {
               const Icon = c.icon;
               return (
@@ -93,37 +113,38 @@ export default function ContactSlide() {
                   href={c.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl bg-zinc-50 hover:bg-orange-50 border border-zinc-200/80 hover:border-orange-300 transition-all group shadow-2xs hover:shadow-md cursor-pointer"
+                  className="flex items-center gap-3.5 p-3 sm:p-4 rounded-2xl bg-zinc-50/80 hover:bg-orange-50/80 border border-zinc-200/80 hover:border-orange-300 transition-all group shadow-2xs hover:shadow-md cursor-pointer"
                 >
-                  <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-zinc-900 group-hover:bg-orange-500 text-white flex items-center justify-center transition-colors shadow shrink-0">
-                    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-zinc-900 group-hover:bg-orange-500 text-white flex items-center justify-center transition-colors shadow shrink-0">
+                    <Icon className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-zinc-400 font-bold block truncate">
                       {c.sub}
                     </span>
-                    <span className="text-xs sm:text-base font-bold text-zinc-900 group-hover:text-orange-600 transition-colors block truncate">
+                    <span className="text-xs sm:text-sm md:text-base font-black text-zinc-900 group-hover:text-orange-600 transition-colors block truncate font-space">
                       {c.label}
                     </span>
                   </div>
-                  <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-400 group-hover:text-orange-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0" />
+                  <ArrowUpRight className="w-4 h-4 text-zinc-400 group-hover:text-orange-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all shrink-0" />
                 </a>
               );
             })}
           </div>
         </div>
-
-        {/* Big Bottom Typography: CONTACTO */}
-        <div className="mt-4 sm:mt-12">
-          <h1 className="text-4xl sm:text-8xl lg:text-9xl font-black text-zinc-950 uppercase tracking-tighter font-space leading-none">
-            CONTACTO
-          </h1>
-        </div>
       </div>
 
-      <div className="relative z-10 flex items-center justify-between text-xs font-semibold text-zinc-400 uppercase tracking-wider">
-        <span>Dilo Digital © 2026 · Todos los derechos reservados</span>
-        <span>Hecho con precisión para nuestros clientes</span>
+      {/* Clean Footer Bar identical to Cover Slide 1 */}
+      <div className="relative z-10 flex items-center justify-between text-xs font-semibold text-zinc-400 tracking-wider pt-3 sm:pt-4 border-t border-zinc-100 mt-3 md:mt-0">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <span className="text-orange-500 font-black text-base sm:text-lg leading-none select-none">+</span>
+          <span className="uppercase text-zinc-500 font-bold text-[9px] sm:text-xs">
+            Agencia de Marketing Digital
+          </span>
+        </div>
+        <div className="text-zinc-400 text-[10px] sm:text-[11px] font-medium uppercase tracking-wider">
+          Dilo Digital © 2026 · Todos los derechos reservados
+        </div>
       </div>
     </div>
   );

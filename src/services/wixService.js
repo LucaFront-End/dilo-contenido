@@ -435,3 +435,96 @@ export function deleteComment(slug, commentId) {
   }
 }
 
+/**
+ * Obtiene las publicaciones aprobadas de una parrilla desde localStorage
+ */
+export function getApprovals(slug) {
+  try {
+    const key = `dilo_approvals_${slug || 'default'}`;
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    console.error('Error al leer aprobaciones:', e);
+    return {};
+  }
+}
+
+/**
+ * Guarda las aprobaciones de los posts en localStorage y las sincroniza con Wix CMS
+ */
+export async function saveApprovals(slug, approvedPosts, clientTitle = 'Cliente') {
+  try {
+    const key = `dilo_approvals_${slug || 'default'}`;
+    localStorage.setItem(key, JSON.stringify(approvedPosts));
+
+    const totalContentPosts = 25;
+    const approvedList = Object.keys(approvedPosts)
+      .filter((k) => !!approvedPosts[k])
+      .map(Number)
+      .sort((a, b) => a - b);
+    const approvedCount = approvedList.length;
+    const percentage = totalContentPosts > 0 ? Math.round((approvedCount / totalContentPosts) * 100) : 0;
+    const formattedList = approvedList.map((n) => `#${n}`).join(', ');
+
+    const nowStr = new Date().toLocaleString('es-MX', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const approvalSummary = `${percentage}% Aprobado (${approvedCount}/${totalContentPosts}) | Posts aprobados: [${formattedList || 'Ninguno'}] | Actualizado: ${nowStr} por ${clientTitle}`;
+
+    // Sincronizar en segundo plano con Wix CMS en ParrillaGeneral
+    try {
+      const token = await getWixToken();
+      if (token) {
+        fetch('https://www.wixapis.com/wix-data/v2/items/query', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+          },
+          body: JSON.stringify({
+            dataCollectionId: 'ParrillaGeneral',
+            query: { filter: { slug: slug } }
+          })
+        })
+          .then((r) => r.json())
+          .then((res) => {
+            const item = res?.dataItems?.[0];
+            if (item && item.id) {
+              fetch(`https://www.wixapis.com/wix-data/v2/items/${item.id}`, {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': token
+                },
+                body: JSON.stringify({
+                  dataCollectionId: 'ParrillaGeneral',
+                  dataItem: {
+                    data: {
+                      ...item.data,
+                      aprobaciones: JSON.stringify(approvedPosts),
+                      resumenAprobacion: approvalSummary,
+                      porcentajeAprobado: percentage,
+                      postsAprobados: formattedList,
+                      estadoAprobacion: percentage === 100 ? '100% Aprobado' : `${percentage}% Aprobado`
+                    }
+                  }
+                })
+              }).catch(() => {});
+            }
+          })
+          .catch(() => {});
+      }
+    } catch (_) {}
+
+    return { approvedPosts, percentage, approvedCount, approvalSummary };
+  } catch (e) {
+    console.error('Error al guardar aprobaciones:', e);
+    return { approvedPosts };
+  }
+}
+

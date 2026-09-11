@@ -363,16 +363,22 @@ export default function FeedGridView({
                           type="button"
                           onClick={() => setActiveCommentSlide(slide)}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer border ${
-                            slideCommentsCount > 0
+                            isApproved
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                              : slideCommentsCount > 0
                               ? 'bg-amber-50 text-amber-900 border-amber-300'
                               : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
                           }`}
-                          title="Comentarios de este post"
+                          title={isApproved ? 'Post aprobado - Comentarios cerrados' : 'Comentarios de este post'}
                         >
-                          <MessageSquare className="w-3.5 h-3.5 text-orange-600" />
-                          <span>Comentarios</span>
+                          {isApproved ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-600" />
+                          ) : (
+                            <MessageSquare className="w-3.5 h-3.5 text-orange-600" />
+                          )}
+                          <span>{isApproved ? 'Aprobado' : 'Comentarios'}</span>
                           {slideCommentsCount > 0 && (
-                            <span className="px-1.5 py-0.2 bg-orange-500 text-white text-[10px] font-black rounded-full">
+                            <span className={`px-1.5 py-0.2 text-[10px] font-black rounded-full ${isApproved ? 'bg-emerald-600 text-white' : 'bg-orange-500 text-white'}`}>
                               {slideCommentsCount}
                             </span>
                           )}
@@ -399,6 +405,7 @@ export default function FeedGridView({
           onDeleteComment={onDeleteComment}
           clientTitle={clientTitle}
           isGlobalView={false}
+          isSlideApproved={!!approvedPosts[activeCommentSlide.pageNumber]}
         />
       )}
     </div>

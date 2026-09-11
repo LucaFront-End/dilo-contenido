@@ -216,15 +216,21 @@ export default function PostSlide({
             <button
               onClick={() => setIsCommentModalOpen(true)}
               className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border ${
-                commentsCount > 0
+                isApproved
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                  : commentsCount > 0
                   ? 'bg-amber-50 text-amber-900 border-amber-300 shadow-sm'
                   : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
               }`}
             >
-              <MessageSquare className="w-4 h-4 text-orange-600" />
-              <span>Comentarios</span>
+              {isApproved ? (
+                <Check className="w-4 h-4 text-emerald-600" />
+              ) : (
+                <MessageSquare className="w-4 h-4 text-orange-600" />
+              )}
+              <span>{isApproved ? 'Aprobado (Cerrado)' : 'Comentarios'}</span>
               {commentsCount > 0 && (
-                <span className="px-1.5 py-0.2 bg-orange-500 text-white text-[10px] font-black rounded-full">
+                <span className={`px-1.5 py-0.2 text-[10px] font-black rounded-full ${isApproved ? 'bg-emerald-600 text-white' : 'bg-orange-500 text-white'}`}>
                   {commentsCount}
                 </span>
               )}
@@ -249,16 +255,22 @@ export default function PostSlide({
               <button
                 onClick={() => setIsCommentModalOpen(true)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer border ${
-                  commentsCount > 0
+                  isApproved
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                    : commentsCount > 0
                     ? 'bg-amber-50 text-amber-900 border-amber-300 shadow-sm'
                     : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-700 border-zinc-200'
                 }`}
-                title="Comentarios y solicitudes de cambio"
+                title={isApproved ? 'Post aprobado - Comentarios cerrados' : 'Comentarios y solicitudes de cambio'}
               >
-                <MessageSquare className="w-3.5 h-3.5 text-orange-600" />
-                <span>Comentarios</span>
+                {isApproved ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                ) : (
+                  <MessageSquare className="w-3.5 h-3.5 text-orange-600" />
+                )}
+                <span>{isApproved ? 'Aprobado' : 'Comentarios'}</span>
                 {commentsCount > 0 && (
-                  <span className="px-1.5 py-0.2 bg-orange-500 text-white text-[10px] font-black rounded-full">
+                  <span className={`px-1.5 py-0.2 text-[10px] font-black rounded-full ${isApproved ? 'bg-emerald-600 text-white' : 'bg-orange-500 text-white'}`}>
                     {commentsCount}
                   </span>
                 )}
@@ -369,6 +381,7 @@ export default function PostSlide({
         onDeleteComment={onDeleteComment}
         clientTitle={clientTitle}
         isGlobalView={false}
+        isSlideApproved={isApproved}
       />
     </div>
   );

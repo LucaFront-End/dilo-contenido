@@ -11,7 +11,8 @@ export default function CommentsModal({
   onDeleteComment,
   onNavigateToSlide,
   clientTitle = 'Cliente',
-  isGlobalView = false
+  isGlobalView = false,
+  isSlideApproved = false
 }) {
   const [author, setAuthor] = useState(clientTitle);
   const [category, setCategory] = useState('Cambio de Copy');
@@ -36,7 +37,7 @@ export default function CommentsModal({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!commentText.trim()) return;
+    if (!commentText.trim() || isSlideApproved) return;
 
     setSubmitting(true);
 
@@ -98,8 +99,28 @@ export default function CommentsModal({
 
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* New Comment Form (Shown when viewing specific slide or optionally) */}
-          {!isGlobalView && (
+          {/* If post is approved, show notification banner and disable adding comments */}
+          {isSlideApproved && !isGlobalView ? (
+            <div className="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 sm:p-5 shadow-2xs flex items-start gap-3.5">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h4 className="text-xs font-black text-emerald-950 uppercase tracking-wide">
+                    Publicación Aprobada
+                  </h4>
+                  <span className="px-2 py-0.5 bg-emerald-200 text-emerald-900 text-[10px] font-bold rounded-full">
+                    Aprobado ✓
+                  </span>
+                </div>
+                <p className="text-xs text-emerald-800 mt-1 leading-relaxed">
+                  Esta publicación ya cuenta con tu aprobación. Para mantener el flujo ordenado y evitar solicitudes contradictorias o duplicadas, no es necesario agregar nuevos comentarios. Si requieres reabrirla, desmarca el botón de aprobación en el post.
+                </p>
+              </div>
+            </div>
+          ) : !isGlobalView ? (
+            /* New Comment Form */
             <form onSubmit={handleSubmit} className="bg-zinc-50 border border-zinc-200/90 rounded-2xl p-5 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-zinc-700 uppercase tracking-wider flex items-center gap-1.5">
@@ -175,7 +196,7 @@ export default function CommentsModal({
                 </button>
               </div>
             </form>
-          )}
+          ) : null}
 
           {/* List of Comments */}
           <div className="space-y-3">

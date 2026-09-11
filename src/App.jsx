@@ -5,7 +5,7 @@ import FeedGridView from './components/FeedGridView';
 import PasswordGate from './components/PasswordGate';
 import HomePortal from './components/HomePortal';
 import Toast from './components/Toast';
-import { getParrillaBySlug, getComments, saveComment, deleteComment } from './services/wixService';
+import { getParrillaBySlug, getComments, saveComment, deleteComment, getApprovals, saveApprovals } from './services/wixService';
 import { fallbackCuauhtliData } from './data/cuauhtliFallbackData';
 import './styles/presentation.css';
 
@@ -44,9 +44,8 @@ export default function App() {
   // Independent post approvals stored per client slug in localStorage
   const [approvedPosts, setApprovedPosts] = useState(() => {
     try {
-      const initialSlug = extractSlugFromPath();
-      const saved = localStorage.getItem(`dilo_approvals_${initialSlug}`);
-      return saved ? JSON.parse(saved) : {};
+      const slug = extractSlugFromPath();
+      return getApprovals(slug);
     } catch {
       return {};
     }
@@ -54,30 +53,24 @@ export default function App() {
 
   useEffect(() => {
     if (currentSlug) {
-      try {
-        const saved = localStorage.getItem(`dilo_approvals_${currentSlug}`);
-        setApprovedPosts(saved ? JSON.parse(saved) : {});
-      } catch {
-        setApprovedPosts({});
-      }
+      setApprovedPosts(getApprovals(currentSlug));
     }
   }, [currentSlug]);
 
-  const handleToggleApprove = (slideNumber) => {
+  const handleToggleApprove = async (slideNumber) => {
     const nextVal = !approvedPosts[slideNumber];
     const updated = { ...approvedPosts, [slideNumber]: nextVal };
     setApprovedPosts(updated);
-    try {
-      localStorage.setItem(`dilo_approvals_${clientData.slug || currentSlug}`, JSON.stringify(updated));
-    } catch (e) {
-      console.warn('Error guardando aprobación:', e);
-    }
+
     showToast(
       nextVal
         ? `Lámina #${slideNumber} aprobada por el cliente 🎉`
         : `Lámina #${slideNumber} marcada como pendiente`,
       'info'
     );
+
+    // Guardar y sincronizar con Wix CMS
+    await saveApprovals(clientData.slug || currentSlug, updated, clientData.title);
   };
   const [showPortalHome, setShowPortalHome] = useState(() => {
     let path = window.location.pathname.replace(/^\/|\/$/g, '');
