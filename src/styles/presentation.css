@@ -121,10 +121,35 @@
 }
 
 @media (min-width: 1024px) {
+  /* Rescaling desktop down by 20% so everything frames with perfection without needing manual browser zoom */
+  .slide-deck-wrapper {
+    zoom: 0.8;
+    padding: 16px 24px;
+    min-height: calc(100vh - 50px);
+    overflow: hidden;
+  }
+
+  .dilo-header {
+    zoom: 0.8;
+    padding: 10px 24px;
+  }
+
+  .feed-grid-view {
+    zoom: 0.8;
+  }
+
   .slide-frame-container {
     aspect-ratio: 16 / 9;
-    max-height: 85vh;
-    min-height: 560px;
+    max-height: 80vh;
+    min-height: 480px;
+  }
+
+  .deck-control-bar {
+    margin-top: 10px;
+  }
+
+  .password-gate-card {
+    zoom: 0.8;
   }
 }
 
