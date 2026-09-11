@@ -150,14 +150,45 @@ export async function getParrillaBySlug(slug) {
     const generalData = await generalRes.json();
     const generalItems = generalData.dataItems || [];
 
-    // Buscar coincidencia por slug o título
-    let matchedGeneral = generalItems.find(
-      it => it.data?.slug === slug || it.data?.title?.toLowerCase().includes(slug?.toLowerCase())
-    )?.data;
+    // Normalizar slug para corregir posibles erratas comunes (ej: sisitemas -> sistemas)
+    const normalizedSlug = (slug || '').toLowerCase().replace(/sisitemas/g, 'sistemas');
+    const slugLower = (slug || '').toLowerCase();
+    const hasSeptiembre = slugLower.includes('septiembre') || normalizedSlug.includes('septiembre');
+    const hasAgosto = slugLower.includes('agosto') || normalizedSlug.includes('agosto');
 
-    // Si no coincide o estamos buscando la default
-    if (!matchedGeneral && (slug === 'sisitemas-cuauhtli-septiembre-2026' || !slug)) {
-      matchedGeneral = generalItems.find(it => it.data?.title?.includes('Sistemas Cuauhtli'))?.data;
+    // 1. Buscar coincidencia exacta por slug (original o normalizado)
+    let matchedGeneral = generalItems.find(it => {
+      const itemSlug = it.data?.slug?.toLowerCase();
+      return itemSlug === slugLower || itemSlug === normalizedSlug;
+    })?.data;
+
+    // 2. Si no coincide por slug exacto, buscar por coincidencia de título y mes
+    if (!matchedGeneral) {
+      matchedGeneral = generalItems.find(it => {
+        const itemTitle = (it.data?.title || '').toLowerCase();
+        const itemMes = (it.data?.mes || '').toLowerCase();
+        const itemSlug = (it.data?.slug || '').toLowerCase();
+
+        const matchBrand = itemTitle.includes('cuauhtli') || slugLower.includes('cuauhtli');
+        if (!matchBrand) return false;
+
+        if (hasSeptiembre) {
+          return itemMes.includes('septiembre') || itemSlug.includes('septiembre');
+        }
+        if (hasAgosto) {
+          return itemMes.includes('agosto') || itemSlug.includes('agosto');
+        }
+        return true;
+      })?.data;
+    }
+
+    // 3. Fallback inteligente si aún no coincide
+    if (!matchedGeneral && (!slug || slugLower.includes('cuauhtli'))) {
+      // Priorizar el mes más reciente (Septiembre sobre Agosto)
+      matchedGeneral = generalItems.find(it => 
+        it.data?.title?.includes('Sistemas Cuauhtli') && 
+        (it.data?.mes?.toLowerCase().includes('septiembre') || it.data?.slug?.includes('septiembre'))
+      )?.data || generalItems.find(it => it.data?.title?.includes('Sistemas Cuauhtli'))?.data;
     }
 
     if (!matchedGeneral) {
@@ -199,7 +230,12 @@ export async function getParrillaBySlug(slug) {
       matchedGeneral.perfilLogo ||
       matchedGeneral.fotoPerfil ||
       matchedGeneral.logotipo ||
-      matchedGeneral.imagenLogo
+      matchedGeneral.imagenLogo ||
+      matchedGeneral.logoDeMarca ||
+      matchedGeneral.logoEmpresa ||
+      matchedGeneral.imagen ||
+      matchedGeneral.marcaLogo ||
+      matchedGeneral.iconoLogo
     );
 
     const dynamicInstagram = {

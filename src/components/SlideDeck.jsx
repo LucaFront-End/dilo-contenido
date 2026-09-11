@@ -116,7 +116,13 @@ export default function SlideDeck({
     }
 
     if (pageNum === 3) {
-      return <StrategySlide estrategia={clientData.estrategia} />;
+      return (
+        <StrategySlide
+          estrategia={clientData.estrategia}
+          clientTitle={clientData.title}
+          clientLogo={clientData.logo}
+        />
+      );
     }
 
     if (pageNum === 29) {
@@ -143,14 +149,14 @@ export default function SlideDeck({
   };
 
   return (
-    <div className="slide-deck-wrapper flex flex-col items-center justify-start md:justify-center relative w-full min-h-screen bg-zinc-100 p-2 sm:p-4 md:p-6 pb-24 md:pb-6 overflow-y-auto md:overflow-hidden">
+    <div className="slide-deck-wrapper flex flex-col items-center justify-start md:justify-center relative w-full min-h-screen bg-zinc-100 p-2 sm:p-3 md:py-2.5 md:px-5 pb-20 md:pb-2.5 overflow-y-auto md:overflow-hidden">
       {/* 16:9 Slide Presentation Frame on desktop, adaptive touch-friendly card on mobile */}
       <div
         ref={deckRef}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        className="slide-frame-container relative w-full max-w-[1500px] h-auto md:aspect-video md:max-h-[85vh] bg-white rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl overflow-hidden border border-zinc-200/80 transition-all flex flex-col"
+        className="slide-frame-container relative w-full max-w-[1540px] h-auto md:aspect-video md:max-h-[89vh] bg-white rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl overflow-hidden border border-zinc-200/80 transition-all flex flex-col"
       >
         {renderSlideContent()}
 
@@ -177,7 +183,7 @@ export default function SlideDeck({
       </div>
 
       {/* Bottom Control Bar with Floating Rounded Container */}
-      <div className="deck-control-bar mt-3 md:mt-4 flex items-center justify-between gap-2 sm:gap-4 w-full max-w-[1500px] px-3 sm:px-5 py-2.5 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-lg select-none">
+      <div className="deck-control-bar mt-2 md:mt-2.5 flex items-center justify-between gap-2 sm:gap-4 w-full max-w-[1540px] px-3 sm:px-5 py-2 sm:py-2.5 bg-white/95 backdrop-blur-md rounded-2xl border border-zinc-200 shadow-lg select-none">
         {/* Left: Prev / Next Buttons */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           <button

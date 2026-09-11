@@ -99,7 +99,7 @@ export default function PostSlide({
       </div>
 
       {/* Slide Body: 2 Columns on desktop, clean vertical stack on mobile */}
-      <div className="flex-1 flex flex-col lg:flex-row items-stretch lg:items-center justify-start lg:justify-between gap-3 sm:gap-6 p-2.5 sm:p-6 md:p-8 lg:p-12 overflow-y-auto max-w-7xl mx-auto w-full z-10">
+      <div className="flex-1 flex flex-col lg:flex-row items-stretch lg:items-center justify-start lg:justify-between gap-3 sm:gap-6 p-2.5 sm:p-4 md:py-3 md:px-6 lg:py-4 lg:px-8 overflow-y-auto lg:overflow-hidden scrollbar-none [&::-webkit-scrollbar]:hidden max-w-7xl mx-auto w-full z-10">
         {/* Left Column: Media Presentation in 4:5 with arrows OUTSIDE the image */}
         <div className="w-full lg:w-1/2 flex flex-col items-center justify-center">
           <div className="flex items-center justify-center gap-1.5 sm:gap-3 w-full">
@@ -118,7 +118,7 @@ export default function PostSlide({
             )}
 
             {/* Clean 4:5 Media Frame (Seamless, unboxed) */}
-            <div className="relative w-full max-w-[320px] sm:max-w-[380px] md:max-w-[410px] aspect-[4/5] rounded-2xl overflow-hidden flex items-center justify-center group bg-transparent">
+            <div className="relative w-full max-w-[320px] sm:max-w-[370px] md:max-w-[400px] aspect-[4/5] rounded-2xl overflow-hidden flex items-center justify-center group bg-transparent">
               {isVideo ? (
                 <div className="w-full h-full bg-zinc-950 rounded-2xl overflow-hidden flex items-center justify-center relative">
                   <video
@@ -182,12 +182,12 @@ export default function PostSlide({
 
           {/* Carousel thumbnails strip (Gallery underneath) */}
           {isCarousel && !isVideo && (
-            <div className="flex items-center justify-center gap-1.5 sm:gap-2 mt-2.5 sm:mt-3.5 overflow-x-auto max-w-full pb-1">
+            <div className="flex items-center justify-center gap-1.5 sm:gap-2 mt-2 sm:mt-2.5 overflow-x-auto max-w-full pb-1 scrollbar-none">
               {images.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveImageIdx(idx)}
-                  className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
+                  className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
                     idx === activeImageIdx
                       ? 'border-orange-500 scale-105 shadow-md shadow-orange-500/20'
                       : 'border-transparent opacity-60 hover:opacity-100'
@@ -239,15 +239,15 @@ export default function PostSlide({
         </div>
 
         {/* Right Column: Copy & Actions */}
-        <div className="w-full lg:w-1/2 flex flex-col justify-between max-w-xl mt-2 sm:mt-4 lg:mt-0">
+        <div className="w-full lg:w-1/2 flex flex-col justify-between max-w-xl mt-2 sm:mt-3 lg:mt-0">
           {/* Top Bar: Orange COPY Pill + Client Actions (Desktop only) */}
-          <div className="hidden lg:flex items-center justify-between gap-2 mb-3">
+          <div className="hidden lg:flex items-center justify-between gap-2 mb-2">
             {/* Orange COPY Pill faithful to PDF */}
             <div className="copy-badge-pill">
               <svg viewBox="0 0 24 24" className="w-5 h-5 fill-none stroke-current stroke-2">
                 <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
               </svg>
-              <span className="font-extrabold tracking-wider font-space text-lg">COPY</span>
+              <span className="font-extrabold tracking-wider font-space text-base sm:text-lg">COPY</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -295,7 +295,7 @@ export default function PostSlide({
           {commentsCount > 0 && (
             <div
               onClick={() => setIsCommentModalOpen(true)}
-              className="mb-3 px-3.5 py-2 bg-amber-50/90 border border-amber-200 rounded-xl flex items-center justify-between cursor-pointer hover:bg-amber-100/90 transition-colors"
+              className="mb-2 px-3 py-1.5 bg-amber-50/90 border border-amber-200 rounded-xl flex items-center justify-between cursor-pointer hover:bg-amber-100/90 transition-colors"
             >
               <div className="flex items-center gap-2 text-xs font-semibold text-amber-900">
                 <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
@@ -311,16 +311,16 @@ export default function PostSlide({
             </div>
           )}
 
-          {/* Copy Text Body (PROTECTED FROM COPYING) */}
+          {/* Copy Text Body (PROTECTED FROM COPYING, NO NATIVE SCROLLBAR) */}
           <div
-            className="bg-zinc-50/70 border border-zinc-200/80 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 text-xs sm:text-sm text-zinc-800 leading-relaxed max-h-[340px] sm:max-h-[380px] overflow-y-auto font-sans shadow-inner space-y-2 sm:space-y-3 select-none"
+            className="bg-zinc-50/70 border border-zinc-200/80 rounded-xl sm:rounded-2xl p-3 sm:p-4 text-xs sm:text-sm text-zinc-800 leading-relaxed max-h-[350px] sm:max-h-[390px] lg:max-h-[430px] overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] font-sans shadow-inner space-y-1.5 sm:space-y-2 select-none"
             style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none', msUserSelect: 'none' }}
             onCopy={(e) => { e.preventDefault(); return false; }}
             onContextMenu={(e) => e.preventDefault()}
           >
-            <div className="flex items-center justify-between pb-2 border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
+            <div className="flex items-center justify-between pb-1.5 border-b border-zinc-200 text-[10px] sm:text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
               <span>Copy de la Publicación</span>
-              <span className="text-[10px] text-zinc-400 font-normal">Solo lectura</span>
+              <span className="text-[9px] sm:text-[10px] text-zinc-400 font-normal">Solo lectura</span>
             </div>
             {slide.copy ? (
               slide.copy.split('\n\n').map((paragraph, pIdx) => (

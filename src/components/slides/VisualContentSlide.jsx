@@ -119,19 +119,19 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
       </div>
 
       {/* Slide Inner Body */}
-      <div className="flex-1 flex flex-col lg:flex-row items-center justify-between gap-4 md:gap-6 p-3 sm:p-6 md:p-8 overflow-y-auto max-w-7xl mx-auto w-full">
+      <div className="flex-1 flex flex-col lg:flex-row items-center justify-around gap-3 md:gap-6 p-2 sm:p-4 md:py-2.5 md:px-6 overflow-y-auto lg:overflow-hidden max-w-6xl mx-auto w-full scrollbar-none">
         {/* Left Side: 3x3 High-Res Grid in 4:5 Instagram proportion (Centered & uncropped) */}
-        <div className="w-full lg:w-1/2 flex flex-col justify-center">
-          <div className="mb-3 flex items-center justify-between">
+        <div className="w-full lg:w-1/2 flex flex-col justify-center max-w-[360px] sm:max-w-[400px] lg:max-w-[390px] xl:max-w-[420px]">
+          <div className="mb-2 sm:mb-2.5 flex items-center justify-between">
             <div>
-              <h3 className="text-lg sm:text-xl md:text-2xl font-black text-zinc-900 font-space tracking-tight">
+              <h3 className="text-base sm:text-lg md:text-xl font-black text-zinc-900 font-space tracking-tight">
                 Vista de Feed Instagram
               </h3>
-              <p className="text-[11px] sm:text-xs text-zinc-500 font-medium">
-                Parrilla mensual de publicaciones interconectadas en formato 4:5. Toca para ver su detalle.
+              <p className="text-[10px] sm:text-xs text-zinc-500 font-medium">
+                Parrilla mensual de publicaciones interconectadas en formato 4:5.
               </p>
             </div>
-            <span className="text-[10px] sm:text-xs font-bold px-2.5 py-1 bg-orange-100 text-orange-700 rounded-full shrink-0">
+            <span className="text-[9px] sm:text-[10px] font-bold px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full shrink-0">
               9 Diseños · 4:5
             </span>
           </div>
@@ -166,7 +166,7 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
           </div>
 
           {/* 3x3 Grid with 4:5 Instagram vertical format */}
-          <div className="grid grid-cols-3 gap-2 md:gap-3 bg-zinc-100 p-2 sm:p-3 rounded-2xl border border-zinc-200 shadow-inner">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 bg-zinc-100 p-1.5 sm:p-2.5 rounded-2xl border border-zinc-200 shadow-inner">
             {feedItems.map((item) => (
               <div
                 key={item.id}
@@ -181,20 +181,20 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
                     e.target.src = `/assets/slides/slide_${String(item.targetSlide).padStart(2, '0')}.png`;
                   }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-1.5 text-white">
-                  <span className="text-[9px] uppercase font-bold text-orange-400">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-1 text-white">
+                  <span className="text-[8px] uppercase font-bold text-orange-400">
                     Slide #{item.targetSlide}
                   </span>
-                  <span className="text-[10px] font-semibold line-clamp-2 leading-tight">
+                  <span className="text-[9px] font-semibold line-clamp-2 leading-tight">
                     {item.title}
                   </span>
                 </div>
                 {item.badge && (
-                  <span className="absolute top-1 right-1 px-1.5 py-0.5 bg-black/75 backdrop-blur-sm text-white text-[8px] font-bold rounded">
+                  <span className="absolute top-1 right-1 px-1 py-0.2 bg-black/75 backdrop-blur-sm text-white text-[7px] font-bold rounded">
                     {item.badge}
                   </span>
                 )}
-                <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-orange-600/90 text-white text-[8px] font-bold rounded">
+                <span className="absolute bottom-1 left-1 px-1 py-0.2 bg-orange-600/90 text-white text-[7px] font-bold rounded">
                   #{item.targetSlide}
                 </span>
               </div>
@@ -203,8 +203,8 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
         </div>
 
         {/* Right Side: Realistic Instagram Smartphone Mockup */}
-        <div className="hidden lg:flex w-full lg:w-1/2 justify-center items-center">
-          <div className="smartphone-mockup shadow-2xl">
+        <div className="hidden lg:flex w-full lg:w-1/2 justify-center items-center shrink-0">
+          <div className="smartphone-mockup shadow-xl scale-[0.96] xl:scale-100 origin-center">
             {/* Dynamic Island / Speaker */}
             <div className="mockup-island" />
 
