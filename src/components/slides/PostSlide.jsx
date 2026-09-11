@@ -88,11 +88,11 @@ export default function PostSlide({
         </div>
       </div>
 
-      {/* Authentic Dilo Graphics on Right (Desktop only) */}
+      {/* Authentic Dilo Graphics on Right (Desktop only - positioned to never overlap copy) */}
       <img
         src="/assets/graphics/dilo-right-motif.png"
         alt=""
-        className="absolute top-8 md:top-12 -right-2 md:right-4 h-[65%] sm:h-[72%] md:h-[78%] max-h-[560px] object-contain pointer-events-none select-none hidden xl:block z-0 opacity-70"
+        className="absolute top-10 md:top-14 -right-16 2xl:-right-8 h-[45%] md:h-[55%] max-h-[420px] object-contain pointer-events-none select-none hidden xl:block z-0 opacity-25"
       />
 
       {/* Slide Body: 2 Columns on desktop, clean vertical stack on mobile */}
@@ -235,8 +235,8 @@ export default function PostSlide({
           </div>
         </div>
 
-        {/* Right Column: Copy & Actions */}
-        <div className="w-full lg:w-1/2 flex flex-col justify-between max-w-xl mt-2 sm:mt-3 lg:mt-0">
+        {/* Right Column: Copy & Actions (Constrained and spaced to never overlap background motif) */}
+        <div className="w-full lg:w-1/2 flex flex-col justify-between max-w-lg lg:mr-8 xl:mr-14 2xl:mr-20 mt-2 sm:mt-3 lg:mt-0 relative z-10">
           {/* Top Bar: Orange COPY Pill + Client Actions (Desktop only) */}
           <div className="hidden lg:flex items-center justify-between gap-2 mb-2">
             {/* Orange COPY Pill faithful to PDF */}
@@ -308,9 +308,9 @@ export default function PostSlide({
             </div>
           )}
 
-          {/* Copy Text Body (PROTECTED FROM COPYING, NO NATIVE SCROLLBAR) */}
+          {/* Copy Text Body (SOLID OPAQUE WHITE BACKGROUND TO NEVER LET BACKGROUND SHAPES OVERLAP) */}
           <div
-            className="bg-zinc-50/70 border border-zinc-200/80 rounded-xl sm:rounded-2xl p-3 sm:p-4 text-xs sm:text-sm text-zinc-800 leading-relaxed max-h-[350px] sm:max-h-[390px] lg:max-h-[430px] overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] font-sans shadow-inner space-y-1.5 sm:space-y-2 select-none"
+            className="bg-white border border-zinc-200/90 rounded-xl sm:rounded-2xl p-3.5 sm:p-4 text-xs sm:text-sm text-zinc-800 leading-relaxed max-h-[350px] sm:max-h-[390px] lg:max-h-[430px] overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] font-sans shadow-sm space-y-1.5 sm:space-y-2 select-none relative z-10"
             style={{ userSelect: 'none', WebkitUserSelect: 'none', MozUserSelect: 'none', msUserSelect: 'none' }}
             onCopy={(e) => { e.preventDefault(); return false; }}
             onContextMenu={(e) => e.preventDefault()}
