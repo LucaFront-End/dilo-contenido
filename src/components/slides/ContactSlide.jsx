@@ -34,11 +34,11 @@ export default function ContactSlide() {
     <div className="slide-content contact-slide relative w-full h-full flex flex-col justify-between p-6 sm:p-8 md:p-14 overflow-hidden select-none bg-white">
       {/* Original Dilo Vector Graphics Faithful to PDF Page 30 */}
 
-      {/* Left: Authentic Single Black Swirl / Rulo */}
+      {/* Left: Authentic Single Black Swirl / Rulo emerging smaller from top-left corner */}
       <img
         src="/assets/graphics/left-swirl.png"
         alt=""
-        className="absolute -top-4 -left-2 md:top-0 md:left-0 w-24 sm:w-28 md:w-36 lg:w-44 object-contain pointer-events-none select-none z-0 opacity-80"
+        className="absolute -top-1 -left-1 sm:top-0 sm:left-0 w-12 sm:w-14 md:w-18 lg:w-20 max-h-[140px] sm:max-h-[170px] md:max-h-[210px] object-contain pointer-events-none select-none z-0 opacity-75"
       />
 
       {/* Right Side: Authentic Pen Nib + Two Swirls (Punta de la pluma y los dos rulos) */}
