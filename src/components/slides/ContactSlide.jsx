@@ -34,11 +34,11 @@ export default function ContactSlide() {
     <div className="slide-content contact-slide relative w-full h-full flex flex-col justify-between p-6 sm:p-8 md:p-14 overflow-hidden select-none bg-white">
       {/* Original Dilo Vector Graphics Faithful to PDF Page 30 */}
 
-      {/* Left: Authentic Single Black Swirl / Rulo emerging smaller from top-left corner */}
+      {/* Left: Authentic Single Black Swirl / Rulo emerging smaller from top-left corner (Desktop/Tablet only to avoid logo/text overlap on mobile) */}
       <img
         src="/assets/graphics/left-swirl.png"
         alt=""
-        className="absolute -top-1 -left-1 sm:top-0 sm:left-0 w-12 sm:w-14 md:w-18 lg:w-20 max-h-[140px] sm:max-h-[170px] md:max-h-[210px] object-contain pointer-events-none select-none z-0 opacity-75"
+        className="absolute -top-1 -left-1 sm:top-0 sm:left-0 w-12 sm:w-14 md:w-18 lg:w-20 max-h-[140px] sm:max-h-[170px] md:max-h-[210px] object-contain pointer-events-none select-none z-0 opacity-75 hidden sm:block"
       />
 
       {/* Right Side: Authentic Pen Nib + Two Swirls (Punta de la pluma y los dos rulos) */}
@@ -50,15 +50,15 @@ export default function ContactSlide() {
 
       {/* Main Center Area: Left-Structured Layout matching Slide 1 */}
       <div className="relative z-10 my-auto w-full max-w-6xl mx-auto py-2 md:py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-12 items-center">
           {/* Left Column: Branding, Big Impact Typography & Value proposition (7 cols) */}
           <div className="lg:col-span-7 flex flex-col justify-center">
             {/* Official Dilo Digital Logo Lockup */}
-            <div className="mb-4 sm:mb-6">
+            <div className="mb-3 sm:mb-6">
               <img
                 src="/assets/logo/dilo-logo-black.png"
                 alt="Dilo Digital - Agencia de Marketing Digital"
-                className="h-10 sm:h-12 md:h-16 w-auto object-contain select-none"
+                className="h-11 sm:h-12 md:h-16 w-auto object-contain select-none"
               />
             </div>
 

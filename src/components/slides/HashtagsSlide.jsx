@@ -92,8 +92,14 @@ export default function HashtagsSlide({ hashtags }) {
           {categories.map((cat) => (
             <button
               key={cat.id}
-              onClick={() => setActiveTab(cat.id)}
-              className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveTab(cat.id);
+              }}
+              onTouchEnd={(e) => {
+                e.stopPropagation();
+              }}
+              className={`flex-1 py-2 px-2 rounded-lg text-xs font-bold transition-all text-center cursor-pointer ${
                 activeTab === cat.id
                   ? 'bg-white text-zinc-900 shadow-sm border border-zinc-200'
                   : 'text-zinc-500 hover:text-zinc-900'

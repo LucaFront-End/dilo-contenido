@@ -1,10 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Calendar as CalendarIcon,
   CheckCircle2,
   Clock,
   Play,
-  ChevronRight
+  ChevronRight,
+  X,
+  List,
+  Grid as GridIcon
 } from 'lucide-react';
 import { getOptimizedWixImage } from '../../services/wixService';
 
@@ -21,6 +24,8 @@ export default function CalendarSlide({
   approvedPosts = {},
   onSelectSlide
 }) {
+  const [mobileView, setMobileView] = useState('calendar'); // 'calendar' | 'agenda'
+  const [selectedDayMobile, setSelectedDayMobile] = useState(null); // { dayNumber, posts }
   // Filtrar posts de contenido con useMemo para rendimiento instantáneo
   const contentPosts = useMemo(() => {
     return (clientData?.slides || []).filter((s) => s.wixPostId);
@@ -95,30 +100,56 @@ export default function CalendarSlide({
 
       {/* Header Compacto de la Lámina */}
       <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 pb-2.5 border-b border-zinc-100 shrink-0">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
-              <CalendarIcon className="w-3 h-3 text-orange-600" />
-              Cronograma de Publicación
-            </span>
-            <span className="text-[11px] text-zinc-400 font-mono">
-              {clientData?.title || 'Dilo Digital'}
-            </span>
+        <div className="flex items-center justify-between w-full sm:w-auto">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                <CalendarIcon className="w-3 h-3 text-orange-600" />
+                Cronograma de Publicación
+              </span>
+              <span className="text-[11px] text-zinc-400 font-mono">
+                {clientData?.title || 'Dilo Digital'}
+              </span>
+            </div>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-black text-zinc-900 font-space tracking-tight mt-0.5">
+              {MONTH_NAMES_ES[monthIdx].toUpperCase()} {year}
+            </h2>
           </div>
-          <h2 className="text-lg sm:text-xl md:text-2xl font-black text-zinc-900 font-space tracking-tight mt-0.5">
-            {MONTH_NAMES_ES[monthIdx].toUpperCase()} {year}
-          </h2>
+
+          {/* Selector de Vista en Mobile: Mes vs Lista */}
+          <div className="flex sm:hidden items-center bg-zinc-100 p-0.5 rounded-xl border border-zinc-200 shrink-0">
+            <button
+              onClick={() => setMobileView('calendar')}
+              className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
+                mobileView === 'calendar'
+                  ? 'bg-white text-zinc-900 shadow-xs'
+                  : 'text-zinc-500 hover:text-zinc-900'
+              }`}
+            >
+              Mes
+            </button>
+            <button
+              onClick={() => setMobileView('agenda')}
+              className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
+                mobileView === 'agenda'
+                  ? 'bg-white text-zinc-900 shadow-xs'
+                  : 'text-zinc-500 hover:text-zinc-900'
+              }`}
+            >
+              Lista ({totalPosts})
+            </button>
+          </div>
         </div>
 
         {/* Resumen de aprobación y conteo */}
         <div className="flex items-center gap-2 shrink-0">
-          <div className="px-3 py-1 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-700 text-xs font-bold flex items-center gap-1.5">
+          <div className="px-2.5 sm:px-3 py-1 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-700 text-[11px] sm:text-xs font-bold flex items-center gap-1.5">
             <Clock className="w-3.5 h-3.5 text-zinc-500" />
-            <span>{totalPosts} Posts Programados</span>
+            <span>{totalPosts} Posts</span>
           </div>
 
           <div
-            className={`px-3 py-1 rounded-xl border text-xs font-bold flex items-center gap-1.5 ${
+            className={`px-2.5 sm:px-3 py-1 rounded-xl border text-[11px] sm:text-xs font-bold flex items-center gap-1.5 ${
               approvalPercent === 100
                 ? 'bg-emerald-500 text-white border-emerald-600 shadow-sm'
                 : approvalPercent > 0
@@ -132,14 +163,14 @@ export default function CalendarSlide({
               }`}
             />
             <span>
-              {approvalPercent}% Aprobado ({approvedCount}/{totalPosts})
+              {approvalPercent}% Aprobado <span className="hidden sm:inline">({approvedCount}/{totalPosts})</span>
             </span>
           </div>
         </div>
       </div>
 
       {/* Grilla del Calendario (100% en pantalla, sin scroll) */}
-      <div className="relative z-10 flex-1 flex flex-col min-h-0 overflow-visible">
+      <div className={`relative z-10 flex-1 flex flex-col min-h-0 overflow-visible ${mobileView === 'agenda' ? 'hidden sm:flex' : 'flex'}`}>
         {/* Cabecera de días de la semana */}
         <div className="grid grid-cols-7 gap-1 sm:gap-1.5 mb-1 text-center shrink-0">
           {WEEKDAYS.map((wd, i) => (
@@ -214,8 +245,40 @@ export default function CalendarSlide({
                   )}
                 </div>
 
-                {/* Contenido del Día (Sin scroll interno) */}
-                <div className="flex-1 min-h-0 flex flex-col justify-center gap-1">
+                {/* Mobile view (<sm): clean tap-friendly cell without squished text */}
+                <div
+                  onClick={() => {
+                    if (hasPosts) {
+                      setSelectedDayMobile({ dayNumber, posts: dayPosts });
+                    }
+                  }}
+                  className={`sm:hidden flex-1 flex items-center justify-center p-0.5 cursor-pointer ${
+                    hasPosts ? 'active:scale-95' : ''
+                  }`}
+                >
+                  {hasPosts && (
+                    <div className="w-7 h-7 rounded-lg overflow-hidden bg-zinc-900 border border-orange-400 shadow-2xs relative">
+                      <img
+                        src={getOptimizedWixImage(
+                          dayPosts[0].posterUrl || dayPosts[0].images?.[0] || dayPosts[0].postImages?.[0] || '/assets/logo/dilo-logo-black.png',
+                          80, 80, 75
+                        )}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                      {dayPosts.length > 1 && (
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                          <span className="text-[9px] font-black text-white font-mono leading-none">
+                            +{dayPosts.length}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Contenido del Día para Desktop (Sin scroll interno) */}
+                <div className="hidden sm:flex flex-1 min-h-0 flex-col justify-center gap-1">
                   {dayPosts.length === 1 && (() => {
                     const post = dayPosts[0];
                     const isApproved = !!approvedPosts[post.pageNumber];
@@ -423,16 +486,176 @@ export default function CalendarSlide({
         </div>
       </div>
 
+      {/* Vista Cronograma / Lista en mobile */}
+      {mobileView === 'agenda' && (
+        <div className="sm:hidden relative z-10 flex-1 overflow-y-auto space-y-2.5 py-1 pr-1 scrollbar-none">
+          {Object.entries(postsByDay)
+            .sort(([a], [b]) => Number(a) - Number(b))
+            .map(([dayNum, pList]) => (
+              <div key={dayNum} className="bg-zinc-50 rounded-2xl border border-zinc-200 p-2.5 space-y-2">
+                <div className="flex items-center justify-between pb-1 border-b border-zinc-200/60">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-orange-600 text-white font-mono font-black text-xs flex items-center justify-center shadow-xs">
+                      {dayNum}
+                    </span>
+                    <span className="text-xs font-black text-zinc-800 font-space">
+                      {dayNum} de {monthName}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">
+                    {pList.length} {pList.length === 1 ? 'post' : 'posts'}
+                  </span>
+                </div>
+
+                <div className="space-y-1.5">
+                  {pList.map((post) => {
+                    const isApproved = !!approvedPosts[post.pageNumber];
+                    const thumb = post.posterUrl || post.images?.[0] || post.postImages?.[0] || '/assets/logo/dilo-logo-black.png';
+                    return (
+                      <div
+                        key={post.id || post.pageNumber}
+                        onClick={() => onSelectSlide && onSelectSlide(post.pageNumber - 1)}
+                        className="p-2 rounded-xl bg-white border border-zinc-200 flex items-center gap-2.5 cursor-pointer active:scale-[0.98] transition-all"
+                      >
+                        <div className="w-11 h-11 rounded-lg overflow-hidden bg-zinc-900 shrink-0 relative">
+                          <img
+                            src={getOptimizedWixImage(thumb, 120, 120, 75)}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                          {post.isVideo && (
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                              <Play className="w-3 h-3 text-white fill-white" />
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-black text-zinc-900">
+                              Lámina #{post.pageNumber}
+                            </span>
+                            <span className={`text-[8.5px] font-bold px-1.5 py-0.2 rounded-full ${
+                              isApproved ? 'bg-emerald-100 text-emerald-800' : 'bg-zinc-100 text-zinc-600'
+                            }`}>
+                              {isApproved ? '✓ Aprobado' : 'Pendiente'}
+                            </span>
+                          </div>
+                          <span className="text-[10px] font-semibold text-orange-600 uppercase block truncate">
+                            {post.rawType || post.type}
+                          </span>
+                        </div>
+
+                        <ChevronRight className="w-4 h-4 text-zinc-400 shrink-0" />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+        </div>
+      )}
+
+      {/* Modal / Bottom Sheet para día seleccionado en Mobile */}
+      {selectedDayMobile && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end justify-center p-0 sm:hidden"
+          onClick={() => setSelectedDayMobile(null)}
+        >
+          <div
+            className="bg-white w-full rounded-t-3xl max-h-[82vh] flex flex-col p-4 shadow-2xl border-t border-zinc-200 animate-in slide-in-from-bottom duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-100 shrink-0">
+              <div>
+                <span className="text-[10px] font-black uppercase text-orange-600 tracking-wider">
+                  Publicaciones del Día
+                </span>
+                <h3 className="text-base font-black text-zinc-900 font-space">
+                  {selectedDayMobile.dayNumber} de {monthName} {year}
+                </h3>
+              </div>
+              <button
+                onClick={() => setSelectedDayMobile(null)}
+                className="p-1.5 rounded-full bg-zinc-100 text-zinc-600 hover:bg-zinc-200 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-3 space-y-2.5">
+              {selectedDayMobile.posts.map((post) => {
+                const isApproved = !!approvedPosts[post.pageNumber];
+                const thumb = post.posterUrl || post.images?.[0] || post.postImages?.[0] || '/assets/logo/dilo-logo-black.png';
+                return (
+                  <div
+                    key={post.id || post.pageNumber}
+                    onClick={() => {
+                      setSelectedDayMobile(null);
+                      if (onSelectSlide) onSelectSlide(post.pageNumber - 1);
+                    }}
+                    className="p-3 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-transform"
+                  >
+                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-zinc-900 shrink-0 relative">
+                      <img
+                        src={getOptimizedWixImage(thumb, 160, 160, 80)}
+                        alt=""
+                        className="w-full h-full object-cover"
+                      />
+                      {post.isVideo && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <Play className="w-4 h-4 text-white fill-white" />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-xs font-black text-zinc-900">
+                          Lámina #{post.pageNumber}
+                        </span>
+                        <span
+                          className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
+                            isApproved
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                              : 'bg-amber-100 text-amber-800 border border-amber-200'
+                          }`}
+                        >
+                          {isApproved ? '✓ Aprobado' : '⏳ Pendiente'}
+                        </span>
+                      </div>
+                      <span className="text-[11px] font-bold text-orange-600 uppercase block mt-0.5">
+                        {post.rawType || post.type}
+                      </span>
+                      {post.copy && (
+                        <p className="text-[10px] text-zinc-500 line-clamp-1 mt-0.5">
+                          {post.copy}
+                        </p>
+                      )}
+                    </div>
+
+                    <ChevronRight className="w-5 h-5 text-zinc-400 shrink-0" />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Pie de Lámina Compacto */}
       <div className="relative z-10 pt-2 border-t border-zinc-100 flex items-center justify-between text-[11px] text-zinc-400 shrink-0 mt-1">
         <div className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-orange-500 inline-block" />
-          <span>
+          <span className="hidden sm:inline">
             Pasa el cursor sobre los días para ver detalles completos o haz clic para saltar a la lámina.
           </span>
+          <span className="sm:hidden">
+            Toca cualquier día con publicaciones para ver sus detalles.
+          </span>
         </div>
-        <div className="font-mono text-zinc-500">
-          Diapositiva #{slide?.pageNumber || 'Final'} · Dilo Digital
+        <div className="font-mono text-zinc-500 text-[10px] sm:text-[11px]">
+          Lámina #{slide?.pageNumber || '21'}
         </div>
       </div>
     </div>

@@ -88,25 +88,43 @@ export default function SlideDeck({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [totalSlides]);
 
-  // Touch swipe support for mobile
+  // Touch swipe support for mobile (with tap and vertical scroll rejection)
   const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
   const touchEndX = useRef(0);
+  const touchEndY = useRef(0);
+  const isSwiping = useRef(false);
 
   const handleTouchStart = (e) => {
+    if (!e.targetTouches || e.targetTouches.length === 0) return;
     touchStartX.current = e.targetTouches[0].clientX;
+    touchStartY.current = e.targetTouches[0].clientY;
+    touchEndX.current = e.targetTouches[0].clientX;
+    touchEndY.current = e.targetTouches[0].clientY;
+    isSwiping.current = false;
   };
 
   const handleTouchMove = (e) => {
+    if (!e.targetTouches || e.targetTouches.length === 0) return;
     touchEndX.current = e.targetTouches[0].clientX;
+    touchEndY.current = e.targetTouches[0].clientY;
+    isSwiping.current = true;
   };
 
   const handleTouchEnd = () => {
-    const diff = touchStartX.current - touchEndX.current;
-    if (diff > 50) {
-      nextSlide();
-    } else if (diff < -50) {
-      prevSlide();
+    if (!isSwiping.current) return; // Simple tap! Never change slides on tap
+    const diffX = touchStartX.current - touchEndX.current;
+    const diffY = touchStartY.current - touchEndY.current;
+
+    // Only trigger slide transition if horizontal gesture is deliberate and exceeds vertical drift
+    if (Math.abs(diffX) > 55 && Math.abs(diffX) > Math.abs(diffY) * 1.4) {
+      if (diffX > 0) {
+        nextSlide();
+      } else {
+        prevSlide();
+      }
     }
+    isSwiping.current = false;
   };
 
   // Render proper slide component dynamically
@@ -262,9 +280,9 @@ export default function SlideDeck({
             }`}
             title={`Aprobadas: ${approvedCount} de ${totalContentPosts} publicaciones`}
           >
-            <Check className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="font-extrabold">{approvalPercent}% Aprobado</span>
-            <span className="text-[10px] opacity-75 hidden sm:inline font-bold">
+            <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span className="font-extrabold">{approvalPercent}% <span className="hidden sm:inline">Aprobado</span></span>
+            <span className="text-[10px] opacity-75 hidden md:inline font-bold">
               ({approvedCount}/{totalContentPosts})
             </span>
           </div>
