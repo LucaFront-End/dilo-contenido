@@ -117,16 +117,16 @@ export default function ContactSlide() {
         </div>
       </div>
 
-      {/* Clean Footer Bar identical to Cover Slide 1 */}
-      <div className="relative z-10 flex items-center justify-between text-xs font-semibold text-zinc-400 tracking-wider pt-3 sm:pt-4 border-t border-zinc-100 mt-3 md:mt-0">
+      {/* Clean Footer Bar */}
+      <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-1 sm:gap-2 text-xs font-semibold text-zinc-400 tracking-wider pt-2.5 sm:pt-4 border-t border-zinc-100 mt-2 md:mt-0">
         <div className="flex items-center gap-1.5 sm:gap-2">
           <span className="text-orange-500 font-black text-base sm:text-lg leading-none select-none">+</span>
           <span className="uppercase text-zinc-500 font-bold text-[9px] sm:text-xs">
             Agencia de Marketing Digital
           </span>
         </div>
-        <div className="text-zinc-400 text-[10px] sm:text-[11px] font-medium uppercase tracking-wider">
-          Dilo Digital © 2026 · Todos los derechos reservados
+        <div className="text-zinc-400 text-[9px] sm:text-[11px] font-medium uppercase tracking-wider text-center sm:text-right">
+          Dilo Digital © 2026 <span className="hidden sm:inline">· Todos los derechos reservados</span>
         </div>
       </div>
     </div>
