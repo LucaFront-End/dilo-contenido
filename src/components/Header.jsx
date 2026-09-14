@@ -23,7 +23,7 @@ export default function Header({
           <button
             onClick={onOpenPortal}
             className="flex items-center gap-1.5 sm:gap-2 group hover:opacity-80 transition-opacity cursor-pointer shrink-0"
-            title="Ir al Portal General de Parrillas"
+            title={`Ir al portal de parrillas de ${clientTitle || 'la marca'}`}
           >
             <div className="dilo-brand-logo flex items-center">
               <img
@@ -49,7 +49,7 @@ export default function Header({
             <button
               onClick={onOpenBrandPortal || onOpenPortal}
               className="px-2 sm:px-2.5 py-1 text-[11px] sm:text-xs font-semibold rounded-lg bg-zinc-100 hover:bg-orange-50 text-zinc-700 hover:text-orange-600 border border-zinc-200 transition-colors flex items-center gap-1 cursor-pointer shrink-0"
-              title={`Ver todas las parrillas de ${clientTitle || 'la marca'}`}
+              title={`Ver historial de parrillas de ${clientTitle || 'la marca'}`}
             >
               <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-orange-500" />
               <span className="hidden md:inline">Parrillas de {clientTitle ? clientTitle.split(' ')[0] : 'Marca'}</span>

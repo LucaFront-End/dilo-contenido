@@ -254,20 +254,15 @@ export default function App() {
     window.history.pushState({}, '', `/parrillas/${cleanSlug}`);
     setCurrentSlug(cleanSlug);
     setShowPortalHome(false);
-    setBrandFilter(null);
   };
 
   if (showPortalHome) {
+    const activeBrand = brandFilter || clientData?.title || sessionStorage.getItem('dilo_active_brand') || 'Sistemas Cuauhtli';
     return (
       <HomePortal
         onSelectSlug={handleSelectSlug}
         defaultSlug={currentSlug}
-        brandFilter={brandFilter}
-        onClearBrandFilter={() => {
-          setBrandFilter(null);
-          sessionStorage.removeItem('dilo_active_brand');
-          window.history.pushState({}, '', '/parrillas/portal');
-        }}
+        brandFilter={activeBrand}
       />
     );
   }
