@@ -40,7 +40,12 @@ export default function App() {
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [toast, setToast] = useState(null);
-  const [brandFilter, setBrandFilter] = useState(null);
+  const [brandFilter, setBrandFilter] = useState(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const queryBrand = searchParams.get('brand');
+    if (queryBrand) return decodeURIComponent(queryBrand);
+    return sessionStorage.getItem('dilo_active_brand') || null;
+  });
   
   // Independent post approvals stored per client slug in localStorage
   const [approvedPosts, setApprovedPosts] = useState(() => {
@@ -97,6 +102,11 @@ export default function App() {
   useEffect(() => {
     const handlePopState = () => {
       let path = window.location.pathname.replace(/^\/|\/$/g, '');
+      const searchParams = new URLSearchParams(window.location.search);
+      const queryBrand = searchParams.get('brand');
+      if (queryBrand) {
+        setBrandFilter(decodeURIComponent(queryBrand));
+      }
       if (path === 'portal' || path === 'parrillas/portal') {
         setShowPortalHome(true);
       } else {
@@ -120,6 +130,9 @@ export default function App() {
     try {
       const data = await getParrillaBySlug(slugToLoad);
       setClientData(data);
+      if (data?.title) {
+        sessionStorage.setItem('dilo_active_brand', data.title);
+      }
       setIsWixLive(true);
 
       // Keep browser address bar clean at /parrillas/:slug
@@ -250,7 +263,11 @@ export default function App() {
         onSelectSlug={handleSelectSlug}
         defaultSlug={currentSlug}
         brandFilter={brandFilter}
-        onClearBrandFilter={() => setBrandFilter(null)}
+        onClearBrandFilter={() => {
+          setBrandFilter(null);
+          sessionStorage.removeItem('dilo_active_brand');
+          window.history.pushState({}, '', '/parrillas/portal');
+        }}
       />
     );
   }
@@ -288,13 +305,17 @@ export default function App() {
         isWixLive={isWixLive}
         onRefreshWix={handleRefreshWix}
         onOpenPortal={() => {
-          setBrandFilter(null);
-          window.history.pushState({}, '', '/parrillas/portal');
+          const brand = clientData?.title || sessionStorage.getItem('dilo_active_brand') || null;
+          setBrandFilter(brand);
+          const targetUrl = brand ? `/parrillas/portal?brand=${encodeURIComponent(brand)}` : '/parrillas/portal';
+          window.history.pushState({}, '', targetUrl);
           setShowPortalHome(true);
         }}
         onOpenBrandPortal={() => {
-          setBrandFilter(clientData.title);
-          window.history.pushState({}, '', '/parrillas/portal');
+          const brand = clientData?.title || sessionStorage.getItem('dilo_active_brand') || null;
+          setBrandFilter(brand);
+          const targetUrl = brand ? `/parrillas/portal?brand=${encodeURIComponent(brand)}` : '/parrillas/portal';
+          window.history.pushState({}, '', targetUrl);
           setShowPortalHome(true);
         }}
       />
