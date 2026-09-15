@@ -99,14 +99,9 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
         {/* Left Side: 3x3 High-Res Grid in 4:5 Instagram proportion (Centered & uncropped) */}
         <div className="w-full lg:w-1/2 flex flex-col justify-center max-w-[360px] sm:max-w-[400px] lg:max-w-[390px] xl:max-w-[420px]">
           <div className="mb-2 sm:mb-2.5 flex items-center justify-between">
-            <div>
-              <h3 className="text-base sm:text-lg md:text-xl font-black text-zinc-900 font-space tracking-tight">
-                Vista de Feed Instagram
-              </h3>
-              <p className="text-[10px] sm:text-xs text-zinc-500 font-medium">
-                Parrilla mensual de publicaciones interconectadas para tu perfil.
-              </p>
-            </div>
+            <h3 className="text-base sm:text-lg md:text-xl font-black text-zinc-900 font-space tracking-tight">
+              Vista de Feed Instagram
+            </h3>
             <span className="text-[9px] sm:text-[10px] font-bold px-2.5 py-1 bg-orange-100 text-orange-700 rounded-full shrink-0">
               {feedItems.length} Publicaciones
             </span>
