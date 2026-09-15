@@ -40,6 +40,7 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
       return {
         id: post.id || `feed-item-${idx}`,
         targetSlide: post.pageNumber || idx + 4,
+        postNumber: idx + 1,
         title: cleanTitle,
         image: img,
         badge: badge.toUpperCase(),
@@ -103,11 +104,11 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
                 Vista de Feed Instagram
               </h3>
               <p className="text-[10px] sm:text-xs text-zinc-500 font-medium">
-                Parrilla mensual de publicaciones interconectadas en formato 4:5.
+                Parrilla mensual de publicaciones interconectadas para tu perfil.
               </p>
             </div>
-            <span className="text-[9px] sm:text-[10px] font-bold px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full shrink-0">
-              {feedItems.length} Diseños · 4:5
+            <span className="text-[9px] sm:text-[10px] font-bold px-2.5 py-1 bg-orange-100 text-orange-700 rounded-full shrink-0">
+              {feedItems.length} Publicaciones
             </span>
           </div>
 
@@ -160,7 +161,7 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-1.5 text-white pointer-events-none">
                   <span className="text-[8px] uppercase font-bold text-orange-400">
-                    Slide #{item.targetSlide}
+                    Post #{item.postNumber} · Lámina {item.targetSlide}
                   </span>
                   <span className="text-[9px] font-semibold line-clamp-2 leading-tight">
                     {item.title}
@@ -172,7 +173,7 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
                   </span>
                 )}
                 <span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-orange-600/90 text-white text-[7.5px] font-bold rounded shadow-xs pointer-events-none">
-                  #{item.targetSlide}
+                  #{item.postNumber}
                 </span>
               </div>
             ))}

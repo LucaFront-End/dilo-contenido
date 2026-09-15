@@ -102,7 +102,7 @@ export default function FeedGridView({
               Mosaico de Publicaciones
             </h2>
             <p className="text-xs text-zinc-500 mt-0.5">
-              Vista general de todas las publicaciones programadas en formato carrusel 4:5 para {clientTitle}.
+              Vista general de todas las publicaciones programadas para {clientTitle}.
             </p>
           </div>
 
@@ -241,7 +241,7 @@ export default function FeedGridView({
                 {/* Top Badges */}
                 <div className="absolute top-3 left-3 flex items-center gap-2 z-10">
                   <span className="px-2.5 py-1 bg-black/80 backdrop-blur-md rounded-lg text-white font-mono text-xs font-bold">
-                    #{slide.pageNumber}
+                    #{postIdx + 1}
                   </span>
                   <span className="px-2.5 py-1 bg-orange-600 text-white font-bold text-[10px] uppercase rounded-lg shadow-sm">
                     {slide.rawType || (isVideo ? 'VIDEO' : isCarousel ? 'CARRUSEL' : slide.type)}
@@ -324,7 +324,7 @@ export default function FeedGridView({
               <div className="p-5 flex-1 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between text-xs text-zinc-400 mb-2">
-                    <span>Publicación #{slide.pageNumber}</span>
+                    <span>Publicación #{postIdx + 1} (Lámina {slide.pageNumber})</span>
                     <span className="font-semibold text-orange-600">
                       {slide.rawType || slide.category || 'Contenido'}
                     </span>
