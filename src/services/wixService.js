@@ -292,12 +292,16 @@ export async function getParrillaBySlug(slug) {
 
     // Si no coincide exactamente, buscar por coincidencia de título y mes
     if (!matchedGeneralItem) {
+      const cleanSlugBrand = slugLower
+        .replace(/-(septiembre|agosto|octubre|noviembre|diciembre|enero|febrero|marzo|abril|mayo|junio|julio|2025|2026|2027)/g, '')
+        .replace(/[^a-z0-9]/g, '');
+
       matchedGeneralItem = generalItems.find(it => {
-        const itemTitle = (it.data?.title || '').toLowerCase();
+        const itemTitle = (it.data?.title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
         const itemMes = (it.data?.mes || '').toLowerCase();
         const itemSlug = (it.data?.slug || '').toLowerCase();
 
-        const matchBrand = itemTitle.includes('cuauhtli') || slugLower.includes('cuauhtli');
+        const matchBrand = cleanSlugBrand && (itemTitle.includes(cleanSlugBrand) || cleanSlugBrand.includes(itemTitle));
         if (!matchBrand) return false;
 
         if (hasSeptiembre) return itemMes.includes('sept') || itemSlug.includes('sept');
@@ -309,10 +313,14 @@ export async function getParrillaBySlug(slug) {
 
     // Fallback inteligente
     if (!matchedGeneralItem) {
+      const cleanSlugBrand = slugLower
+        .replace(/-(septiembre|agosto|octubre|noviembre|diciembre|enero|febrero|marzo|abril|mayo|junio|julio|2025|2026|2027)/g, '')
+        .replace(/[^a-z0-9]/g, '');
+
       matchedGeneralItem = generalItems.find(it => {
-        const itemTitle = (it.data?.title || '').toLowerCase();
-        return itemTitle.includes('cuauhtli');
-      }) || generalItems[0];
+        const itemTitle = (it.data?.title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        return cleanSlugBrand && (itemTitle.includes(cleanSlugBrand) || cleanSlugBrand.includes(itemTitle));
+      }) || generalItems.find(it => (it.data?.title || '').toLowerCase().includes('cuauhtli')) || generalItems[0];
     }
 
     if (!matchedGeneralItem) {
@@ -446,17 +454,41 @@ export async function getParrillaBySlug(slug) {
       });
     });
 
-    // Instagram Profile dinámico
+    // Instagram Profile dinámico conectado a ParrillaGeneral de Wix CMS
+    const rawCategory = (
+      matchedGeneral.categoraDeIg ||
+      matchedGeneral.categoriaDeIg ||
+      matchedGeneral.categoria ||
+      ''
+    ).trim();
+
+    const rawBio = (
+      matchedGeneral.presentacin ||
+      matchedGeneral.presentacion ||
+      matchedGeneral.bio ||
+      ''
+    ).trim();
+
+    const rawWeb = (
+      matchedGeneral.pginaWeb ||
+      matchedGeneral.paginaWeb ||
+      matchedGeneral.url ||
+      matchedGeneral.web ||
+      matchedGeneral.enlace ||
+      ''
+    ).trim();
+
     const dynamicInstagram = {
-      username: brandTitle.toLowerCase().replace(/[^a-z0-9]/g, ''),
+      username: (matchedGeneral.usuarioInstagram || matchedGeneral.instagramUser || brandTitle).toLowerCase().replace(/[^a-z0-9]/g, ''),
       displayName: brandTitle,
+      category: rawCategory,
       logo: resolvedLogo,
       avatar: resolvedLogo,
-      bio: 'Sistemas de seguridad y control de acceso para empresas y residencias.\nCDMX y EDOMEX.',
+      bio: rawBio,
       postsCount: wixPosts.length || 1,
       followersCount: 1250,
       followingCount: 340,
-      link: 'www.cuauhtli.mx',
+      link: rawWeb,
       feedGrid: allPostImages.slice(0, 9)
     };
 
@@ -662,6 +694,12 @@ export async function getParrillaBySlug(slug) {
       contrasea: matchedGeneral.contrasea || '',
       logo: resolvedLogo,
       mockupUrl: resolvedMockup,
+      categoria: rawCategory,
+      categoraDeIg: rawCategory,
+      presentacion: rawBio,
+      presentacin: rawBio,
+      paginaWeb: rawWeb,
+      pginaWeb: rawWeb,
       estrategia: dynamicEstrategia,
       hashtags: dynamicHashtags,
       instagram: dynamicInstagram,

@@ -60,23 +60,41 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
     instagram?.username ||
     clientData?.instagramUser ||
     clientData?.usuarioInstagram ||
-    'sistemascuauhtli';
+    (clientTitle || clientData?.title || 'perfil').toLowerCase().replace(/[^a-z0-9]/g, '');
 
   const brandDisplayName =
     instagram?.displayName ||
     clientData?.tituloTelefono ||
     clientData?.title ||
-    'Sistemas Cuauhtli | Instalación de CCTV Y ALARMAS';
+    clientTitle ||
+    '';
+
+  const brandCategory =
+    instagram?.category ||
+    clientData?.categoria ||
+    clientData?.categoraDeIg ||
+    clientData?.categoriaDeIg ||
+    clientData?.rawGeneral?.categoraDeIg ||
+    clientData?.rawGeneral?.categoriaDeIg ||
+    '';
 
   const brandBio =
     instagram?.bio ||
+    clientData?.presentacion ||
+    clientData?.presentacin ||
+    clientData?.rawGeneral?.presentacin ||
+    clientData?.rawGeneral?.presentacion ||
     clientData?.bioTelefono ||
-    'Ciencia, tecnología e ingeniería\nSistemas de seguridad para empresas: #CCTV, #Alarmas, #ControldeAcceso y #Cercaselectricas\nServicio en #CDMX y #EDOMEX';
+    '';
 
   const brandLink =
     instagram?.link ||
+    clientData?.paginaWeb ||
+    clientData?.pginaWeb ||
+    clientData?.rawGeneral?.pginaWeb ||
+    clientData?.rawGeneral?.paginaWeb ||
     clientData?.enlaceTelefono ||
-    'www.cuauhtli.mx';
+    '';
 
   return (
     <div className="slide-content visual-content-slide flex w-full h-full relative overflow-hidden bg-white">
@@ -126,7 +144,12 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
                 <span className="font-bold text-zinc-900 block leading-tight">
                   @{brandUsername}
                 </span>
-                <span className="text-[10px] text-zinc-500">
+                {brandCategory && (
+                  <span className="text-[10px] text-zinc-500 block leading-tight">
+                    {brandCategory}
+                  </span>
+                )}
+                <span className="text-[10px] text-zinc-400">
                   {contentSlides.length || instagram?.postsCount || 17} posts · {instagram?.followersCount || '1.250'} seguidores
                 </span>
               </div>
@@ -254,21 +277,40 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
                 <p className="font-bold text-xs text-zinc-900 leading-tight">
                   {brandDisplayName}
                 </p>
-                <p className="text-[10px] text-zinc-500 mt-0.5">Ciencia, tecnología e ingeniería</p>
-                <div className="text-[10.5px] text-zinc-700 leading-snug mt-1 whitespace-pre-line line-clamp-3">
-                  {brandBio}
-                </div>
-                <div className="mt-1 flex items-center gap-1 text-[10.5px] text-blue-600 font-medium">
-                  <span>Cotiza Ahora 👇</span>
-                  <a
-                    href={brandLink.startsWith('http') ? brandLink : `https://${brandLink}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline truncate"
-                  >
-                    {brandLink.replace(/^https?:\/\//, '')}
-                  </a>
-                </div>
+                {brandCategory && (
+                  <p className="text-[10px] text-zinc-500 mt-0.5 font-normal leading-tight">
+                    {brandCategory}
+                  </p>
+                )}
+                {brandBio && (
+                  <div className="text-[10.5px] text-zinc-700 leading-snug mt-1 whitespace-pre-line line-clamp-4">
+                    {brandBio}
+                  </div>
+                )}
+                {brandLink && (
+                  <div className="mt-1 flex items-center gap-1.5 text-[10.5px] text-blue-600 font-medium">
+                    <svg
+                      className="w-3 h-3 text-zinc-400 shrink-0"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                    </svg>
+                    <a
+                      href={brandLink.startsWith('http') ? brandLink : `https://${brandLink}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline truncate font-semibold"
+                    >
+                      {brandLink.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                    </a>
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}
