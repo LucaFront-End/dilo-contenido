@@ -1,7 +1,7 @@
 // Datos de Sistemas Cuauhtli generados a partir del PDF de Dilo Digital
 export const fallbackCuauhtliData = {
   "title": "Sistemas Cuauhtli",
-  "slug": "sisitemas-cuauhtli-septiembre-2026",
+  "slug": "sistemas-cuauhtli-septiembre-2026",
   "mes": "Septiembre",
   "ano": 2026,
   "contrasea": "V7#mQ2!xL9@pR4$k",

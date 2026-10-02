@@ -5,6 +5,7 @@ import FeedGridView from './components/FeedGridView';
 import PasswordGate from './components/PasswordGate';
 import HomePortal from './components/HomePortal';
 import Toast from './components/Toast';
+import ErrorBoundary from './components/ErrorBoundary';
 import { getParrillaBySlug, getComments, saveComment, deleteComment, getApprovals, saveApprovals } from './services/wixService';
 import { fallbackCuauhtliData } from './data/cuauhtliFallbackData';
 import './styles/presentation.css';
@@ -26,7 +27,7 @@ const extractSlugFromPath = () => {
   if (path && path !== '' && path !== 'portal') return path;
   
   // Default demo slug: Sistemas Cuauhtli
-  return 'sisitemas-cuauhtli-septiembre-2026';
+  return 'sistemas-cuauhtli-septiembre-2026';
 };
 
 export default function App() {
@@ -327,33 +328,38 @@ export default function App() {
 
       {/* Main View Area */}
       <main className="flex-1 flex flex-col relative">
-        {viewMode === 'slides' ? (
-          <SlideDeck
-            clientData={clientData}
-            onCopyToast={showToast}
-            comments={comments}
-            onAddComment={handleAddComment}
-            onDeleteComment={handleDeleteComment}
-            approvedPosts={approvedPosts}
-            onToggleApprove={handleToggleApprove}
-            initialSlideIndex={activeSlideIndex}
-          />
-        ) : (
-          <FeedGridView
-            slides={clientData.slides}
-            clientTitle={clientData.title}
-            onCopyToast={showToast}
-            comments={comments}
-            onAddComment={handleAddComment}
-            onDeleteComment={handleDeleteComment}
-            approvedPosts={approvedPosts}
-            onToggleApprove={handleToggleApprove}
-            onSelectSlide={(slideIdx) => {
-              setActiveSlideIndex(slideIdx);
-              setViewMode('slides');
-            }}
-          />
-        )}
+        <ErrorBoundary
+          onFallbackToSlides={() => setViewMode('slides')}
+          onReset={() => loadGridData(currentSlug)}
+        >
+          {viewMode === 'slides' ? (
+            <SlideDeck
+              clientData={clientData}
+              onCopyToast={showToast}
+              comments={comments}
+              onAddComment={handleAddComment}
+              onDeleteComment={handleDeleteComment}
+              approvedPosts={approvedPosts}
+              onToggleApprove={handleToggleApprove}
+              initialSlideIndex={activeSlideIndex}
+            />
+          ) : (
+            <FeedGridView
+              slides={clientData?.slides || []}
+              clientTitle={clientData?.title || ''}
+              onCopyToast={showToast}
+              comments={comments}
+              onAddComment={handleAddComment}
+              onDeleteComment={handleDeleteComment}
+              approvedPosts={approvedPosts}
+              onToggleApprove={handleToggleApprove}
+              onSelectSlide={(slideIdx) => {
+                setActiveSlideIndex(slideIdx);
+                setViewMode('slides');
+              }}
+            />
+          )}
+        </ErrorBoundary>
       </main>
 
       {/* Floating Notification Toast */}

@@ -26,8 +26,8 @@ function formatTypeLabel(raw, rawType) {
 }
 
 export default function FeedGridView({
-  slides,
-  clientTitle,
+  slides = [],
+  clientTitle = '',
   onCopyToast,
   onSelectSlide,
   comments = [],
@@ -42,8 +42,13 @@ export default function FeedGridView({
   const [expandedCopySlideId, setExpandedCopySlideId] = useState(null);
 
   // Filter posts (all dynamic post slides from Wix CMS)
-  const contentSlides = slides.filter(
-    (s) => s.wixPostId || (!['COVER', 'FEED', 'ESTRATEGIA', 'HASTAGS', 'HASHTAGS', 'CONTACT', 'CONTACTO'].includes((s.type || '').toUpperCase()))
+  const contentSlides = (slides || []).filter(
+    (s) =>
+      s &&
+      (s.wixPostId ||
+        (!['COVER', 'FEED', 'ESTRATEGIA', 'CALENDARIO', 'HASTAGS', 'HASHTAGS', 'CONTACT', 'CONTACTO'].includes(
+          (s.type || '').toUpperCase()
+        )))
   );
   const totalContentPosts = contentSlides.length;
   const approvedCount = contentSlides.filter((s) => !!approvedPosts[s.pageNumber]).length;
@@ -180,38 +185,63 @@ export default function FeedGridView({
       </div>
 
       {/* Grid of Posts in 4:5 Instagram proportion with Carousel */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filtered.map((slide) => {
-          const isApproved = !!approvedPosts[slide.pageNumber];
-          const isVideo =
-            slide.isVideo ||
-            slide.videoUrl ||
-            slide.type?.toUpperCase().includes('VIDEO') ||
-            slide.pageNumber === 5;
+      {filtered.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-zinc-200 p-12 text-center my-6 shadow-sm">
+          <Layers className="w-12 h-12 text-zinc-300 mx-auto mb-3" />
+          <h3 className="text-base font-bold text-zinc-800">No se encontraron publicaciones</h3>
+          <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">
+            No hay publicaciones que coincidan con la categoría seleccionada.
+          </p>
+          <button
+            type="button"
+            onClick={() => setActiveFilter('ALL')}
+            className="mt-4 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer"
+          >
+            Ver todas las publicaciones
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filtered.map((slide, postIdx) => {
+            const isApproved = !!approvedPosts[slide.pageNumber];
+            const isVideo =
+              slide.isVideo ||
+              slide.videoUrl ||
+              slide.type?.toUpperCase().includes('VIDEO') ||
+              slide.pageNumber === 5;
 
-          // Carousel post creatives vs single image
-          const postImages =
-            slide.postImages && slide.postImages.length > 0
-              ? slide.postImages
-              : slide.images && slide.images.length > 0
-              ? slide.images
-              : [slide.image];
+            // Carousel post creatives vs single image
+            const postImages =
+              slide.postImages && slide.postImages.length > 0
+                ? slide.postImages
+                : slide.images && slide.images.length > 0
+                ? slide.images
+                : slide.image
+                ? [slide.image]
+                : ['/assets/logo/dilo-logo-black.png'];
 
-          const isCarousel = postImages.length > 1;
-          const currentImgIdx = cardCarouselIdx[slide.id] || 0;
-          const currentImg = postImages[currentImgIdx] || postImages[0] || slide.image;
-          const isCopyExpanded = expandedCopySlideId === slide.id;
+            const isCarousel = postImages.length > 1;
+            const currentImgIdx = cardCarouselIdx[slide.id] || 0;
+            const currentImg = postImages[currentImgIdx] || postImages[0] || slide.image;
+            const isCopyExpanded = expandedCopySlideId === slide.id;
 
-          return (
-            <div
-              key={slide.id}
-              className="bg-white rounded-2xl border border-zinc-200/90 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group"
-            >
-              {/* Card Media Preview in 4:5 format with Carousel Navigation */}
+            return (
               <div
-                onClick={() => onSelectSlide && onSelectSlide(slide.pageNumber - 1)}
-                className="relative aspect-[4/5] bg-zinc-950 overflow-hidden cursor-pointer flex items-center justify-center select-none"
+                key={slide.id || `post-${postIdx}`}
+                className="bg-white rounded-2xl border border-zinc-200/90 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group"
               >
+                {/* Card Media Preview in 4:5 format with Carousel Navigation */}
+                <div
+                  onClick={() => {
+                    if (onSelectSlide) {
+                      const targetIdx = (slides || []).findIndex(
+                        (s) => s?.id === slide.id || s?.pageNumber === slide.pageNumber
+                      );
+                      onSelectSlide(targetIdx >= 0 ? targetIdx : (slide.pageNumber ? slide.pageNumber - 1 : postIdx));
+                    }
+                  }}
+                  className="relative aspect-[4/5] bg-zinc-950 overflow-hidden cursor-pointer flex items-center justify-center select-none"
+                >
                 {isVideo ? (
                   <div className="relative w-full h-full flex items-center justify-center bg-zinc-950">
                     <img
@@ -448,6 +478,7 @@ export default function FeedGridView({
           );
         })}
       </div>
+      )}
 
       {/* Slide Comments Modal */}
       {activeCommentSlide && (
