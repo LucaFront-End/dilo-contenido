@@ -8,7 +8,9 @@ import {
   Layers,
   ThumbsUp,
   MessageSquare,
-  Play
+  Play,
+  X,
+  ExternalLink
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import CommentsModal from './CommentsModal';
@@ -40,6 +42,7 @@ export default function FeedGridView({
   const [activeCommentSlide, setActiveCommentSlide] = useState(null);
   const [cardCarouselIdx, setCardCarouselIdx] = useState({});
   const [expandedCopySlideId, setExpandedCopySlideId] = useState(null);
+  const [playingPostId, setPlayingPostId] = useState(null);
 
   // Filter posts (all dynamic post slides from Wix CMS)
   const contentSlides = (slides || []).filter(
@@ -224,39 +227,84 @@ export default function FeedGridView({
             const currentImgIdx = cardCarouselIdx[slide.id] || 0;
             const currentImg = postImages[currentImgIdx] || postImages[0] || slide.image;
             const isCopyExpanded = expandedCopySlideId === slide.id;
+            const isPlayingThisVideo = isVideo && playingPostId === (slide.id || `post-${postIdx}`);
 
             return (
               <div
                 key={slide.id || `post-${postIdx}`}
                 className="bg-white rounded-2xl border border-zinc-200/90 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col group"
               >
-                {/* Card Media Preview in 4:5 format with Carousel Navigation */}
+                {/* Card Media Preview in 4:5 format with Carousel Navigation or Inline Video */}
                 <div
                   onClick={() => {
-                    if (onSelectSlide) {
+                    // For non-video slides, clicking the preview opens the slide deck
+                    if (!isVideo && onSelectSlide) {
                       const targetIdx = (slides || []).findIndex(
                         (s) => s?.id === slide.id || s?.pageNumber === slide.pageNumber
                       );
                       onSelectSlide(targetIdx >= 0 ? targetIdx : (slide.pageNumber ? slide.pageNumber - 1 : postIdx));
                     }
                   }}
-                  className="relative aspect-[4/5] bg-zinc-950 overflow-hidden cursor-pointer flex items-center justify-center select-none"
+                  className={`relative aspect-[4/5] bg-zinc-950 overflow-hidden flex items-center justify-center select-none ${
+                    !isVideo ? 'cursor-pointer' : ''
+                  }`}
                 >
                 {isVideo ? (
-                  <div className="relative w-full h-full flex items-center justify-center bg-zinc-950">
-                    <img
-                      src={getOptimizedWixImage(slide.posterUrl || currentImg || '/assets/logo/dilo-logo-black.png', 600, 750, 80)}
-                      alt={`Slide ${slide.pageNumber} video poster`}
-                      loading="lazy"
-                      decoding="async"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-black/35 flex items-center justify-center">
-                      <div className="w-12 h-12 rounded-full bg-white/90 text-zinc-900 flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white transition-transform">
-                        <Play className="w-5 h-5 fill-current translate-x-0.5" />
+                  isPlayingThisVideo ? (
+                    <div
+                      className="relative w-full h-full bg-black flex items-center justify-center"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <video
+                        key={slide.videoUrl || `vid-${slide.id}`}
+                        src={slide.videoUrl || '/assets/video/sample_reel.mp4'}
+                        poster={slide.posterUrl || currentImg}
+                        controls
+                        autoPlay
+                        playsInline
+                        preload="auto"
+                        className="w-full h-full object-contain bg-black"
+                        onEnded={() => setPlayingPostId(null)}
+                      />
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPlayingPostId(null);
+                        }}
+                        className="absolute top-3 right-3 p-1.5 rounded-full bg-black/75 hover:bg-black text-white text-xs z-20 backdrop-blur-sm cursor-pointer shadow-md transition-colors"
+                        title="Cerrar reproductor"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      className="relative w-full h-full flex items-center justify-center bg-zinc-950 cursor-pointer group/vid"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setPlayingPostId(slide.id || `post-${postIdx}`);
+                      }}
+                      title="Reproducir video aquí en el mosaico"
+                    >
+                      <img
+                        src={getOptimizedWixImage(slide.posterUrl || currentImg || '/assets/logo/dilo-logo-black.png', 600, 750, 80)}
+                        alt={`Slide ${slide.pageNumber} video poster`}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-contain bg-zinc-950 group-hover/vid:scale-102 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-black/35 flex items-center justify-center">
+                        <div className="w-14 h-14 rounded-full bg-white/95 text-zinc-900 flex items-center justify-center shadow-xl group-hover/vid:scale-110 group-hover/vid:bg-orange-500 group-hover/vid:text-white transition-all duration-200">
+                          <Play className="w-6 h-6 fill-current translate-x-0.5" />
+                        </div>
+                      </div>
+                      <div className="absolute bottom-3 left-3 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-md text-white text-[10px] font-bold z-10 flex items-center gap-1 shadow-sm pointer-events-none">
+                        <Play className="w-2.5 h-2.5 text-orange-400 fill-orange-400" />
+                        <span>Ver video aquí</span>
                       </div>
                     </div>
-                  </div>
+                  )
                 ) : (
                   <img
                     src={getOptimizedWixImage(currentImg, 600, 750, 80)}
@@ -269,7 +317,7 @@ export default function FeedGridView({
                 )}
 
                 {/* Top Badges */}
-                <div className="absolute top-3 left-3 flex items-center gap-2 z-10">
+                <div className="absolute top-3 left-3 flex items-center gap-2 z-10 pointer-events-none">
                   <span className="px-2.5 py-1 bg-black/80 backdrop-blur-md rounded-lg text-white font-mono text-xs font-bold">
                     #{postIdx + 1}
                   </span>
@@ -278,13 +326,32 @@ export default function FeedGridView({
                   </span>
                 </div>
 
-                {/* Approved Badge */}
-                {isApproved && (
-                  <div className="absolute top-3 right-3 px-2.5 py-1 bg-emerald-500 text-white font-bold text-[10px] rounded-lg shadow flex items-center gap-1 z-10">
-                    <Check className="w-3 h-3" />
-                    <span>Aprobado</span>
-                  </div>
-                )}
+                {/* Top Right: Slide link for videos or Approved Badge */}
+                <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
+                  {isApproved && (
+                    <div className="px-2.5 py-1 bg-emerald-500 text-white font-bold text-[10px] rounded-lg shadow flex items-center gap-1">
+                      <Check className="w-3 h-3" />
+                      <span>Aprobado</span>
+                    </div>
+                  )}
+                  {isVideo && onSelectSlide && !isPlayingThisVideo && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const targetIdx = (slides || []).findIndex(
+                          (s) => s?.id === slide.id || s?.pageNumber === slide.pageNumber
+                        );
+                        onSelectSlide(targetIdx >= 0 ? targetIdx : (slide.pageNumber ? slide.pageNumber - 1 : postIdx));
+                      }}
+                      className="px-2 py-1 bg-black/65 hover:bg-black/90 text-white rounded-lg backdrop-blur-sm transition-colors cursor-pointer flex items-center gap-1 text-[10px] font-medium shadow-sm"
+                      title="Abrir en diapositiva completa"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      <span className="hidden sm:inline">Lámina</span>
+                    </button>
+                  )}
+                </div>
 
                 {/* Carousel Navigation Arrows & Indicators */}
                 {isCarousel && (
@@ -354,7 +421,21 @@ export default function FeedGridView({
               <div className="p-5 flex-1 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between text-xs text-zinc-400 mb-2">
-                    <span>Publicación #{postIdx + 1} (Lámina {slide.pageNumber})</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (onSelectSlide) {
+                          const targetIdx = (slides || []).findIndex(
+                            (s) => s?.id === slide.id || s?.pageNumber === slide.pageNumber
+                          );
+                          onSelectSlide(targetIdx >= 0 ? targetIdx : (slide.pageNumber ? slide.pageNumber - 1 : postIdx));
+                        }
+                      }}
+                      className="hover:text-orange-600 transition-colors cursor-pointer font-medium text-left"
+                      title="Ver lámina en diapositivas"
+                    >
+                      Publicación #{postIdx + 1} (Lámina {slide.pageNumber}) ↗
+                    </button>
                     <span className="font-semibold text-orange-600">
                       {slide.rawType || slide.category || 'Contenido'}
                     </span>

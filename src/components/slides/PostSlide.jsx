@@ -115,8 +115,8 @@ export default function PostSlide({
               </button>
             )}
 
-            {/* Clean 4:5 Media Frame (Seamless, unboxed) */}
-            <div className="relative w-full max-w-[320px] sm:max-w-[370px] md:max-w-[400px] aspect-[4/5] rounded-2xl overflow-hidden flex items-center justify-center group bg-transparent">
+            {/* Clean Media Frame: 9:16 for Reels/Videos, 4:5 for Carousel/Posts */}
+            <div className={`relative w-full ${isVideo ? 'max-w-[250px] sm:max-w-[270px] md:max-w-[290px] aspect-[9/16]' : 'max-w-[320px] sm:max-w-[370px] md:max-w-[400px] aspect-[4/5]'} rounded-2xl overflow-hidden flex items-center justify-center group bg-black shadow-lg`}>
               {isVideo ? (
                 <div className="w-full h-full bg-zinc-950 rounded-2xl overflow-hidden flex items-center justify-center relative">
                   {videoUrl ? (
@@ -126,12 +126,12 @@ export default function PostSlide({
                       controls
                       playsInline
                       preload="metadata"
-                      className="w-full h-full object-cover rounded-2xl"
+                      className="w-full h-full object-contain bg-black rounded-2xl"
                       poster={posterUrl}
                     />
                   ) : posterUrl ? (
                     <div className="w-full h-full relative">
-                      <img src={posterUrl} alt="Video preview" className="w-full h-full object-cover" />
+                      <img src={posterUrl} alt="Video preview" className="w-full h-full object-contain bg-black" />
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                         <div className="w-12 h-12 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg">
                           <Play className="w-6 h-6 fill-white ml-0.5" />
@@ -146,7 +146,7 @@ export default function PostSlide({
                   )}
                   <span className="absolute top-3 left-3 px-2.5 py-1 bg-black/75 backdrop-blur-sm text-white text-[10px] font-bold rounded-lg pointer-events-none flex items-center gap-1 z-10">
                     <Play className="w-3 h-3 text-orange-500 fill-orange-500" />
-                    <span>Video / Reel</span>
+                    <span>Video / Reel (9:16)</span>
                   </span>
                 </div>
               ) : (
@@ -159,16 +159,14 @@ export default function PostSlide({
                 />
               )}
 
-              {/* Lightbox zoom button overlay (images only) */}
-              {!isVideo && (
-                <button
-                  onClick={() => setIsLightboxOpen(true)}
-                  className="absolute top-2.5 right-2.5 p-1.5 sm:p-2 bg-black/60 hover:bg-black/80 text-white rounded-xl backdrop-blur-sm opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                  title="Ampliar creatividad"
-                >
-                  <ZoomIn className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                </button>
-              )}
+              {/* Lightbox zoom button overlay (both images and video) */}
+              <button
+                onClick={() => setIsLightboxOpen(true)}
+                className="absolute top-2.5 right-2.5 p-1.5 sm:p-2 bg-black/60 hover:bg-black/80 text-white rounded-xl backdrop-blur-sm opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-20"
+                title={isVideo ? "Ampliar video (9:16)" : "Ampliar creatividad"}
+              >
+                <ZoomIn className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </button>
 
               {/* Carousel Slide Counter Badge */}
               {isCarousel && !isVideo && (
@@ -370,21 +368,47 @@ export default function PostSlide({
         </div>
       </div>
 
-      {/* Lightbox Modal */}
+      {/* Lightbox Modal: Adapts strictly to 9:16 for videos, never stretching */}
       {isLightboxOpen && (
         <div
           className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 backdrop-blur-md"
           onClick={() => setIsLightboxOpen(false)}
         >
-          <div className="relative max-w-5xl max-h-[90vh] flex flex-col items-center">
-            <img
-              src={images[activeImageIdx]}
-              alt="Creatividad completa"
-              className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
-            />
+          <div
+            className={`relative flex flex-col items-center justify-center ${
+              isVideo
+                ? 'w-full max-w-[340px] sm:max-w-[380px] aspect-[9/16] max-h-[85vh]'
+                : 'max-w-5xl max-h-[90vh]'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {isVideo ? (
+              videoUrl ? (
+                <video
+                  src={videoUrl}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-contain rounded-2xl shadow-2xl bg-black"
+                  poster={posterUrl}
+                />
+              ) : (
+                <img
+                  src={posterUrl}
+                  alt="Video poster"
+                  className="w-full h-full object-contain rounded-2xl shadow-2xl bg-black"
+                />
+              )
+            ) : (
+              <img
+                src={images[activeImageIdx]}
+                alt="Creatividad completa"
+                className="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl"
+              />
+            )}
             <button
               onClick={() => setIsLightboxOpen(false)}
-              className="mt-4 px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full text-xs font-bold transition-colors cursor-pointer"
+              className="mt-4 px-6 py-2 bg-white/20 hover:bg-white/30 text-white rounded-full text-xs font-bold transition-colors cursor-pointer shrink-0"
             >
               Cerrar visualizador (Esc)
             </button>
