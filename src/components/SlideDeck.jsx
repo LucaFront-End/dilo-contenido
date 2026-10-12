@@ -36,7 +36,7 @@ export default function SlideDeck({
   const currentSlide = slides[currentSlideIndex];
 
   // Calculate approval percentage across all actual content posts dynamically
-  const nonContentSlideTypes = ['COVER', 'FEED', 'ESTRATEGIA', 'HASTAGS', 'HASHTAGS', 'CONTACT', 'CONTACTO'];
+  const nonContentSlideTypes = ['COVER', 'FEED', 'ESTRATEGIA', 'CALENDARIO', 'HASTAGS', 'HASHTAGS', 'CONTACT', 'CONTACTO'];
   const contentSlides = slides.filter(
     (s) => s.wixPostId || (!nonContentSlideTypes.includes((s.type || '').toUpperCase()) && s.pageNumber >= 4)
   );

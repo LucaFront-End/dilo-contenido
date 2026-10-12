@@ -45,15 +45,19 @@ export default function HomePortal({ onSelectSlug, defaultSlug, brandFilter }) {
     getParrillasGenerales()
       .then((items) => {
         if (items && items.length > 0) {
-          const mapped = items.map((it) => ({
-            title: (it.title || 'Cliente').trim(),
-            month: `${it.mes || '2026'}`.trim(),
-            slug: it.slug || it.title?.toLowerCase().replace(/\s+/g, '-'),
-            postsCount: it.title?.includes('Cuauhtli') ? 25 : 1,
-            hasPassword: !!it.contrasea,
-            badge: 'Parrilla Activa',
-            image: resolveWixMediaUrl(it.mockup) || '/assets/slides/slide_01.png'
-          }));
+          const mapped = items.map((it) => {
+            const m = (it.resumenAprobacion || '').match(/\/(\d+)/);
+            const count = m ? parseInt(m[1], 10) : (it.totalPosts || (it.title?.includes('Cuauhtli') ? 20 : 10));
+            return {
+              title: (it.title || 'Cliente').trim(),
+              month: `${it.mes || '2026'}`.trim(),
+              slug: it.slug || it.title?.toLowerCase().replace(/\s+/g, '-'),
+              postsCount: count,
+              hasPassword: !!it.contrasea,
+              badge: 'Parrilla Activa',
+              image: resolveWixMediaUrl(it.mockup) || resolveWixMediaUrl(it.logoDeLaMarca) || '/assets/slides/slide_01.png'
+            };
+          });
           setLiveGrids(mapped);
         } else {
           setLiveGrids(fallbackGrids);
@@ -65,20 +69,21 @@ export default function HomePortal({ onSelectSlug, defaultSlug, brandFilter }) {
 
   const allGrids = liveGrids.length > 0 ? liveGrids : fallbackGrids;
 
-  // The client's brand is strictly isolated to their own brand (never exposes other agency clients)
+  // The client's brand is strictly isolated to their own brand if active, or displays all if agency portal
+  const savedBrand = sessionStorage.getItem('dilo_active_brand') || localStorage.getItem('dilo_active_brand');
   const effectiveBrand = useMemo(() => {
-    return (brandFilter || sessionStorage.getItem('dilo_active_brand') || localStorage.getItem('dilo_active_brand') || 'Sistemas Cuauhtli').trim();
-  }, [brandFilter]);
+    return (brandFilter || savedBrand || '').trim();
+  }, [brandFilter, savedBrand]);
 
-  // Strictly filter to ONLY grids belonging to this specific client/brand
+  // Strictly filter to ONLY grids belonging to this specific client/brand, or show all if in agency/general portal
   const clientGrids = useMemo(() => {
+    if (!effectiveBrand) return allGrids;
     const sBrand = effectiveBrand.toLowerCase();
     const filtered = allGrids.filter((g) => {
       const gTitle = (g.title || '').toLowerCase();
       return gTitle.includes(sBrand) || sBrand.includes(gTitle);
     });
-    // Fallback safety if brand name has slight variations
-    return filtered.length > 0 ? filtered : allGrids.filter(g => g.title?.toLowerCase().includes('cuauhtli'));
+    return filtered.length > 0 ? filtered : allGrids;
   }, [allGrids, effectiveBrand]);
 
   // Extract unique months for this client's editions with counts
@@ -194,16 +199,21 @@ export default function HomePortal({ onSelectSlug, defaultSlug, brandFilter }) {
         <div className="text-center max-w-2xl mx-auto mb-8 md:mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Historial de Parrillas · {effectiveBrand}</span>
+            <span>{effectiveBrand ? `Historial de Parrillas · ${effectiveBrand}` : 'Portal General de Clientes Dilo'}</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tight font-space text-white">
-            Parrillas de <span className="text-orange-500">{effectiveBrand}</span>
+            {effectiveBrand ? (
+              <>Parrillas de <span className="text-orange-500">{effectiveBrand}</span></>
+            ) : (
+              <>Parrillas de <span className="text-orange-500">Contenido</span></>
+            )}
           </h1>
 
           <p className="text-sm sm:text-base text-zinc-400 mt-3 sm:mt-4 leading-relaxed px-2">
-            Consulta y accede a tus publicaciones mensuales anteriores y vigentes de {effectiveBrand}.
-            Revisa copies, creatividades estratégicas y calendarios de cada edición.
+            {effectiveBrand
+              ? `Consulta y accede a tus publicaciones mensuales anteriores y vigentes de ${effectiveBrand}. Revisa copies, creatividades estratégicas y calendarios de cada edición.`
+              : 'Portal privado para clientes de Dilo Digital. Selecciona tu marca y edición mensual para revisar copies, creatividades estratégicas y calendarios.'}
           </p>
         </div>
 

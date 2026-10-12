@@ -465,10 +465,15 @@ export async function getParrillaBySlug(slug) {
     };
 
     // 4. Hashtags dinámicos parseados de Wix
+    const rawHashtagsMarca = matchedGeneral.hastagsDeMarca || matchedGeneral.hashtagsDeMarca;
+    const rawHashtagsNicho = matchedGeneral.hastagsDeNicho || matchedGeneral.hashtagsDeNicho;
+    const rawHashtagsGeo = matchedGeneral.hastagsDeGeolocalizacin1 || matchedGeneral.hastagsDeGeolocalizacion || matchedGeneral.hashtagsDeGeolocalizacion || matchedGeneral.geolocalizacion;
+
     const dynamicHashtags = {
-      marca: parseHashtags(matchedGeneral.hastagsDeMarca),
-      nicho: parseHashtags(matchedGeneral.hastagsDeNicho),
-      geo: parseHashtags(matchedGeneral.hastagsDeGeolocalizacin1)
+      marca: parseHashtags(rawHashtagsMarca),
+      nicho: parseHashtags(rawHashtagsNicho),
+      geo: parseHashtags(rawHashtagsGeo),
+      geolocalizacion: parseHashtags(rawHashtagsGeo)
     };
 
     // 5. Colección de imágenes de los posts de Wix para el Feed Grid de Instagram (Slide 2)

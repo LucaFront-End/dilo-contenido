@@ -8,7 +8,7 @@ export default function HashtagsSlide({ hashtags }) {
     {
       id: 'nicho',
       title: '# DE NICHO',
-      tags: hashtags?.nicho || [
+      tags: (hashtags?.nicho && hashtags.nicho.length > 0) ? hashtags.nicho : [
         '#HogarSeguroInteligente',
         '#SeguridadResidencialPremium',
         '#EmpresasSeguras',
@@ -19,7 +19,7 @@ export default function HashtagsSlide({ hashtags }) {
     {
       id: 'marca',
       title: '# DE MARCA',
-      tags: hashtags?.marca || [
+      tags: (hashtags?.marca && hashtags.marca.length > 0) ? hashtags.marca : [
         '#SeguridadElectrónica',
         '#CCTVProfesional',
         '#AlarmasInteligentes',
@@ -31,14 +31,16 @@ export default function HashtagsSlide({ hashtags }) {
     {
       id: 'geo',
       title: '# GEOLOCALIZACIÓN',
-      tags: hashtags?.geolocalizacion || [
-        '#CDMX',
-        '#CiudadDeMexico',
-        '#SeguridadCDMX',
-        '#NegociosCDMX',
-        '#HogarSeguroCDMX',
-        '#EmpresasCDMX'
-      ]
+      tags: (hashtags?.geolocalizacion && hashtags.geolocalizacion.length > 0)
+        ? hashtags.geolocalizacion
+        : ((hashtags?.geo && hashtags.geo.length > 0) ? hashtags.geo : [
+          '#CDMX',
+          '#CiudadDeMexico',
+          '#SeguridadCDMX',
+          '#NegociosCDMX',
+          '#HogarSeguroCDMX',
+          '#EmpresasCDMX'
+        ])
     }
   ];
 

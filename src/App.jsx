@@ -149,9 +149,9 @@ export default function App() {
       localComments.forEach(c => commentMap.set(c.id || `${c.slideNumber}_${c.text}`, c));
       setComments(Array.from(commentMap.values()));
 
-      // Load approvals for this specific client slug (merging Wix CMS + local)
+      // Load approvals for this specific client slug (Wix CMS is live source of truth)
       const localApprovals = getApprovals(data.slug || slugToLoad);
-      const mergedApprovals = { ...(data.initialApprovals || {}), ...localApprovals };
+      const mergedApprovals = { ...localApprovals, ...(data.initialApprovals || {}) };
       setApprovedPosts(mergedApprovals);
 
       // Check session storage for existing unlocked state

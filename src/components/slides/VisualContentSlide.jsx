@@ -54,7 +54,7 @@ export default function VisualContentSlide({ clientTitle, instagram, clientData,
     instagram?.logo ||
     instagram?.avatar ||
     clientData?.logo ||
-    '/assets/logo/cuauhtli-logo.png';
+    '/assets/logo/dilo-logo-black.png';
 
   const brandUsername =
     instagram?.username ||
