@@ -207,11 +207,6 @@ export default function FeedGridView({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((slide, postIdx) => {
             const isApproved = !!approvedPosts[slide.pageNumber];
-            const isVideo =
-              slide.isVideo ||
-              slide.videoUrl ||
-              slide.type?.toUpperCase().includes('VIDEO') ||
-              slide.pageNumber === 5;
 
             // Carousel post creatives vs single image
             const postImages =
@@ -224,6 +219,17 @@ export default function FeedGridView({
                 : ['/assets/logo/dilo-logo-black.png'];
 
             const isCarousel = postImages.length > 1;
+
+            // Video post check (100% dinámico: nunca sobreponer video en carruseles de fotos)
+            const isVideo =
+              !isCarousel &&
+              (slide.isVideo ||
+                !!slide.videoUrl ||
+                (slide.type || '').toUpperCase().includes('VIDEO') ||
+                (slide.type || '').toUpperCase().includes('REEL') ||
+                (slide.rawType || '').toUpperCase().includes('REEL') ||
+                (slide.rawType || '').toUpperCase().includes('VIDEO'));
+
             const currentImgIdx = cardCarouselIdx[slide.id] || 0;
             const currentImg = postImages[currentImgIdx] || postImages[0] || slide.image;
             const isCopyExpanded = expandedCopySlideId === slide.id;

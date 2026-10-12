@@ -33,12 +33,13 @@ export default function PostSlide({
   const images = viewMode === 'creative' ? postImages : [slide.image];
   const isCarousel = images.length > 1;
 
-  // Video post check (100% dinámico desde CMS)
+  // Video post check (100% dinámico desde CMS: nunca sobreponer video en carruseles de fotos)
   const isVideo =
-    slide.isVideo ||
-    !!slide.videoUrl ||
-    slide.type?.toUpperCase().includes('VIDEO') ||
-    slide.type?.toUpperCase().includes('REEL');
+    !isCarousel &&
+    (slide.isVideo ||
+      !!slide.videoUrl ||
+      slide.type?.toUpperCase().includes('VIDEO') ||
+      slide.type?.toUpperCase().includes('REEL'));
 
   const videoUrl = slide.videoUrl || null;
   const posterUrl = slide.posterUrl || images[0] || '';
