@@ -292,6 +292,7 @@ export default function App() {
       <Header
         clientTitle={clientData.title}
         clientMonth={clientData.mes}
+        clientYear={clientData.ano || clientData.year || 2026}
         viewMode={viewMode}
         setViewMode={setViewMode}
         isFullscreen={isFullscreen}

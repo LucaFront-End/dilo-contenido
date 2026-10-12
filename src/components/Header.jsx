@@ -4,6 +4,7 @@ import { Maximize2, Minimize2, Share2, LayoutGrid, Presentation, Lock, Sparkles,
 export default function Header({
   clientTitle,
   clientMonth,
+  clientYear,
   viewMode,
   setViewMode,
   isFullscreen,
@@ -135,9 +136,9 @@ export default function Header({
             </button>
           )}
 
-          {/* 2026 Year Indicator */}
+          {/* Dynamic Year Indicator */}
           <span className="dilo-year font-bold text-sm sm:text-base text-zinc-900 tracking-tight ml-0.5 hidden sm:inline">
-            2026
+            {clientYear || 2026}
           </span>
         </div>
       </div>
