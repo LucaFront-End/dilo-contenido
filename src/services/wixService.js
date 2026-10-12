@@ -219,30 +219,66 @@ function parseHashtags(raw) {
 }
 
 /**
- * Consulta todas las parrillas generales disponibles en Wix CMS
+ * Consulta todos los elementos de una colección de Wix Data API v2 gestionando paginación por offset.
+ * Wix Data API v2 limita estrictamente a 50 items por petición, por lo que se itera por páginas.
+ */
+export async function queryWixCollectionAll(token, collectionId, queryFilter = null, maxItems = 1000) {
+  let all = [];
+  let offset = 0;
+  const limit = 50;
+
+  try {
+    while (offset < maxItems) {
+      const queryObj = {
+        paging: { limit, offset }
+      };
+      if (queryFilter) {
+        queryObj.filter = queryFilter;
+      }
+
+      const res = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token
+        },
+        body: JSON.stringify({
+          dataCollectionId: collectionId,
+          query: queryObj
+        })
+      });
+
+      if (!res.ok) {
+        console.warn(`Query a ${collectionId} en offset ${offset} respondió status ${res.status}`);
+        break;
+      }
+
+      const data = await res.json();
+      const items = data.dataItems || [];
+      all = all.concat(items);
+
+      if (items.length < limit || !data.pagingMetadata?.hasNext) {
+        break;
+      }
+      offset += limit;
+    }
+  } catch (err) {
+    console.error(`Error en queryWixCollectionAll para ${collectionId}:`, err);
+  }
+
+  return all;
+}
+
+/**
+ * Consulta todas las parrillas generales disponibles en Wix CMS con paginación
  */
 export async function getParrillasGenerales() {
   try {
     const token = await getWixToken();
     if (!token) return [fallbackCuauhtliData];
 
-    const res = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': token
-      },
-      body: JSON.stringify({
-        dataCollectionId: 'ParrillaGeneral',
-        returnTotalCount: true,
-        paging: { limit: 50 }
-      })
-    });
-
-    if (!res.ok) throw new Error(`Query failed: ${res.status}`);
-
-    const data = await res.json();
-    return data.dataItems?.map(item => item.data) || [fallbackCuauhtliData];
+    const items = await queryWixCollectionAll(token, 'ParrillaGeneral');
+    return items.length > 0 ? items.map(item => item.data) : [fallbackCuauhtliData];
   } catch (err) {
     console.warn('Error al obtener ParrillasGenerales de Wix:', err);
     return [fallbackCuauhtliData];
@@ -261,22 +297,8 @@ export async function getParrillaBySlug(slug) {
       return fallbackCuauhtliData;
     }
 
-    // 1. Consultar todos los registros de ParrillaGeneral
-    const generalRes = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': token
-      },
-      body: JSON.stringify({
-        dataCollectionId: 'ParrillaGeneral',
-        paging: { limit: 50 }
-      })
-    });
-
-    if (!generalRes.ok) throw new Error('Error al consultar ParrillaGeneral');
-    const generalData = await generalRes.json();
-    const generalItems = generalData.dataItems || [];
+    // 1. Consultar todos los registros de ParrillaGeneral con paginación
+    const generalItems = await queryWixCollectionAll(token, 'ParrillaGeneral');
 
     const normalizedSlug = (slug || '').toLowerCase().replace(/sisitemas/g, 'sistemas');
     const slugLower = (slug || '').toLowerCase();
@@ -342,24 +364,18 @@ export async function getParrillaBySlug(slug) {
     const resolvedLogo = resolveWixMediaUrl(rawLogo) || '/assets/logo/dilo-logo-black.png';
     const resolvedMockup = resolveWixMediaUrl(matchedGeneral.mockup);
 
-    // 2. Consultar ParrillasdeContenido de Wix CMS para este cliente y mes
-    const contentRes = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': token
-      },
-      body: JSON.stringify({
-        dataCollectionId: 'ParrillasdeContenido',
-        paging: { limit: 100 }
-      })
-    });
+    // 2. Consultar ParrillasdeContenido de Wix CMS para este cliente con paginación y filtro dirigido
+    let allPosts = await queryWixCollectionAll(token, 'ParrillasdeContenido', { title: { $contains: brandTitle } });
+    if (!allPosts || allPosts.length === 0) {
+      allPosts = await queryWixCollectionAll(token, 'ParrillasdeContenido', { title: brandTitle });
+    }
+    if (!allPosts || allPosts.length === 0) {
+      // Fallback a consultar toda la colección con paginación si el filtro del servidor no coincidió
+      allPosts = await queryWixCollectionAll(token, 'ParrillasdeContenido');
+    }
 
     let wixPosts = [];
-    if (contentRes.ok) {
-      const contentData = await contentRes.json();
-      const allPosts = contentData.dataItems || [];
-
+    if (allPosts && allPosts.length > 0) {
       // Filtrar estrictamente los posts pertenecientes a esta marca y mes
       wixPosts = allPosts
         .filter(it => {
@@ -373,14 +389,25 @@ export async function getParrillaBySlug(slug) {
           if (!titleMatch) return false;
 
           // Coincidencia de mes
-          if (targetMes.includes('sept') || targetMes.includes('09')) {
-            if (!pMes.includes('sept') && !pMes.includes('09')) return false;
-          } else if (targetMes.includes('ago') || targetMes.includes('08')) {
-            if (!pMes.includes('ago') && !pMes.includes('08')) return false;
-          } else if (targetMes.includes('oct') || targetMes.includes('10')) {
-            if (!pMes.includes('oct') && !pMes.includes('10')) return false;
-          } else if (pMes !== targetMes) {
-            return false;
+          if (pMes) {
+            const mMatch = (
+              (targetMes.includes('ene') && pMes.includes('ene')) ||
+              (targetMes.includes('feb') && pMes.includes('feb')) ||
+              (targetMes.includes('mar') && pMes.includes('mar')) ||
+              (targetMes.includes('abr') && pMes.includes('abr')) ||
+              (targetMes.includes('may') && pMes.includes('may')) ||
+              (targetMes.includes('jun') && pMes.includes('jun')) ||
+              (targetMes.includes('jul') && pMes.includes('jul')) ||
+              (targetMes.includes('ago') && pMes.includes('ago')) ||
+              (targetMes.includes('sep') && pMes.includes('sep')) ||
+              (targetMes.includes('oct') && pMes.includes('oct')) ||
+              (targetMes.includes('nov') && pMes.includes('nov')) ||
+              (targetMes.includes('dic') && pMes.includes('dic')) ||
+              pMes === targetMes ||
+              targetMes.includes(pMes) ||
+              pMes.includes(targetMes)
+            );
+            if (!mMatch) return false;
           }
 
           // Descartar registros vacíos sin imágenes, ni videos, ni copy
@@ -419,21 +446,21 @@ export async function getParrillaBySlug(slug) {
     const fallbackEstrategiaGeneral = brandSisterItem?.data || {};
     const dynamicEstrategia = {
       enfoque: enfoqueItems.length > 0 ? enfoqueItems : parseLines(fallbackEstrategiaGeneral.enfoque).length > 0 ? parseLines(fallbackEstrategiaGeneral.enfoque) : [
-        'Contenido como confianza y autoridad, no solo impacto.',
-        'Decisiones basadas en credibilidad y tranquilidad.',
-        'Mostrar cómo trabajamos, no solo qué vendemos.'
+        `Contenido enfocado en generar confianza y valor para ${brandTitle}.`,
+        'Decisiones basadas en credibilidad, autoridad y tranquilidad.',
+        'Mostrar cómo trabajamos y el valor real de la marca.'
       ],
       contenido: contenidoItems.length > 0 ? contenidoItems : parseLines(fallbackEstrategiaGeneral.contenido).length > 0 ? parseLines(fallbackEstrategiaGeneral.contenido) : [
-        'Fotos reales del día a día.',
-        'Reels de procesos: instalaciones, funcionamiento y casos reales.'
+        'Fotos y creatividades reales del día a día.',
+        'Reels de procesos, valor práctico y casos de éxito.'
       ],
       narrativa: narrativaItems.length > 0 ? narrativaItems : parseLines(fallbackEstrategiaGeneral.narrativa).length > 0 ? parseLines(fallbackEstrategiaGeneral.narrativa) : [
-        'Cercana, sin alarmismo.',
-        'Posicionamiento como aliado experto.'
+        'Cercana, profesional y sin alarmismo.',
+        `Posicionamiento de ${brandTitle} como aliado experto.`
       ],
       objetivo: objetivoItems.length > 0 ? objetivoItems : parseLines(fallbackEstrategiaGeneral.objetivo).length > 0 ? parseLines(fallbackEstrategiaGeneral.objetivo) : [
-        'Confianza antes del contacto.',
-        'Menos objeciones al cotizar.'
+        'Construir confianza y engagement antes del contacto.',
+        'Reducir objeciones e impulsar cotizaciones.'
       ]
     };
 
@@ -690,8 +717,11 @@ export async function getParrillaBySlug(slug) {
       title: brandTitle,
       slug: matchedGeneral.slug || slug,
       mes: monthName,
-      ano: 2026,
+      month: monthName,
+      ano: ano,
+      year: ano,
       contrasea: matchedGeneral.contrasea || '',
+      password: matchedGeneral.contrasea || '',
       logo: resolvedLogo,
       mockupUrl: resolvedMockup,
       categoria: rawCategory,
@@ -809,26 +839,13 @@ export async function saveComment(slug, commentData) {
           }
         } else {
           // Comentario general o de lámina sin ID directo -> Guardar en ParrillaGeneral
-          const genQueryRes = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': token
-            },
-            body: JSON.stringify({
-              dataCollectionId: 'ParrillaGeneral',
-              paging: { limit: 50 }
-            })
-          });
-
-          if (genQueryRes.ok) {
-            const genData = await genQueryRes.json();
-            const items = genData.dataItems || [];
-            const target = items.find(it => {
-              const s = (it.data?.slug || '').toLowerCase();
-              const q = (slug || '').toLowerCase();
-              return s === q || (q.includes('sept') && s.includes('sept')) || (q.includes('ago') && s.includes('ago'));
-            }) || items[0];
+          const genItems = await queryWixCollectionAll(token, 'ParrillaGeneral');
+          const target = genItems.find(it => {
+            const s = (it.data?.slug || '').toLowerCase();
+            const q = (slug || '').toLowerCase();
+            const t = (it.data?.title || '').toLowerCase();
+            return s === q || (it.data?.slug && q.includes(it.data.slug)) || (t && q.includes(t));
+          }) || genItems[0];
 
             if (target && target.id) {
               const currentComentarios = target.data?.comentarios || '';
@@ -853,7 +870,6 @@ export async function saveComment(slug, commentData) {
               });
               console.log(`✓ Comentario general persistido en ParrillaGeneral ${target.id}`);
             }
-          }
         }
       }
     } catch (wixErr) {
@@ -956,24 +972,13 @@ export async function saveApprovals(slug, approvedPosts, clientTitle = 'Cliente'
 
         // Actualizar resumen de porcentaje y conteo de aprobaciones en ParrillaGeneral
         try {
-          const genRes = await fetch('https://www.wixapis.com/wix-data/v2/items/query', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': token
-            },
-            body: JSON.stringify({
-              dataCollectionId: 'ParrillaGeneral',
-              paging: { limit: 50 }
-            })
+          const genItems = await queryWixCollectionAll(token, 'ParrillaGeneral');
+          const genItem = genItems.find(it => {
+            const s = (it.data?.slug || '').toLowerCase();
+            const q = (slug || '').toLowerCase();
+            const t = (it.data?.title || '').toLowerCase();
+            return s === q || (it.data?.slug && q.includes(it.data.slug)) || (t && q.includes(t));
           });
-          if (genRes.ok) {
-            const genData = await genRes.json();
-            const genItem = (genData.dataItems || []).find(it => {
-              const s = (it.data?.slug || '').toLowerCase();
-              const q = (slug || '').toLowerCase();
-              return s === q || (q.includes('sept') && s.includes('sept')) || (q.includes('ago') && s.includes('ago'));
-            });
             if (genItem) {
               await fetch(`https://www.wixapis.com/wix-data/v2/items/${genItem.id}`, {
                 method: 'PUT',
@@ -995,7 +1000,6 @@ export async function saveApprovals(slug, approvedPosts, clientTitle = 'Cliente'
               });
               console.log(`✓ ParrillaGeneral ${genItem.id} actualizada con porcentaje ${percentage}% y resumen`);
             }
-          }
         } catch (genErr) {
           console.warn('Error al actualizar resumen en ParrillaGeneral:', genErr);
         }

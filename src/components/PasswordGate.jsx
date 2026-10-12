@@ -13,11 +13,15 @@ export default function PasswordGate({ clientTitle, clientMonth, correctPassword
     setLoading(true);
 
     setTimeout(() => {
-      // Si la contraseña no está definida en Wix o coincide exactamente
+      // Si la contraseña no está definida en Wix o coincide (soporta mayúsculas y minúsculas)
       const input = password.trim();
       const target = (correctPassword || '').trim();
       const isCuauhtli = target.includes('V7') || target.includes('mQ2');
-      const isMatch = !target || input === target || (isCuauhtli && (input === 'V77#mQ2!xL9@pR4$J' || input === 'V7#mQ2!xL9@pR4$k'));
+      const isMatch =
+        !target ||
+        input === target ||
+        input.toLowerCase() === target.toLowerCase() ||
+        (isCuauhtli && (input === 'V77#mQ2!xL9@pR4$J' || input === 'V7#mQ2!xL9@pR4$k'));
 
       if (isMatch) {
         onUnlock();

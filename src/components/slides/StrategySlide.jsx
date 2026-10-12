@@ -2,15 +2,16 @@ import React from 'react';
 import { Target, Compass, MessageSquare, Award, CheckCircle2 } from 'lucide-react';
 
 export default function StrategySlide({ estrategia, clientTitle, clientLogo }) {
+  const brand = clientTitle || 'la marca';
   const pillars = [
     {
       title: 'Enfoque',
       icon: Compass,
       color: 'orange',
       items: estrategia?.enfoque || [
-        'Contenido como confianza y autoridad, no solo impacto.',
+        `Contenido como confianza y valor para ${brand}.`,
         'Decisiones basadas en credibilidad y tranquilidad.',
-        'Mostrar cómo trabajamos, no solo qué vendemos.'
+        'Mostrar cómo trabajamos y qué aportamos.'
       ]
     },
     {
@@ -18,8 +19,8 @@ export default function StrategySlide({ estrategia, clientTitle, clientLogo }) {
       icon: Award,
       color: 'blue',
       items: estrategia?.contenido || [
-        'Fotos reales del día a día.',
-        'Reels de procesos: instalaciones, funcionamiento y casos reales.'
+        'Fotos y creatividades reales del día a día.',
+        'Reels de procesos, valor práctico y casos reales.'
       ]
     },
     {
@@ -27,8 +28,8 @@ export default function StrategySlide({ estrategia, clientTitle, clientLogo }) {
       icon: MessageSquare,
       color: 'emerald',
       items: estrategia?.narrativa || [
-        'Cercana, sin alarmismo.',
-        'Posicionamiento como aliado experto.'
+        'Cercana, profesional y sin alarmismo.',
+        `Posicionamiento de ${brand} como aliado experto.`
       ]
     },
     {
@@ -36,8 +37,8 @@ export default function StrategySlide({ estrategia, clientTitle, clientLogo }) {
       icon: Target,
       color: 'purple',
       items: estrategia?.objetivo || [
-        'Confianza antes del contacto.',
-        'Menos objeciones al cotizar.'
+        'Construir confianza antes del contacto.',
+        'Menos objeciones al momento de cotizar.'
       ]
     }
   ];
